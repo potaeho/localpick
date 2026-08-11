@@ -28,12 +28,43 @@ export type Creator = {
   philosophy: string;
 };
 
+/**
+ * 상품 분류. 소비자가 스토어를 훑는 1차 축이다.
+ *
+ * 지역은 이 실험의 가설(생산지 신뢰·지역 방문)과 직결되지만, 소비자가 장을 볼
+ * 때 먼저 찾는 것은 "무엇을 살까"이지 "어느 지역 것을 살까"가 아니다. 그래서
+ * 카테고리를 앞세우고 지역은 상품 안에서 드러낸다.
+ */
+export type Category = {
+  id: string;
+  name: string;
+  /** 카테고리 소개 한 줄 */
+  description: string;
+};
+
+/** 상품 일러스트 종류 — 실물 사진 대신 그리는 그림의 형태를 고른다 */
+export type ProductImageKind =
+  | "jar"
+  | "bottle"
+  | "pouch"
+  | "grain"
+  | "kelp"
+  | "citrus"
+  | "persimmon"
+  | "bread"
+  | "tea"
+  | "mealkit"
+  | "honey"
+  | "greens"
+  | "garlic";
+
 export type Product = {
   slug: string;
   name: string;
   /** 한 줄 설명 */
   tagline: string;
-  category: string;
+  categoryId: string;
+  imageKind: ProductImageKind;
   regionId: string;
   creatorId: string;
   /** 원산지 — 신뢰 가설의 핵심 필드 */

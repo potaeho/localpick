@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Logo } from "./Logo";
-import { regions } from "@/lib/products";
+import { categories } from "@/lib/products";
 
 /**
  * 스토어 헤더.
@@ -63,8 +63,8 @@ export function Header() {
         </form>
       </div>
 
-      {/* 지역 네비 — 가로 스크롤로 모바일에서도 전체 지역 접근 가능 */}
-      <nav aria-label="지역별 상품" className="border-t border-lp-gray-100">
+      {/* 카테고리 네비 — 가로 스크롤로 모바일에서도 전체 접근 가능 */}
+      <nav aria-label="카테고리" className="border-t border-lp-gray-100">
         <div className="mx-auto max-w-6xl overflow-x-auto px-4 lg:px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <ul className="flex items-center gap-1 py-2">
             <li>
@@ -75,13 +75,13 @@ export function Header() {
                 전체
               </Link>
             </li>
-            {regions.map((region) => (
-              <li key={region.id}>
+            {categories.map((category) => (
+              <li key={category.id}>
                 <Link
-                  href={`/regions/${region.id}`}
+                  href={`/categories/${category.id}`}
                   className="block whitespace-nowrap rounded-full px-3 py-1.5 text-sm text-lp-gray-700 hover:bg-lp-green-light hover:text-lp-green"
                 >
-                  {region.name}
+                  {category.name}
                 </Link>
               </li>
             ))}
