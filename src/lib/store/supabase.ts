@@ -51,6 +51,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (text ? JSON.parse(text) : undefined) as T;
 }
 
+// Each insert writes `payload` (the source of truth the app reads back) plus
+// the flattened columns that make the row browsable in Supabase.
+//
+// ⚠️ Deploy order matters: the schema must be upgraded (schema.sql applied)
+// BEFORE this adapter ships. PostgREST rejects an insert that names a column
+// the table doesn't have (400 / PGRST204) — it does not ignore it — so shipping
+// these columns against the old schema would break every write.
+
 function appendEvent(event: TrackedEvent): Promise<void> {
   return request<void>("lp_events?on_conflict=dedupe_key", {
     method: "POST",
@@ -59,6 +67,17 @@ function appendEvent(event: TrackedEvent): Promise<void> {
       id: event.id,
       session_id: event.sessionId,
       dedupe_key: event.dedupeKey,
+      event_type: event.type,
+      product_slug: event.productSlug ?? null,
+      region_id: event.regionId ?? null,
+      creator_id: event.creatorId ?? null,
+      device: event.device,
+      trigger: event.trigger ?? null,
+      utm_source: event.utmSource ?? null,
+      utm_medium: event.utmMedium ?? null,
+      utm_campaign: event.utmCampaign ?? null,
+      utm_content: event.utmContent ?? null,
+      client_ts: event.ts,
       payload: event,
     }),
   });
@@ -68,7 +87,28 @@ async function saveSurvey(response: SurveyResponse): Promise<string> {
   const rows = await request<InsertRecord[]>("lp_surveys?on_conflict=dedupe_key", {
     method: "POST",
     headers: { Prefer: "resolution=ignore-duplicates,return=representation" },
-    body: JSON.stringify({ id: response.id, session_id: response.sessionId, dedupe_key: response.dedupeKey, payload: response }),
+    body: JSON.stringify({
+      id: response.id,
+      session_id: response.sessionId,
+      dedupe_key: response.dedupeKey,
+      product_slug: response.productSlug ?? null,
+      trigger: response.trigger,
+      device: response.device,
+      buy_reason: response.buyReason,
+      buy_reason_detail: response.buyReasonDetail ?? null,
+      use_context: response.useContext,
+      purchase_experience: response.purchaseExperience,
+      channels: response.channels,
+      trust_factors: response.trustFactors,
+      region_interest: response.regionInterest,
+      interview_willing: response.interviewWilling,
+      utm_source: response.utmSource ?? null,
+      utm_medium: response.utmMedium ?? null,
+      utm_campaign: response.utmCampaign ?? null,
+      utm_content: response.utmContent ?? null,
+      client_ts: response.ts,
+      payload: response,
+    }),
   });
   if (rows[0]?.id) return rows[0].id;
   const existing = await request<InsertRecord[]>(`lp_surveys?select=id&dedupe_key=eq.${encodeURIComponent(response.dedupeKey)}&limit=1`);
@@ -80,7 +120,18 @@ async function saveConsent(consent: InterviewConsent): Promise<boolean> {
   const rows = await request<InsertRecord[]>("lp_consents?on_conflict=dedupe_key", {
     method: "POST",
     headers: { Prefer: "resolution=ignore-duplicates,return=representation" },
-    body: JSON.stringify({ id: consent.id, session_id: consent.sessionId, dedupe_key: consent.dedupeKey, payload: consent }),
+    body: JSON.stringify({
+      id: consent.id,
+      session_id: consent.sessionId,
+      dedupe_key: consent.dedupeKey,
+      survey_id: consent.surveyId,
+      name: consent.name,
+      contact: consent.contact,
+      contact_type: consent.contactType,
+      notice_version: consent.noticeVersion,
+      client_ts: consent.ts,
+      payload: consent,
+    }),
   });
   return rows.length > 0;
 }
