@@ -101,6 +101,12 @@ alter table public.lp_admin_login_audit enable row level security;
 -- New Supabase projects may not expose new public tables to the Data API by
 -- default. The server's service_role needs these explicit privileges; anon and
 -- authenticated remain ungranted and RLS has no public policy.
+revoke all privileges on table
+  public.lp_events,
+  public.lp_surveys,
+  public.lp_consents,
+  public.lp_admin_login_audit
+from anon, authenticated, public;
 grant usage on schema public to service_role;
 grant select, insert, delete on public.lp_events, public.lp_surveys, public.lp_consents to service_role;
 grant select, insert on public.lp_admin_login_audit to service_role;
