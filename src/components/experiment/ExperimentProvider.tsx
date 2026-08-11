@@ -13,7 +13,6 @@ import { captureUtm, trackOnce } from "@/lib/events";
 import type { SurveyTrigger } from "@/lib/types";
 import { FakeDoorOverlay } from "./FakeDoorOverlay";
 import { SurveyModal } from "./SurveyModal";
-import { useExitIntent } from "./useExitIntent";
 
 const VIEWED_KEY = "lp_viewed";
 const BUY_CLICKED_KEY = "lp_buy_clicked";
@@ -70,33 +69,23 @@ export function ExperimentProvider({
     trigger: SurveyTrigger;
     productSlug?: string;
   } | null>(null);
-  /** 이탈 의도 감시를 켤지 — 서로 다른 상품을 기준치만큼 봤고, 구매 클릭은 안 한 경우 */
-  const [browseArmed, setBrowseArmed] = useState(false);
-
   const viewedRef = useRef<string[]>([]);
   const lastViewedRef = useRef<string | undefined>(undefined);
   const buyInFlightRef = useRef(false);
-
-  /** 보조 트리거를 켤 조건인지 다시 판단한다 */
-  const evaluateArm = useCallback(() => {
-    const buyClicked =
-      window.sessionStorage.getItem(BUY_CLICKED_KEY) === "1";
-    const alreadyShown =
-      window.sessionStorage.getItem(SURVEY_SHOWN_KEY) === "1";
-
-    setBrowseArmed(
-      !buyClicked &&
-        !alreadyShown &&
-        viewedRef.current.length >= BROWSE_THRESHOLD,
-    );
-  }, []);
 
   useEffect(() => {
     // 광고에서 넘어온 UTM을 세션에 붙잡아둔다
     captureUtm();
     viewedRef.current = readJson<string[]>(VIEWED_KEY, []);
-    evaluateArm();
-  }, [evaluateArm]);
+  }, []);
+
+  const openSurvey = useCallback(
+    (trigger: SurveyTrigger, productSlug?: string) => {
+      writeSession(SURVEY_SHOWN_KEY, "1");
+      setSurvey({ trigger, productSlug });
+    },
+    [],
+  );
 
   const noteProductViewed = useCallback(
     (productSlug: string) => {
@@ -114,28 +103,35 @@ export function ExperimentProvider({
       viewedRef.current = merged;
       if (merged !== stored) writeSession(VIEWED_KEY, JSON.stringify(merged));
 
-      evaluateArm();
-    },
-    [evaluateArm],
-  );
+      /*
+       * 보조 경로: 서로 다른 상품을 기준치만큼 보면 그 자리에서 바로 묻는다.
+       *
+       * 이전에는 떠나려는 신호(마우스가 화면 밖으로 나감 / 뒤로가기 스와이프)를
+       * 기다렸는데, 상품만 계속 둘러보는 사람에게는 끝내 뜨지 않아 응답이 거의
+       * 모이지 않았다.
+       *
+       * 구매 버튼을 누른 세션에는 여전히 뜨지 않는다. 구매 의도 측정이 이
+       * 실험의 핵심 지표라, 그 흐름만은 방해하지 않는다.
+       */
+      const buyClicked =
+        window.sessionStorage.getItem(BUY_CLICKED_KEY) === "1";
+      const alreadyShown =
+        window.sessionStorage.getItem(SURVEY_SHOWN_KEY) === "1";
 
-  const openSurvey = useCallback(
-    (trigger: SurveyTrigger, productSlug?: string) => {
-      writeSession(SURVEY_SHOWN_KEY, "1");
-      setBrowseArmed(false);
-      setSurvey({ trigger, productSlug });
+      if (!buyClicked && !alreadyShown && merged.length >= BROWSE_THRESHOLD) {
+        openSurvey("browse_3", productSlug);
+      }
     },
-    [],
+    [openSurvey],
   );
 
   const buyClick = useCallback((productSlug: string) => {
     if (buyInFlightRef.current) return;
     buyInFlightRef.current = true;
 
-    // 구매 클릭자에게는 이탈 의도 기반 설문을 띄우지 않는다. 핵심 지표를
+    // 구매 클릭자에게는 탐색 기반 보조 설문을 띄우지 않는다. 핵심 지표를
     // 측정하는 흐름과 보조 흐름이 섞이면 결과 해석이 어려워진다.
     writeSession(BUY_CLICKED_KEY, "1");
-    setBrowseArmed(false);
 
     setFakeDoorSlug(productSlug);
     // Queue these records in the same order as the participant sees them.
@@ -152,11 +148,6 @@ export function ExperimentProvider({
       buyInFlightRef.current = false;
     });
   }, []);
-
-  // 보조 경로: 서로 다른 상품 3개를 본 뒤 떠나려 할 때 한 번만 묻는다
-  useExitIntent(browseArmed, () => {
-    openSurvey("browse_3", lastViewedRef.current);
-  });
 
   return (
     <ExperimentContext.Provider value={{ buyClick, noteProductViewed }}>

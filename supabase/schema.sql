@@ -1,5 +1,12 @@
 -- LOCAL PICK production storage. Run this in the Supabase SQL Editor before
 -- deploying with STORAGE_ADAPTER=supabase. Keep the service-role key server-only.
+--
+-- Design: `payload` (jsonb) stays the source of truth the app reads back, and
+-- the flattened columns beside it exist so the team can browse, filter, sort,
+-- and chart the data directly in Supabase (or point a BI tool at it) without
+-- unpacking jsonb by hand. Writes populate both; the dashboard still reads
+-- `payload`, so flattening carries no risk to the read path.
+
 create table if not exists public.lp_events (
   id text primary key,
   session_id text,
@@ -41,6 +48,96 @@ alter table public.lp_consents add column if not exists dedupe_key text;
 update public.lp_events set session_id = payload->>'sessionId' where session_id is null;
 update public.lp_surveys set session_id = payload->>'sessionId' where session_id is null;
 update public.lp_consents set session_id = payload->>'sessionId' where session_id is null;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Flattened, browsable columns. All are add-if-not-exists so this file stays
+-- idempotent and can be re-run to upgrade an already-populated database.
+-- ─────────────────────────────────────────────────────────────────────────────
+
+-- lp_events: one row per tracked interaction.
+alter table public.lp_events add column if not exists event_type text;   -- product_view / buy_click / survey_complete / ...
+alter table public.lp_events add column if not exists product_slug text;
+alter table public.lp_events add column if not exists region_id text;
+alter table public.lp_events add column if not exists creator_id text;
+alter table public.lp_events add column if not exists device text;       -- mobile / desktop
+alter table public.lp_events add column if not exists trigger text;      -- buy_click / browse_3 (survey events only)
+alter table public.lp_events add column if not exists utm_source text;
+alter table public.lp_events add column if not exists utm_medium text;
+alter table public.lp_events add column if not exists utm_campaign text;
+alter table public.lp_events add column if not exists utm_content text;
+alter table public.lp_events add column if not exists client_ts timestamptz;  -- client-reported time (payload.ts)
+
+-- lp_surveys: one row per completed survey. Selection answers become columns;
+-- free-text (useContext, buyReasonDetail) is kept but the qualitative reading
+-- still happens in the admin dashboard.
+alter table public.lp_surveys add column if not exists product_slug text;
+alter table public.lp_surveys add column if not exists trigger text;
+alter table public.lp_surveys add column if not exists device text;
+alter table public.lp_surveys add column if not exists buy_reason text;
+alter table public.lp_surveys add column if not exists buy_reason_detail text;
+alter table public.lp_surveys add column if not exists use_context text;
+alter table public.lp_surveys add column if not exists purchase_experience text;
+alter table public.lp_surveys add column if not exists channels text[];        -- 복수 선택
+alter table public.lp_surveys add column if not exists trust_factors text[];    -- 복수 선택
+alter table public.lp_surveys add column if not exists region_interest text;
+alter table public.lp_surveys add column if not exists interview_willing boolean;
+alter table public.lp_surveys add column if not exists utm_source text;
+alter table public.lp_surveys add column if not exists utm_medium text;
+alter table public.lp_surveys add column if not exists utm_campaign text;
+alter table public.lp_surveys add column if not exists utm_content text;
+alter table public.lp_surveys add column if not exists client_ts timestamptz;
+
+-- lp_consents: interview contacts (PERSONAL DATA). Flattened for the deletion /
+-- retention workflow; the dashboard still masks these and logs every reveal.
+alter table public.lp_consents add column if not exists survey_id text;
+alter table public.lp_consents add column if not exists name text;
+alter table public.lp_consents add column if not exists contact text;
+alter table public.lp_consents add column if not exists contact_type text;   -- email / phone
+alter table public.lp_consents add column if not exists notice_version text;
+alter table public.lp_consents add column if not exists client_ts timestamptz;
+
+-- Backfill flattened columns from any pre-existing payload rows.
+update public.lp_events set
+  event_type   = coalesce(event_type, payload->>'type'),
+  product_slug = coalesce(product_slug, payload->>'productSlug'),
+  region_id    = coalesce(region_id, payload->>'regionId'),
+  creator_id   = coalesce(creator_id, payload->>'creatorId'),
+  device       = coalesce(device, payload->>'device'),
+  trigger      = coalesce(trigger, payload->>'trigger'),
+  utm_source   = coalesce(utm_source, payload->>'utmSource'),
+  utm_medium   = coalesce(utm_medium, payload->>'utmMedium'),
+  utm_campaign = coalesce(utm_campaign, payload->>'utmCampaign'),
+  utm_content  = coalesce(utm_content, payload->>'utmContent'),
+  client_ts    = coalesce(client_ts, (payload->>'ts')::timestamptz)
+where event_type is null;
+
+update public.lp_surveys set
+  product_slug        = coalesce(product_slug, payload->>'productSlug'),
+  trigger             = coalesce(trigger, payload->>'trigger'),
+  device              = coalesce(device, payload->>'device'),
+  buy_reason          = coalesce(buy_reason, payload->>'buyReason'),
+  buy_reason_detail   = coalesce(buy_reason_detail, payload->>'buyReasonDetail'),
+  use_context         = coalesce(use_context, payload->>'useContext'),
+  purchase_experience = coalesce(purchase_experience, payload->>'purchaseExperience'),
+  channels            = coalesce(channels, array(select jsonb_array_elements_text(payload->'channels'))),
+  trust_factors       = coalesce(trust_factors, array(select jsonb_array_elements_text(payload->'trustFactors'))),
+  region_interest     = coalesce(region_interest, payload->>'regionInterest'),
+  interview_willing   = coalesce(interview_willing, (payload->>'interviewWilling')::boolean),
+  utm_source          = coalesce(utm_source, payload->>'utmSource'),
+  utm_medium          = coalesce(utm_medium, payload->>'utmMedium'),
+  utm_campaign        = coalesce(utm_campaign, payload->>'utmCampaign'),
+  utm_content         = coalesce(utm_content, payload->>'utmContent'),
+  client_ts           = coalesce(client_ts, (payload->>'ts')::timestamptz)
+where buy_reason is null;
+
+update public.lp_consents set
+  survey_id      = coalesce(survey_id, payload->>'surveyId'),
+  name           = coalesce(name, payload->>'name'),
+  contact        = coalesce(contact, payload->>'contact'),
+  contact_type   = coalesce(contact_type, payload->>'contactType'),
+  notice_version = coalesce(notice_version, payload->>'noticeVersion'),
+  client_ts      = coalesce(client_ts, (payload->>'ts')::timestamptz)
+where contact is null;
 
 -- PostgREST `?on_conflict=dedupe_key` requires a conflict target that PostgreSQL
 -- can infer. A partial unique index is not inferable by `ON CONFLICT(dedupe_key)`.
@@ -86,8 +183,13 @@ create unique index if not exists lp_consents_dedupe_key_unique
   on public.lp_consents (dedupe_key);
 create index if not exists lp_events_created_at_idx on public.lp_events (created_at);
 create index if not exists lp_events_session_id_idx on public.lp_events (session_id);
+-- Speeds up the per-product / per-campaign browsing the flattened columns enable.
+create index if not exists lp_events_event_type_idx on public.lp_events (event_type);
+create index if not exists lp_events_product_slug_idx on public.lp_events (product_slug);
+create index if not exists lp_events_utm_campaign_idx on public.lp_events (utm_campaign);
 create index if not exists lp_surveys_created_at_idx on public.lp_surveys (created_at);
 create index if not exists lp_surveys_session_id_idx on public.lp_surveys (session_id);
+create index if not exists lp_surveys_product_slug_idx on public.lp_surveys (product_slug);
 create index if not exists lp_consents_created_at_idx on public.lp_consents (created_at);
 create index if not exists lp_consents_session_id_idx on public.lp_consents (session_id);
 create index if not exists lp_admin_login_audit_failures_idx
