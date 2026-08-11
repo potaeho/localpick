@@ -37,9 +37,18 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     cache: "no-store",
   });
   if (!response.ok) {
-    throw new Error(`Supabase storage request failed (${response.status})`);
+    // 상태 코드만으로는 원인을 알 수 없어 디버깅이 오래 걸린다. PostgREST가
+    // 돌려주는 message/hint를 함께 남긴다 (자격 증명은 포함되지 않는다).
+    const detail = await response.text().catch(() => "");
+    throw new Error(
+      `Supabase storage request failed (${response.status})${detail ? `: ${detail.slice(0, 300)}` : ""}`,
+    );
   }
-  return (response.status === 204 ? undefined : await response.json()) as T;
+
+  // `Prefer: return=minimal` 인서트는 204가 아니라 **201에 빈 본문**으로 온다.
+  // 상태 코드만 보고 건너뛰면 빈 문자열을 JSON.parse 하다 터진다.
+  const text = await response.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }
 
 function appendEvent(event: TrackedEvent): Promise<void> {
