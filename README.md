@@ -1,36 +1,133 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LOCAL PICK — 페이크도어 테스트 스토어
 
-## Getting Started
+태두리의 로컬 상품 수요 검증을 위한 페이크도어 테스트 자산입니다. Instagram·Meta
+광고를 클릭한 소비자가 실제 스토어를 경험하고 가격·배송 조건을 확인한 뒤
+`구매하기`를 누르는 지점까지를 재현하며, **그 클릭이 이 실험의 핵심 구매 의도
+신호**입니다. 클릭 즉시 실험임을 공개하고 설문으로 연결해 후속 인터뷰 대상자를
+모집합니다.
 
-First, run the development server:
+## 시작하기
 
 ```bash
+npm install
+cp .env.example .env.local   # 값을 채운 뒤
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+스토어는 `http://localhost:3000`, 관리자 대시보드는 `/admin` 입니다.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 필수 환경변수
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| 변수 | 설명 |
+|---|---|
+| `ADMIN_PASSWORD` | 대시보드 접근 비밀번호 (팀 공용) |
+| `ADMIN_SESSION_SECRET` | 세션 쿠키 서명 키, 32자 이상 |
+| `SESSION_SIGNING_SECRET` | 익명 실험 세션(`lp_sid`) 전용 HMAC 키, 운영에서 32자 이상 필수 |
+| `NEXT_PUBLIC_PRIVACY_CONTACT` | 개인정보 문의·삭제 요청을 **실제로 받는** 주소 |
+| `STORAGE_ADAPTER` | `jsonl`(개발) 또는 `supabase`(운영) |
+| `DATA_RETENTION_DAYS` | Supabase 보존 기간(일), 기본 90일 |
 
-## Learn More
+`NEXT_PUBLIC_PRIVACY_CONTACT`가 비어 있으면 인터뷰 연락처 수집이 UI와 서버 양쪽에서
+비활성화됩니다. 삭제 요청을 처리할 창구가 없는 상태로 개인정보를 받지 않기 위한
+장치이므로, 받을 수 없는 그럴듯한 주소로 채우지 마세요.
 
-To learn more about Next.js, take a look at the following resources:
+## 광고 링크 만들기
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+상품별로 UTM을 붙여 집행합니다. 캠페인 값이 대시보드의 캠페인별 분해 기준이 됩니다.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+/products/gokseong-black-rice?utm_source=instagram&utm_campaign=fakedoor01
+```
 
-## Deploy on Vercel
+UTM은 첫 도착 시 세션에 저장되어, 이후 다른 페이지로 이동해도 같은 광고 유입으로
+집계됩니다.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 실험 흐름
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+Meta 광고 → 상품 상세 → 구매하기 → 페이크도어 공개 → 설문(7문항) → 인터뷰 동의
+```
+
+설문은 두 경로로 열립니다.
+
+- **주 경로** — 구매 버튼 클릭 후 페이크도어 안내 직후
+- **보조 경로** — 서로 다른 상품 3개를 본 뒤 이탈 의도가 감지될 때. 세션당 1회이며,
+  **구매 버튼을 누른 세션에는 뜨지 않습니다**(핵심 지표 오염 방지)
+
+## 설계상 지키고 있는 것
+
+기획서 9장(허위 광고로 인한 신뢰 훼손 대응)과 5장(조건 통제)에 따라 다음을
+**의도적으로 만들지 않았습니다**. 기능 추가 시에도 유지해 주세요.
+
+- 결제·카드·배송지 입력 필드 (어디에도 없음)
+- 후기 수·재구매 수·판매량·재고 수량·할인 마감 타이머 (판매한 적이 없어 어떤
+  숫자를 적어도 조작이 됨)
+- 사업자등록번호·통신판매업 신고번호·인증 마크
+- 상품마다 다른 상세 페이지 템플릿 — 섹션 순서와 정보 항목이 `Product` 스키마로
+  고정되어, 클릭률 차이가 페이지 구성 탓인지 상품 수요 탓인지 섞이지 않습니다
+
+## 데이터
+
+| 파일 | 내용 |
+|---|---|
+| `.data/events.jsonl` | 행동 이벤트 |
+| `.data/surveys.jsonl` | 설문 응답 |
+| `.data/consents.jsonl` | 인터뷰 연락처 (**개인정보**) |
+
+`.data/`는 gitignore 되어 있습니다. 커밋하지 마세요.
+
+> ⚠️ **배포 전 반드시 저장소를 교체하세요.** Vercel 등 서버리스 환경은 파일시스템이
+> 휘발성이라 JSONL로 두면 설문 응답과 연락처가 유실됩니다.
+> `STORAGE_ADAPTER=supabase`와 자격 증명을 설정하면 프로덕션에서 그대로 동작하고,
+> 설정하지 않으면 조용히 유실되는 대신 명시적으로 오류를 냅니다.
+> Supabase 신규 프로젝트는 public 테이블을 Data API에 자동 노출하지 않을 수 있으므로,
+> `supabase/schema.sql`을 적용한 뒤 해당 테이블 노출 설정도 확인하세요. 서비스 역할 키는
+> 서버 Route Handler에만 두며 `NEXT_PUBLIC_` 변수로 노출하지 않습니다.
+
+### 개인정보 취급
+
+- 인터뷰 연락처는 설문 응답과 **별도 파일·별도 엔드포인트**로 분리 저장합니다
+- 대시보드는 마스킹된 값만 내려받고, 원문은 `열람`을 눌렀을 때 한 건씩만
+  가져옵니다. 열람 사실은 서버 로그에 남습니다
+- **CSV 내보내기에는 연락처가 포함되지 않습니다.** CSV는 메신저·메일로 쉽게
+  옮겨다녀 통제 범위를 벗어나기 때문입니다
+- 수집한 연락처를 광고 타기팅이나 판매 목적으로 재사용하지 않습니다
+
+### 보존 기간과 삭제
+
+`DATA_RETENTION_DAYS`(기본 90일)를 운영 환경에 설정하세요. 정식 보존 기간 삭제는
+영구적인 대량 삭제이므로, 개인정보 담당자가 대상·기준일을 검토하고 **삭제 승인**을
+받은 뒤 Supabase SQL Editor에서 `created_at` 기준으로 이벤트·설문·동의를 함께
+삭제해야 합니다. 적용 전 행 수를 확인하고, 적용 후 삭제 수와 기준일을 개인정보
+처리 로그에 남기세요. JSONL 개발 저장소에서는 삭제 성공을 가장하지 않도록 이
+작업을 지원하지 않습니다.
+
+## 실제 집행 전 교체할 것
+
+- `src/lib/products.ts` — 목업 상품 8종. 등장하는 생산자는 실존 인물이 아닙니다.
+  확정된 상품·가격·배송비와, 사용 권한을 받은 실제 로컬 크리에이터 정보로
+  교체하세요
+- `src/components/store/ProductImage.tsx` — 실물 사진이 없어 브랜드 컬러 기반
+  일러스트를 그립니다. 사진 확보 시 이 컴포넌트만 교체하면 됩니다
+
+기획서 10장의 나머지 확정 사항(광고 예산·기간, 인터뷰 사례, 표시·광고 및
+전자상거래 준수 검토, 실험 중단 기준)은 코드 범위 밖의 팀 의사결정입니다.
+
+## 2차 실험(메시지 A/B)으로 확장할 때
+
+1차는 상품 수요 비교입니다. 2차에서 신뢰 / 발견 / 지역 연결 메시지를 비교할 때는
+상품 상세의 헤드라인을 `searchParams`의 variant로 분기하고, 광고 링크의
+`utm_campaign`을 조건별로 나누면 됩니다. 대시보드의 캠페인별 분해가 이미 그
+비교를 지원합니다.
+
+## 기술 참고
+
+Next.js 16 기준이라 이전 버전과 다른 점이 있습니다.
+
+- `params`·`searchParams`는 Promise → `await` 필요
+- `middleware.ts`가 **`proxy.ts`로 변경**됨. 익명 세션 쿠키 발급과 `/admin`
+  낙관적 리다이렉트를 담당하며, 실제 권한 검증은
+  `app/admin/(protected)/layout.tsx`에서 합니다 (Next.js 문서가 Proxy를 완전한
+  인증 수단으로 쓰지 말라고 명시)
+- 전역 타입 헬퍼 `PageProps<'/route'>`, `RouteContext<'/api/...'>` 사용
+- Tailwind v4 — 설정 파일 없이 `globals.css`의 `@theme`에 토큰 정의

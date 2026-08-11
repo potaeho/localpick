@@ -1,0 +1,376 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import { Modal } from "./Modal";
+import { ConsentForm } from "./ConsentForm";
+import { QUESTIONS, type Question } from "@/lib/survey-questions";
+import { getDevice, getUtm, trackOnce } from "@/lib/events";
+import type { SurveyAnswers, SurveyTrigger } from "@/lib/types";
+
+type AnswerMap = Partial<Record<keyof SurveyAnswers, unknown>>;
+
+const EMPTY: AnswerMap = { channels: [], trustFactors: [] };
+
+/** 화면 폭에 따라 한 화면에 보여줄 문항 수를 정한다 */
+function usePerStep(): number {
+  const [perStep, setPerStep] = useState(1);
+
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 640px)");
+    const apply = () => setPerStep(query.matches ? 2 : 1);
+    apply();
+    query.addEventListener("change", apply);
+    return () => query.removeEventListener("change", apply);
+  }, []);
+
+  return perStep;
+}
+
+function isAnswered(question: Question, answers: AnswerMap): boolean {
+  const value = answers[question.id];
+
+  switch (question.kind) {
+    case "single":
+      if (typeof value !== "string" || !value) return false;
+      // '기타'를 골랐으면 자유 입력까지 채워야 다음으로 넘어간다
+      if (question.detailWhen && value === question.detailWhen) {
+        const detail = answers.buyReasonDetail;
+        return typeof detail === "string" && detail.trim().length > 0;
+      }
+      return true;
+    case "multi":
+      return Array.isArray(value) && value.length > 0;
+    case "text":
+      return question.optional
+        ? true
+        : typeof value === "string" && value.trim().length > 0;
+    case "boolean":
+      return typeof value === "boolean";
+  }
+}
+
+/**
+ * 설문 모달.
+ *
+ * 기획서 5단계의 7문항을 2분 안에 끝낼 수 있도록, 모바일은 한 화면에 한 문항,
+ * 데스크탑은 두 문항씩 보여준다. 인터뷰 연락처는 설문이 저장된 뒤 별도 화면에서
+ * 따로 받는다.
+ */
+export function SurveyModal({
+  open,
+  trigger,
+  productSlug,
+  onClose,
+}: {
+  open: boolean;
+  trigger: SurveyTrigger;
+  productSlug?: string;
+  onClose: () => void;
+}) {
+  const perStep = usePerStep();
+  const [answers, setAnswers] = useState<AnswerMap>(EMPTY);
+  const [step, setStep] = useState(0);
+  const [phase, setPhase] = useState<"questions" | "consent" | "done">(
+    "questions",
+  );
+  const [surveyId, setSurveyId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const steps = useMemo(() => {
+    const grouped: Question[][] = [];
+    for (let i = 0; i < QUESTIONS.length; i += perStep) {
+      grouped.push(QUESTIONS.slice(i, i + perStep));
+    }
+    return grouped;
+  }, [perStep]);
+
+  // StrictMode가 개발 중 effect를 두 번 실행하므로 한 번만 보내도록 막는다
+  const startSent = useRef(false);
+  useEffect(() => {
+    if (!open || startSent.current) return;
+    startSent.current = true;
+    void trackOnce(`survey_start:${trigger}:${productSlug ?? "none"}`, {
+      type: "survey_start",
+      productSlug,
+      trigger,
+    });
+  }, [open, productSlug, trigger]);
+
+  function setAnswer(id: keyof SurveyAnswers, value: unknown) {
+    setAnswers((prev) => ({ ...prev, [id]: value }));
+  }
+
+  function toggleMulti(id: keyof SurveyAnswers, option: string) {
+    setAnswers((prev) => {
+      const list = Array.isArray(prev[id]) ? (prev[id] as string[]) : [];
+      return {
+        ...prev,
+        [id]: list.includes(option)
+          ? list.filter((item) => item !== option)
+          : [...list, option],
+      };
+    });
+  }
+
+  // A viewport change can regroup questions while this modal is open. Derive
+  // a safe display index rather than setting state from an effect.
+  const currentStep = Math.min(step, steps.length - 1);
+  const current = steps[currentStep] ?? [];
+  const canAdvance = current.every((question) => isAnswered(question, answers));
+  const isLastStep = currentStep === steps.length - 1;
+
+  async function submit() {
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/survey", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...getUtm(),
+          device: getDevice(),
+          trigger,
+          productSlug,
+          ...answers,
+        }),
+      });
+
+      if (!response.ok) throw new Error("save failed");
+
+      const { surveyId: id } = (await response.json()) as { surveyId: string };
+      setSurveyId(id);
+      setPhase(answers.interviewWilling === true ? "consent" : "done");
+    } catch {
+      setError("저장에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Modal open={open} onClose={onClose} labelledBy="survey-title">
+      {phase === "questions" && (
+        <div className="flex flex-col">
+          <div className="border-b border-lp-gray-100 px-6 pb-4 pt-6">
+            <h2 id="survey-title" className="text-lg font-bold text-lp-ink">
+              더 나은 로컬 상품 구매 경험을 위해
+            </h2>
+            <p className="mt-1 text-sm text-lp-gray-700">
+              {steps.length}단계 중 {currentStep + 1}단계 · 약 2분
+            </p>
+            <div
+              className="mt-3 h-1.5 overflow-hidden rounded-full bg-lp-gray-100"
+              role="progressbar"
+              aria-valuenow={currentStep + 1}
+              aria-valuemin={1}
+              aria-valuemax={steps.length}
+              aria-label="설문 진행률"
+            >
+              <div
+                className="h-full rounded-full bg-lp-green transition-all"
+                style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-8 px-6 py-6">
+            {current.map((question) => (
+              <QuestionField
+                key={question.id}
+                question={question}
+                title={
+                  trigger === "browse_3" && question.id === "buyReason"
+                    ? "상품을 더 알아보고 싶었던 가장 큰 이유는 무엇인가요?"
+                    : undefined
+                }
+                answers={answers}
+                onSet={setAnswer}
+                onToggle={toggleMulti}
+              />
+            ))}
+          </div>
+
+          {error && (
+            <p role="alert" className="px-6 pb-2 text-sm text-red-600">
+              {error}
+            </p>
+          )}
+
+          <div className="sticky bottom-0 flex gap-2 border-t border-lp-gray-100 bg-white px-6 py-4">
+            {currentStep > 0 && (
+              <button
+                type="button"
+                onClick={() => setStep((s) => s - 1)}
+                className="h-12 rounded-lg border border-lp-gray-300 px-5 font-medium text-lp-gray-700 hover:bg-lp-gray-100"
+              >
+                이전
+              </button>
+            )}
+            <button
+              type="button"
+              disabled={!canAdvance || submitting}
+              onClick={() => {
+                if (isLastStep) void submit();
+                else setStep((s) => Math.min(s + 1, steps.length - 1));
+              }}
+              className="h-12 flex-1 rounded-lg bg-lp-green font-bold text-white hover:bg-lp-green-dark disabled:cursor-not-allowed disabled:bg-lp-gray-300"
+            >
+              {submitting ? "저장하는 중…" : isLastStep ? "제출하기" : "다음"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {phase === "consent" && surveyId && (
+        <ConsentForm
+          surveyId={surveyId}
+          productSlug={productSlug}
+          onDone={() => setPhase("done")}
+          onSkip={() => setPhase("done")}
+        />
+      )}
+
+      {phase === "done" && (
+        <div className="px-6 py-10 text-center sm:px-8">
+          <h2 id="survey-title" className="text-lg font-bold text-lp-ink">
+            답변 감사합니다
+          </h2>
+          <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-lp-gray-700">
+            남겨주신 이야기는 로컬 상품을 어떻게 소개하면 좋을지 정하는 데
+            쓰겠습니다.
+          </p>
+          <button
+            type="button"
+            onClick={onClose}
+            className="mt-7 h-12 w-full rounded-lg bg-lp-green font-bold text-white hover:bg-lp-green-dark"
+          >
+            닫기
+          </button>
+        </div>
+      )}
+    </Modal>
+  );
+}
+
+function QuestionField({
+  question,
+  title,
+  answers,
+  onSet,
+  onToggle,
+}: {
+  question: Question;
+  title?: string;
+  answers: AnswerMap;
+  onSet: (id: keyof SurveyAnswers, value: unknown) => void;
+  onToggle: (id: keyof SurveyAnswers, option: string) => void;
+}) {
+  const value = answers[question.id];
+
+  return (
+    <fieldset>
+      <legend className="text-base font-bold leading-snug text-lp-ink">
+        {title ?? question.title}
+      </legend>
+      {question.help && (
+        <p className="mt-1 text-sm text-lp-gray-500">{question.help}</p>
+      )}
+
+      <div className="mt-3 space-y-2">
+        {question.kind === "single" &&
+          question.options.map((option) => (
+            <label
+              key={option}
+              className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 text-sm ${
+                value === option
+                  ? "border-lp-green bg-lp-green-light text-lp-green"
+                  : "border-lp-gray-300 text-lp-gray-900 hover:border-lp-green"
+              }`}
+            >
+              <input
+                type="radio"
+                name={question.id}
+                checked={value === option}
+                onChange={() => onSet(question.id, option)}
+                className="h-4 w-4 accent-lp-green"
+              />
+              {option}
+            </label>
+          ))}
+
+        {question.kind === "single" &&
+          question.detailWhen &&
+          value === question.detailWhen && (
+            <textarea
+              value={(answers.buyReasonDetail as string) ?? ""}
+              onChange={(event) =>
+                onSet("buyReasonDetail", event.target.value)
+              }
+              rows={2}
+              placeholder="어떤 이유였는지 알려주세요"
+              className="w-full rounded-lg border border-lp-gray-300 p-3 text-sm focus:border-lp-green focus:outline-none"
+            />
+          )}
+
+        {question.kind === "multi" &&
+          question.options.map((option) => {
+            const list = Array.isArray(value) ? (value as string[]) : [];
+            const checked = list.includes(option);
+            return (
+              <label
+                key={option}
+                className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 text-sm ${
+                  checked
+                    ? "border-lp-green bg-lp-green-light text-lp-green"
+                    : "border-lp-gray-300 text-lp-gray-900 hover:border-lp-green"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => onToggle(question.id, option)}
+                  className="h-4 w-4 accent-lp-green"
+                />
+                {option}
+              </label>
+            );
+          })}
+
+        {question.kind === "text" && (
+          <textarea
+            value={(value as string) ?? ""}
+            onChange={(event) => onSet(question.id, event.target.value)}
+            rows={3}
+            placeholder={question.placeholder}
+            className="w-full rounded-lg border border-lp-gray-300 p-3 text-sm focus:border-lp-green focus:outline-none"
+          />
+        )}
+
+        {question.kind === "boolean" && (
+          <div className="flex gap-2">
+            {[
+              { label: question.yes, val: true },
+              { label: question.no, val: false },
+            ].map((choice) => (
+              <button
+                key={String(choice.val)}
+                type="button"
+                onClick={() => onSet(question.id, choice.val)}
+                className={`h-12 flex-1 rounded-lg border text-sm font-medium ${
+                  value === choice.val
+                    ? "border-lp-green bg-lp-green-light text-lp-green"
+                    : "border-lp-gray-300 text-lp-gray-700 hover:border-lp-green"
+                }`}
+              >
+                {choice.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </fieldset>
+  );
+}
