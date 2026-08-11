@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
@@ -11,6 +12,7 @@ import { RegionCard } from "@/components/store/RegionCard";
 import { BuyButton } from "@/components/store/BuyButton";
 import { MobileBuyBar } from "@/components/store/MobileBuyBar";
 import {
+  getCategory,
   getCreator,
   getProduct,
   getRegion,
@@ -55,6 +57,7 @@ export default async function ProductDetailPage({
 
   const region = getRegion(product.regionId);
   const creator = getCreator(product.creatorId);
+  const category = getCategory(product.categoryId);
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-8 lg:px-6">
@@ -73,6 +76,7 @@ export default async function ProductDetailPage({
         <div className="relative overflow-hidden rounded-xl bg-lp-gray-100">
           <ProductImage
             slug={product.slug}
+            kind={product.imageKind}
             label={product.name}
             className="aspect-square w-full"
           />
@@ -85,6 +89,15 @@ export default async function ProductDetailPage({
 
         {/* 구매 패널 */}
         <div className="lg:sticky lg:top-32 lg:self-start">
+          {category && (
+            <Link
+              href={`/categories/${category.id}`}
+              className="text-xs text-lp-gray-500 underline underline-offset-4 hover:text-lp-green"
+            >
+              {category.name}
+            </Link>
+          )}
+
           {/* 2. 상품명 · 한 줄 설명 · 원산지 */}
           {product.badges.length > 0 && (
             <ul className="mb-3 flex flex-wrap gap-1.5">

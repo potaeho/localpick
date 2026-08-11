@@ -1,12 +1,18 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/store/ProductCard";
-import { RegionChips } from "@/components/store/RegionChips";
-import { products, regions, searchProducts } from "@/lib/products";
+import { CategoryChips } from "@/components/store/CategoryChips";
+import {
+  categories,
+  getProductsByCategory,
+  products,
+  regions,
+  searchProducts,
+} from "@/lib/products";
 
 export default async function HomePage({ searchParams }: PageProps<"/">) {
   const { q } = await searchParams;
   const query = typeof q === "string" ? q : "";
-  const results = query ? searchProducts(query) : products;
+  const results = query ? searchProducts(query) : [];
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 lg:px-6 lg:py-8">
@@ -24,48 +30,78 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
           만들었는지 상품마다 확인할 수 있습니다.
         </p>
         <p className="mt-6 text-sm text-white/70">
-          {regions.length}개 지역 · 상품 {products.length}개
+          {categories.length}개 카테고리 · {regions.length}개 지역 · 상품{" "}
+          {products.length}개
         </p>
       </section>
 
-      <RegionChips />
+      <CategoryChips />
 
-      <section className="mt-10">
-        <div className="flex items-baseline justify-between gap-4">
-          <h2 className="text-lg font-bold text-lp-ink">
-            {query ? (
-              <>
-                &lsquo;{query}&rsquo; 검색 결과{" "}
-                <span className="text-lp-gray-500">{results.length}개</span>
-              </>
-            ) : (
-              "전체 상품"
-            )}
-          </h2>
-          {query && (
+      {query ? (
+        <section className="mt-10">
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 className="text-lg font-bold text-lp-ink">
+              &lsquo;{query}&rsquo; 검색 결과{" "}
+              <span className="text-lp-gray-500">{results.length}개</span>
+            </h2>
             <Link
               href="/"
               className="shrink-0 text-sm text-lp-gray-700 underline underline-offset-4 hover:text-lp-green"
             >
               검색 초기화
             </Link>
-          )}
-        </div>
+          </div>
 
-        {results.length === 0 ? (
-          <p className="mt-10 text-center text-sm text-lp-gray-500">
-            검색 결과가 없습니다. 다른 지역이나 상품명으로 찾아보세요.
-          </p>
-        ) : (
-          <ul className="mt-5 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
-            {results.map((product) => (
-              <li key={product.slug}>
-                <ProductCard product={product} />
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+          {results.length === 0 ? (
+            <p className="mt-10 text-center text-sm text-lp-gray-500">
+              검색 결과가 없습니다. 다른 상품명이나 지역으로 찾아보세요.
+            </p>
+          ) : (
+            <ul className="mt-5 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
+              {results.map((product) => (
+                <li key={product.slug}>
+                  <ProductCard product={product} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ) : (
+        /* 카테고리별 섹션 — 소비자가 "무엇을 살까"부터 훑도록 한다 */
+        categories.map((category) => {
+          const items = getProductsByCategory(category.id);
+          if (items.length === 0) return null;
+
+          return (
+            <section key={category.id} className="mt-12">
+              <div className="flex items-baseline justify-between gap-4">
+                <div className="min-w-0">
+                  <h2 className="text-lg font-bold text-lp-ink">
+                    {category.name}
+                  </h2>
+                  <p className="mt-1 text-sm text-lp-gray-500">
+                    {category.description}
+                  </p>
+                </div>
+                <Link
+                  href={`/categories/${category.id}`}
+                  className="shrink-0 text-sm text-lp-gray-700 underline underline-offset-4 hover:text-lp-green"
+                >
+                  전체보기
+                </Link>
+              </div>
+
+              <ul className="mt-5 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
+                {items.map((product) => (
+                  <li key={product.slug}>
+                    <ProductCard product={product} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })
+      )}
     </div>
   );
 }

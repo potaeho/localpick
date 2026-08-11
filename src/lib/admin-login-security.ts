@@ -10,6 +10,12 @@ function config() {
   return url && serviceRole ? { url, serviceRole } : null;
 }
 
+function authHeaders(serviceRole: string): HeadersInit {
+  return serviceRole.startsWith("eyJ")
+    ? { apikey: serviceRole, Authorization: `Bearer ${serviceRole}` }
+    : { apikey: serviceRole };
+}
+
 async function hash(value: string): Promise<string> {
   const secret = process.env.ADMIN_SESSION_SECRET;
   if (!secret || secret.length < 32) throw new Error("ADMIN_SESSION_SECRET must be configured");
@@ -36,7 +42,7 @@ async function supabase(path: string, init?: RequestInit): Promise<Response> {
   if (!settings) throw new Error("Supabase audit storage is unavailable");
   return fetch(`${settings.url}/rest/v1/${path}`, {
     ...init,
-    headers: { apikey: settings.serviceRole, Authorization: `Bearer ${settings.serviceRole}`, "Content-Type": "application/json", ...(init?.headers ?? {}) },
+    headers: { ...authHeaders(settings.serviceRole), "Content-Type": "application/json", ...(init?.headers ?? {}) },
     cache: "no-store",
   });
 }

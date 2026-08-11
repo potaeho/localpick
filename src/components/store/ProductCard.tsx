@@ -22,6 +22,7 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="relative overflow-hidden rounded-lg bg-lp-gray-100">
         <ProductImage
           slug={product.slug}
+          kind={product.imageKind}
           label={product.name}
           className="aspect-square w-full transition-transform duration-300 group-hover:scale-105"
         />

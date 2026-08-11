@@ -18,13 +18,19 @@ function config() {
   return { url, serviceRole };
 }
 
+/** New `sb_secret_` API keys are sent only as apikey, never as JWT Bearer tokens. */
+function authHeaders(serviceRole: string): HeadersInit {
+  return serviceRole.startsWith("eyJ")
+    ? { apikey: serviceRole, Authorization: `Bearer ${serviceRole}` }
+    : { apikey: serviceRole };
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const { url, serviceRole } = config();
   const response = await fetch(`${url}/rest/v1/${path}`, {
     ...init,
     headers: {
-      apikey: serviceRole,
-      Authorization: `Bearer ${serviceRole}`,
+      ...authHeaders(serviceRole),
       "Content-Type": "application/json",
       ...(init?.headers ?? {}),
     },
@@ -80,8 +86,7 @@ async function remove(path: string): Promise<number> {
   const response = await fetch(`${url}/rest/v1/${path}`, {
     method: "DELETE",
     headers: {
-      apikey: serviceRole,
-      Authorization: `Bearer ${serviceRole}`,
+      ...authHeaders(serviceRole),
       Prefer: "return=representation",
     },
     cache: "no-store",
