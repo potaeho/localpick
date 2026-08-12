@@ -8,6 +8,7 @@ import { ProductImage } from "@/components/store/ProductImage";
 import { PriceDisplay } from "@/components/store/PriceDisplay";
 import { SpecTable } from "@/components/store/SpecTable";
 import { ProductDetailImages } from "@/components/store/ProductDetailImages";
+import { OptionSelector } from "@/components/store/OptionSelector";
 import { CreatorCard } from "@/components/store/CreatorCard";
 import { RegionCard } from "@/components/store/RegionCard";
 import { BuyButton } from "@/components/store/BuyButton";
@@ -73,19 +74,30 @@ export default async function ProductDetailPage({
       />
 
       <div className="grid gap-8 py-6 lg:grid-cols-2 lg:gap-12">
-        {/* 1. 이미지 + 생산지역 뱃지 */}
-        <div className="relative overflow-hidden rounded-xl bg-lp-gray-100">
-          <ProductImage
-            slug={product.slug}
-            kind={product.imageKind}
-            label={product.name}
-            className="aspect-square w-full"
+        {/* 1. 이미지 + 생산지역 뱃지. 우측 구매 패널이 이미지형 상세설명까지
+            sticky로 따라오도록, 그 설명도 이 좌측 컬럼 안에 함께 둔다
+            (스마트스토어 패턴) */}
+        <div>
+          <div className="relative overflow-hidden rounded-xl bg-lp-gray-100">
+            <ProductImage
+              slug={product.slug}
+              kind={product.imageKind}
+              label={product.name}
+              className="aspect-square w-full"
+            />
+            {region && (
+              <span className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-sm font-medium text-lp-green">
+                {region.province} {region.name}
+              </span>
+            )}
+          </div>
+
+          {/* 스펙 테이블 다음, 신뢰 카드보다 앞 — 스마트스토어의 "상품정보 표
+              다음 이미지형 상세설명" 위치를 그대로 따른다 */}
+          <ProductDetailImages
+            images={product.detailImages}
+            productName={product.name}
           />
-          {region && (
-            <span className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-sm font-medium text-lp-green">
-              {region.province} {region.name}
-            </span>
-          )}
         </div>
 
         {/* 구매 패널 */}
@@ -136,16 +148,16 @@ export default async function ProductDetailPage({
             <SpecTable product={product} />
           </div>
 
-          {/* 9. 구매하기 — 데스크탑에서는 패널 안, 모바일에서는 하단 고정 바 */}
-          <div className="mt-6 hidden md:block">
-            <BuyButton productSlug={product.slug} />
+          {/* 옵션 선택 + 구매하기 — 데스크탑에서는 패널 안, 모바일은 하단
+              고정 바가 구매하기를 대신한다 */}
+          <div className="hidden md:block">
+            <OptionSelector product={product} />
+            <div className="mt-3">
+              <BuyButton productSlug={product.slug} />
+            </div>
           </div>
         </div>
       </div>
-
-      {/* 스펙 테이블 다음, 신뢰 카드보다 앞 — 스마트스토어의 "상품정보 표 다음
-          이미지형 상세설명" 위치를 그대로 따른다 */}
-      <ProductDetailImages images={product.detailImages} productName={product.name} />
 
       {/* 5. 생산자 */}
       {creator && (
