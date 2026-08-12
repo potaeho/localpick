@@ -7,6 +7,7 @@ import { TrackedLink } from "@/components/experiment/TrackedLink";
 import { ProductImage } from "@/components/store/ProductImage";
 import { PriceDisplay } from "@/components/store/PriceDisplay";
 import { SpecTable } from "@/components/store/SpecTable";
+import { ProductDetailImages } from "@/components/store/ProductDetailImages";
 import { CreatorCard } from "@/components/store/CreatorCard";
 import { RegionCard } from "@/components/store/RegionCard";
 import { BuyButton } from "@/components/store/BuyButton";
@@ -141,6 +142,10 @@ export default async function ProductDetailPage({
           </div>
         </div>
       </div>
+
+      {/* 스펙 테이블 다음, 신뢰 카드보다 앞 — 스마트스토어의 "상품정보 표 다음
+          이미지형 상세설명" 위치를 그대로 따른다 */}
+      <ProductDetailImages images={product.detailImages} productName={product.name} />
 
       {/* 5. 생산자 */}
       {creator && (
