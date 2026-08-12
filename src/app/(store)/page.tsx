@@ -1,67 +1,59 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ProductCard } from "@/components/store/ProductCard";
 import { CategoryChips } from "@/components/store/CategoryChips";
+import { HeroBanner, type HeroSlide } from "@/components/store/HeroBanner";
 import {
   categories,
   getProductsByCategory,
-  getRegion,
   products,
   regions,
   searchProducts,
 } from "@/lib/products";
 
-/** 히어로에 실제 산지 사진과 함께 보여줄 지역 — 사진과 문구가 짝을 이루도록 고정한다 */
-const HERO_REGION_ID = "gokseong";
+/*
+ * 배너는 세 가지 메시지를 번갈아 보여준다. 어떤 가치 제안(명절 선물 /
+ * 지역 환원 / 신뢰·발견)이 통하는지는 2차 실험에서 나눠 검증할 대상이므로,
+ * 1차 실험 단계에서는 하나로 단정하지 않고 로테이션으로 함께 노출한다.
+ */
+const HERO_SLIDES: HeroSlide[] = [
+  {
+    id: "chuseok",
+    theme: "orange",
+    eyebrow: "추석 선물 미리 준비하기",
+    title: "올 추석, 뜻깊은 선물을 미리 예약하세요",
+    subtitle:
+      "받는 분의 고향을 떠올리게 하는 로컬 상품으로 명절 인사를 전해보세요.",
+    cta: { label: "추석 선물 둘러보기", href: "/categories/cheong" },
+  },
+  {
+    id: "give-back",
+    theme: "green",
+    eyebrow: "LOCAL PICK의 약속",
+    title: "구매 금액의 일부, 그 지역으로 돌아갑니다",
+    subtitle:
+      "여기서 산 만큼, 만든 이의 마을에 힘이 됩니다. 소비가 곧 지역을 응원하는 방법입니다.",
+    cta: { label: "산지 이야기 보러가기", href: "/regions" },
+  },
+  {
+    id: "intro",
+    theme: "ink",
+    eyebrow: "LOCAL PICK",
+    title: "지역에서 만든 것들",
+    subtitle:
+      "전국 각지의 생산자가 직접 기르고 만든 상품입니다. 누가 어디서 어떻게 만들었는지 상품마다 확인할 수 있습니다.",
+    note: `${categories.length}개 카테고리 · ${regions.length}개 지역 · 상품 ${products.length}개`,
+    cta: { label: "카테고리 둘러보기", href: "/categories" },
+  },
+];
 
 export default async function HomePage({ searchParams }: PageProps<"/">) {
   const { q } = await searchParams;
   const query = typeof q === "string" ? q : "";
   const results = query ? searchProducts(query) : [];
-  const heroRegion = getRegion(HERO_REGION_ID);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 lg:px-6 lg:py-8">
-      {/*
-        히어로 문구는 의도적으로 서술적으로 둔다. 어떤 가치 제안(신뢰 / 발견 /
-        지역 연결)이 통하는지는 2차 실험에서 메시지를 나눠 검증할 대상이므로,
-        1차 실험 단계에서 특정 가치 제안을 단정하지 않는다.
-
-        배경 사진은 실제 산지 사진(곡성 섬진강변)이고, 그 아래 캡션도 같은
-        지역의 실제 소개 문구(regions 데이터)를 그대로 가져와 사진과 정보가
-        짝을 이루게 한다 — 임의의 배경 이미지가 아니라는 뜻이다.
-      */}
-      <section className="relative isolate overflow-hidden rounded-xl text-white">
-        <Image
-          src="/hero/gokseong-valley.jpg"
-          alt="전라남도 곡성, 섬진강을 따라 펼쳐진 산과 논"
-          fill
-          priority
-          sizes="(max-width: 1024px) 100vw, 1152px"
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-lp-green/95 via-lp-green/55 to-lp-green/20" />
-
-        <div className="relative px-6 py-12 sm:px-10 sm:py-20 lg:py-24">
-          <h1 className="text-2xl font-bold leading-snug sm:text-4xl">
-            지역에서 만든 것들
-          </h1>
-          <p className="mt-3 max-w-md text-sm leading-relaxed text-white/90 sm:text-base">
-            전국 각지의 생산자가 직접 기르고 만든 상품입니다. 누가 어디서 어떻게
-            만들었는지 상품마다 확인할 수 있습니다.
-          </p>
-          <p className="mt-6 text-sm text-white/75">
-            {categories.length}개 카테고리 · {regions.length}개 지역 · 상품{" "}
-            {products.length}개
-          </p>
-
-          {heroRegion && (
-            <p className="mt-8 max-w-lg border-t border-white/20 pt-4 text-xs leading-relaxed text-white/70 sm:text-sm">
-              사진 속 {heroRegion.province} {heroRegion.name} — {heroRegion.description}
-            </p>
-          )}
-        </div>
-      </section>
+      <HeroBanner slides={HERO_SLIDES} />
 
       <CategoryChips />
 
