@@ -25,6 +25,7 @@ const HERO_SLIDES: HeroSlide[] = [
     subtitle:
       "받는 분의 고향을 떠올리게 하는 로컬 상품으로 명절 인사를 전해보세요.",
     cta: { label: "추석 선물 둘러보기", href: "/categories/cheong" },
+    image: { src: "/hero/chuseok.jpg", alt: "홍천 아까시 벌꿀을 담은 유리병" },
   },
   {
     id: "trust",
@@ -34,6 +35,7 @@ const HERO_SLIDES: HeroSlide[] = [
     subtitle:
       "레시피가 아니라 사람을 소개합니다. 상품마다 생산자의 이름과 이야기를 확인할 수 있습니다.",
     cta: { label: "정재훈님 이야기 보기", href: "/creators/gokseong-rice" },
+    image: { src: "/hero/trust.jpg", alt: "나무 그릇에 담긴 곡성 유기농 흑미" },
   },
   {
     id: "give-back",
@@ -43,6 +45,7 @@ const HERO_SLIDES: HeroSlide[] = [
     subtitle:
       "여기서 산 만큼, 만든 이의 마을에 힘이 됩니다. 소비가 곧 지역을 응원하는 방법입니다.",
     cta: { label: "산지 이야기 보러가기", href: "/regions" },
+    image: { src: "/hero/give-back.jpg", alt: "섬진강을 따라 펼쳐진 곡성의 논과 산" },
   },
   {
     id: "seasonal",
@@ -52,6 +55,7 @@ const HERO_SLIDES: HeroSlide[] = [
     subtitle:
       "통영 굴은 11월부터 3월까지만 거둡니다. 제철에만 나는 맛을 놓치지 마세요.",
     cta: { label: "통영 굴 보러가기", href: "/products/tongyeong-oyster-oil" },
+    image: { src: "/hero/seasonal.jpg", alt: "통영 굴을 올린 오일 파스타" },
   },
   {
     id: "visit",
@@ -60,6 +64,7 @@ const HERO_SLIDES: HeroSlide[] = [
     title: "먹어보고, 다녀오세요",
     subtitle: "감귤 따기 체험부터 올레길까지 — 서귀포에서 만날 수 있는 것들.",
     cta: { label: "서귀포 소개 보기", href: "/regions/jeju" },
+    image: { src: "/hero/visit.jpg", alt: "반으로 자른 제주 노지감귤" },
   },
   {
     id: "newcomer",
@@ -68,6 +73,7 @@ const HERO_SLIDES: HeroSlide[] = [
     title: "첫 로컬픽, 이렇게 시작하세요",
     subtitle: "카테고리별로 나뉜 상품을 훑어보고, 관심 가는 지역부터 골라보세요.",
     cta: { label: "카테고리 전체 보기", href: "/categories" },
+    image: { src: "/hero/newcomer.jpg", alt: "속을 반으로 가른 경주 찰보리빵" },
   },
   {
     id: "intro",
@@ -78,6 +84,7 @@ const HERO_SLIDES: HeroSlide[] = [
       "전국 각지의 생산자가 직접 기르고 만든 상품입니다. 누가 어디서 어떻게 만들었는지 상품마다 확인할 수 있습니다.",
     note: `${categories.length}개 카테고리 · ${regions.length}개 지역 · 상품 ${products.length}개`,
     cta: { label: "카테고리 둘러보기", href: "/categories" },
+    image: { src: "/hero/intro.jpg", alt: "대바구니에 담긴 완도 다시마" },
   },
 ];
 
