@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Modal } from "./Modal";
 import { ConsentForm } from "./ConsentForm";
@@ -25,6 +25,15 @@ function usePerStep(): number {
   }, []);
 
   return perStep;
+}
+
+/** 뭔가 하나라도 골랐는지 — 초기 빈 상태({channels:[], trustFactors:[]})는 제외 */
+function hasAnyAnswer(answers: AnswerMap): boolean {
+  return Object.values(answers).some((value) => {
+    if (Array.isArray(value)) return value.length > 0;
+    if (typeof value === "string") return value.trim().length > 0;
+    return value !== undefined;
+  });
 }
 
 function isAnswered(question: Question, answers: AnswerMap): boolean {
@@ -98,11 +107,16 @@ export function SurveyModal({
     });
   }, [open, productSlug, trigger]);
 
+  // 마지막으로 손댄 문항 — 이탈 시 "어디서 멈췄는지"로 함께 저장한다
+  const lastTouchedRef = useRef<keyof SurveyAnswers | undefined>(undefined);
+
   function setAnswer(id: keyof SurveyAnswers, value: unknown) {
+    lastTouchedRef.current = id;
     setAnswers((prev) => ({ ...prev, [id]: value }));
   }
 
   function toggleMulti(id: keyof SurveyAnswers, option: string) {
+    lastTouchedRef.current = id;
     setAnswers((prev) => {
       const list = Array.isArray(prev[id]) ? (prev[id] as string[]) : [];
       return {
@@ -112,6 +126,46 @@ export function SurveyModal({
           : [...list, option],
       };
     });
+  }
+
+  /**
+   * 이탈 시점까지의 답변 스냅샷을 저장한다.
+   *
+   * 실패해도 삼킨다 — 자동저장 하나 때문에 설문 진행이 막히면 안 된다.
+   * `keepalive`는 탭을 닫는 순간에도 요청이 끊기지 않게 한다.
+   */
+  const saveProgress = useCallback(
+    (snapshot: AnswerMap) => {
+      if (!hasAnyAnswer(snapshot)) return;
+      void fetch("/api/survey/progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        keepalive: true,
+        body: JSON.stringify({
+          ...getUtm(),
+          device: getDevice(),
+          trigger,
+          productSlug,
+          answers: snapshot,
+          lastQuestionId: lastTouchedRef.current,
+        }),
+      }).catch(() => undefined);
+    },
+    [trigger, productSlug],
+  );
+
+  // 답을 고를 때마다 잠시 기다렸다가 저장한다 — 매 클릭마다 요청을 보내지
+  // 않으면서도, 문항 사이를 오가지 않고 그냥 창을 닫아도 최근 상태가 남는다.
+  useEffect(() => {
+    if (!open || phase !== "questions") return;
+    const timer = setTimeout(() => saveProgress(answers), 700);
+    return () => clearTimeout(timer);
+  }, [answers, open, phase, saveProgress]);
+
+  /** Esc·배경 클릭으로 나갈 때도 방금 고른 값까지는 잡아둔다(디바운스를 기다리지 않고 즉시). */
+  function handleClose() {
+    if (phase === "questions") saveProgress(answers);
+    onClose();
   }
 
   // A viewport change can regroup questions while this modal is open. Derive
@@ -141,6 +195,17 @@ export function SurveyModal({
       if (!response.ok) throw new Error("save failed");
 
       const { surveyId: id } = (await response.json()) as { surveyId: string };
+
+      // 완료했으니 이탈 스냅샷은 정리한다. 실패해도 조용히 넘어간다 — 청소가
+      // 안 됐다고 완료 처리를 막을 이유는 없다(대시보드가 dedupeKey로 한 번
+      // 더 걸러내므로 정리 실패로 완료 응답이 이탈 목록에 섞이지도 않는다).
+      void fetch("/api/survey/progress", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        keepalive: true,
+        body: JSON.stringify({ trigger, productSlug }),
+      }).catch(() => undefined);
+
       setSurveyId(id);
       setPhase(answers.interviewWilling === true ? "consent" : "done");
     } catch {
@@ -151,7 +216,7 @@ export function SurveyModal({
   }
 
   return (
-    <Modal open={open} onClose={onClose} labelledBy="survey-title">
+    <Modal open={open} onClose={handleClose} labelledBy="survey-title">
       {phase === "questions" && (
         <div className="flex flex-col">
           <div className="border-b border-lp-gray-100 px-6 pb-4 pt-6">

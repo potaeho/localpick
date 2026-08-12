@@ -1,6 +1,11 @@
 import "server-only";
 
-import type { InterviewConsent, SurveyResponse, TrackedEvent } from "@/lib/types";
+import type {
+  InterviewConsent,
+  SurveyProgress,
+  SurveyResponse,
+  TrackedEvent,
+} from "@/lib/types";
 import type { StorageAdapter } from "./index";
 
 type SupabaseRecord<T> = { payload: T };
@@ -116,6 +121,81 @@ async function saveSurvey(response: SurveyResponse): Promise<string> {
   return existing[0].id;
 }
 
+type ProgressRow = {
+  id: string;
+  session_id: string;
+  dedupe_key: string;
+  trigger: SurveyProgress["trigger"];
+  product_slug: string | null;
+  device: SurveyProgress["device"];
+  last_question_id: string | null;
+  answers: Partial<SurveyProgress["answers"]>;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  utm_content: string | null;
+  client_ts: string | null;
+};
+
+/**
+ * 답변이 늘어날 때마다 같은 dedupe_key로 계속 upsert된다 — 그래서 이 테이블은
+ * insert-or-update(merge-duplicates)를 쓴다. 다른 테이블(events/surveys/
+ * consents)은 처음 한 번만 기록되면 끝이라 ignore-duplicates(멱등 재시도
+ * 방어)면 충분하지만, 진행 스냅샷은 매번 갱신되어야 의미가 있다.
+ */
+async function saveProgress(progress: SurveyProgress): Promise<void> {
+  await request<void>("lp_survey_progress?on_conflict=dedupe_key", {
+    method: "POST",
+    headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+    body: JSON.stringify({
+      id: progress.dedupeKey,
+      session_id: progress.sessionId,
+      dedupe_key: progress.dedupeKey,
+      trigger: progress.trigger,
+      product_slug: progress.productSlug ?? null,
+      device: progress.device,
+      last_question_id: progress.lastQuestionId ?? null,
+      answers: progress.answers,
+      utm_source: progress.utmSource ?? null,
+      utm_medium: progress.utmMedium ?? null,
+      utm_campaign: progress.utmCampaign ?? null,
+      utm_content: progress.utmContent ?? null,
+      client_ts: progress.ts,
+    }),
+  });
+}
+
+function toSurveyProgress(row: ProgressRow, updatedAt: string): SurveyProgress {
+  return {
+    dedupeKey: row.dedupe_key,
+    sessionId: row.session_id,
+    ts: row.client_ts ?? updatedAt,
+    trigger: row.trigger,
+    productSlug: row.product_slug ?? undefined,
+    device: row.device,
+    answers: row.answers ?? {},
+    lastQuestionId: (row.last_question_id ?? undefined) as SurveyProgress["lastQuestionId"],
+    utmSource: row.utm_source ?? undefined,
+    utmMedium: row.utm_medium ?? undefined,
+    utmCampaign: row.utm_campaign ?? undefined,
+    utmContent: row.utm_content ?? undefined,
+  };
+}
+
+async function readProgress(): Promise<SurveyProgress[]> {
+  const rows = await request<(ProgressRow & { updated_at: string })[]>(
+    "lp_survey_progress?select=id,session_id,dedupe_key,trigger,product_slug,device,last_question_id,answers,utm_source,utm_medium,utm_campaign,utm_content,client_ts,updated_at&order=updated_at.asc",
+  );
+  return rows.map((row) => toSurveyProgress(row, row.updated_at));
+}
+
+async function deleteProgress(dedupeKey: string): Promise<void> {
+  await request<void>(
+    `lp_survey_progress?dedupe_key=eq.${encodeURIComponent(dedupeKey)}`,
+    { method: "DELETE", headers: { Prefer: "return=minimal" } },
+  );
+}
+
 async function saveConsent(consent: InterviewConsent): Promise<boolean> {
   const rows = await request<InsertRecord[]>("lp_consents?on_conflict=dedupe_key", {
     method: "POST",
@@ -175,22 +255,31 @@ export const supabaseAdapter: StorageAdapter = {
   saveConsent,
   readConsents: () => read<InterviewConsent>("lp_consents"),
 
+  saveProgress,
+  readProgress,
+  deleteProgress,
+
   async deleteParticipant(sessionId) {
     const filter = `session_id=eq.${encodeFilter(sessionId)}`;
-    const [events, surveys, consents] = await Promise.all([
+    const [events, surveys, consents, progress] = await Promise.all([
       remove(`lp_events?${filter}`),
       remove(`lp_surveys?${filter}`),
       remove(`lp_consents?${filter}`),
+      remove(`lp_survey_progress?${filter}`),
     ]);
-    return { events, surveys, consents };
+    return { events, surveys, consents, progress };
   },
   async purgeBefore(cutoff) {
     const filter = `created_at=lt.${encodeFilter(cutoff)}`;
-    const [events, surveys, consents] = await Promise.all([
+    // lp_survey_progress is timestamped by updated_at (it is upserted in
+    // place, so created_at would keep the very first draft's age forever).
+    const progressFilter = `updated_at=lt.${encodeFilter(cutoff)}`;
+    const [events, surveys, consents, progress] = await Promise.all([
       remove(`lp_events?${filter}`),
       remove(`lp_surveys?${filter}`),
       remove(`lp_consents?${filter}`),
+      remove(`lp_survey_progress?${progressFilter}`),
     ]);
-    return { events, surveys, consents };
+    return { events, surveys, consents, progress };
   },
 };

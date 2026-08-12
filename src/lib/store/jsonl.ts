@@ -5,6 +5,7 @@ import path from "node:path";
 
 import type {
   InterviewConsent,
+  SurveyProgress,
   SurveyResponse,
   TrackedEvent,
 } from "@/lib/types";
@@ -16,6 +17,7 @@ const FILES = {
   events: path.join(DATA_DIR, "events.jsonl"),
   surveys: path.join(DATA_DIR, "surveys.jsonl"),
   consents: path.join(DATA_DIR, "consents.jsonl"),
+  progress: path.join(DATA_DIR, "survey-progress.jsonl"),
 } as const;
 
 /**
@@ -54,6 +56,22 @@ async function readAll<T>(file: string): Promise<T[]> {
   return records;
 }
 
+type ProgressTombstone = { dedupeKey: string; __deleted: true };
+
+/**
+ * JSONL은 덧붙이기 전용이라 upsert를 흉내 낸다: 같은 dedupeKey로 여러 줄이
+ * 쌓이면 마지막 줄이 그 시도의 최신 상태다. 삭제는 __deleted 표식을 하나 더
+ * 붙여 다음 읽기에서 걸러내는 식으로 처리한다(진짜로 줄을 지우지 않는다).
+ */
+async function readLatestProgress(): Promise<SurveyProgress[]> {
+  const all = await readAll<SurveyProgress | ProgressTombstone>(FILES.progress);
+  const latest = new Map<string, SurveyProgress | ProgressTombstone>();
+  for (const record of all) latest.set(record.dedupeKey, record);
+  return [...latest.values()].filter(
+    (record): record is SurveyProgress => !("__deleted" in record),
+  );
+}
+
 export const jsonlAdapter: StorageAdapter = {
   appendEvent: (event) => append(FILES.events, event),
   readEvents: () => readAll<TrackedEvent>(FILES.events),
@@ -74,6 +92,11 @@ export const jsonlAdapter: StorageAdapter = {
     return true;
   },
   readConsents: () => readAll<InterviewConsent>(FILES.consents),
+
+  saveProgress: (progress) => append(FILES.progress, progress),
+  readProgress: () => readLatestProgress(),
+  deleteProgress: (dedupeKey) =>
+    append(FILES.progress, { dedupeKey, __deleted: true } satisfies ProgressTombstone),
 
   // JSONL is deliberately append-only for local development. Privacy deletion
   // must run against the production Supabase store; do not silently claim a

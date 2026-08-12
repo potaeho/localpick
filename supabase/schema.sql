@@ -38,6 +38,30 @@ create table if not exists public.lp_admin_login_audit (
   attempted_at timestamptz not null default now()
 );
 
+-- Snapshot of a survey's answers-so-far, upserted as the participant progresses
+-- through the modal. One row per attempt (session + trigger + product), kept
+-- separate from lp_surveys so an abandoned attempt never enters the completed-
+-- survey funnel or answer tallies. Deleted once the attempt finishes (its
+-- answers now live in lp_surveys); a stray leftover is still filtered out at
+-- read time by dedupe_key as a second line of defense.
+create table if not exists public.lp_survey_progress (
+  id text primary key,
+  session_id text,
+  dedupe_key text,
+  trigger text,
+  product_slug text,
+  device text,
+  last_question_id text,
+  answers jsonb not null,
+  utm_source text,
+  utm_medium text,
+  utm_campaign text,
+  utm_content text,
+  client_ts timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 -- Supports an in-place upgrade from the original payload-only schema.
 alter table public.lp_events add column if not exists session_id text;
 alter table public.lp_events add column if not exists dedupe_key text;
@@ -195,10 +219,55 @@ create index if not exists lp_consents_session_id_idx on public.lp_consents (ses
 create index if not exists lp_admin_login_audit_failures_idx
   on public.lp_admin_login_audit (ip_hash, attempted_at desc) where success is false;
 
+create unique index if not exists lp_survey_progress_dedupe_key_unique
+  on public.lp_survey_progress (dedupe_key);
+create index if not exists lp_survey_progress_session_id_idx on public.lp_survey_progress (session_id);
+create index if not exists lp_survey_progress_updated_at_idx on public.lp_survey_progress (updated_at);
+
+-- Each autosave is an upsert (insert-or-update by dedupe_key), so updated_at
+-- must move on every revision, not just the first insert — a plain column
+-- default only fires on insert.
+create or replace function public.lp_survey_progress_touch_updated_at()
+returns trigger language plpgsql as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+drop trigger if exists lp_survey_progress_touch_updated_at on public.lp_survey_progress;
+create trigger lp_survey_progress_touch_updated_at
+  before update on public.lp_survey_progress
+  for each row execute function public.lp_survey_progress_touch_updated_at();
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- The one relationship worth enforcing: an interview consent belongs to the
+-- survey it was collected from. lp_surveys.id is the primary key, so this makes
+-- the link visible in Supabase's schema diagram and rejects orphan consents.
+--
+-- `on delete set null` (not the restrict default): a participant-deletion or a
+-- retention purge removes surveys and consents concurrently, so the FK must not
+-- fail if the survey row is deleted while its consent still points at it — the
+-- link is simply nulled. lp_events stays FK-free on purpose (see the design
+-- note at the top): it is a high-write log, correlated by session_id at read
+-- time, not a child row.
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'lp_consents_survey_id_fkey'
+  ) then
+    alter table public.lp_consents
+      add constraint lp_consents_survey_id_fkey
+      foreign key (survey_id) references public.lp_surveys (id)
+      on delete set null;
+  end if;
+end $$;
+create index if not exists lp_consents_survey_id_idx on public.lp_consents (survey_id);
+
 alter table public.lp_events enable row level security;
 alter table public.lp_surveys enable row level security;
 alter table public.lp_consents enable row level security;
 alter table public.lp_admin_login_audit enable row level security;
+alter table public.lp_survey_progress enable row level security;
 
 -- New Supabase projects may not expose new public tables to the Data API by
 -- default. The server's service_role needs these explicit privileges; anon and
@@ -207,11 +276,15 @@ revoke all privileges on table
   public.lp_events,
   public.lp_surveys,
   public.lp_consents,
-  public.lp_admin_login_audit
+  public.lp_admin_login_audit,
+  public.lp_survey_progress
 from anon, authenticated, public;
 grant usage on schema public to service_role;
 grant select, insert, delete on public.lp_events, public.lp_surveys, public.lp_consents to service_role;
 grant select, insert on public.lp_admin_login_audit to service_role;
+-- lp_survey_progress alone needs UPDATE: PostgREST upserts it via
+-- INSERT ... ON CONFLICT (dedupe_key) DO UPDATE as answers accumulate.
+grant select, insert, update, delete on public.lp_survey_progress to service_role;
 
 -- Intentionally do not add public policies. Browser requests cannot access
 -- these tables; Route Handlers use the server-only service role.

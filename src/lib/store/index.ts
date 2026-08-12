@@ -2,6 +2,7 @@ import "server-only";
 
 import type {
   InterviewConsent,
+  SurveyProgress,
   SurveyResponse,
   TrackedEvent,
 } from "@/lib/types";
@@ -30,10 +31,18 @@ export interface StorageAdapter {
   saveConsent(consent: InterviewConsent): Promise<boolean>;
   readConsents(): Promise<InterviewConsent[]>;
 
-  /** 개인정보 삭제 요청은 같은 익명 세션의 이벤트·설문·동의를 함께 제거한다. */
-  deleteParticipant(sessionId: string): Promise<{ events: number; surveys: number; consents: number }>;
+  /**
+   * 설문 도중 답변 스냅샷. 같은 시도(dedupeKey)를 계속 upsert하며,
+   * 완료 시 deleteProgress로 지운다.
+   */
+  saveProgress(progress: SurveyProgress): Promise<void>;
+  readProgress(): Promise<SurveyProgress[]>;
+  deleteProgress(dedupeKey: string): Promise<void>;
+
+  /** 개인정보 삭제 요청은 같은 익명 세션의 이벤트·설문·동의·진행상태를 함께 제거한다. */
+  deleteParticipant(sessionId: string): Promise<{ events: number; surveys: number; consents: number; progress: number }>;
   /** 보존 기간이 지난 전체 기록을 제거한다. */
-  purgeBefore(cutoff: string): Promise<{ events: number; surveys: number; consents: number }>;
+  purgeBefore(cutoff: string): Promise<{ events: number; surveys: number; consents: number; progress: number }>;
 }
 
 function selectedAdapter(): StorageAdapter {
@@ -57,6 +66,9 @@ export const storage: StorageAdapter = {
   findSurveyForConsent: (surveyId, sessionId) => selectedAdapter().findSurveyForConsent(surveyId, sessionId),
   saveConsent: (consent) => selectedAdapter().saveConsent(consent),
   readConsents: () => selectedAdapter().readConsents(),
+  saveProgress: (progress) => selectedAdapter().saveProgress(progress),
+  readProgress: () => selectedAdapter().readProgress(),
+  deleteProgress: (dedupeKey) => selectedAdapter().deleteProgress(dedupeKey),
   deleteParticipant: (sessionId) => selectedAdapter().deleteParticipant(sessionId),
   purgeBefore: (cutoff) => selectedAdapter().purgeBefore(cutoff),
 };
