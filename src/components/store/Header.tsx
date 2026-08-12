@@ -85,6 +85,14 @@ export function Header() {
                 </Link>
               </li>
             ))}
+            <li>
+              <Link
+                href="/regions"
+                className="block whitespace-nowrap rounded-full px-3 py-1.5 text-sm text-lp-gray-700 hover:bg-lp-green-light hover:text-lp-green"
+              >
+                지역별 보기
+              </Link>
+            </li>
           </ul>
         </div>
       </nav>

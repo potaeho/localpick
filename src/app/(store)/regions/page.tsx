@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { KoreaMap } from "@/components/store/KoreaMap";
 import { getProductsByRegion, regions } from "@/lib/products";
 
 export const metadata: Metadata = {
@@ -8,15 +9,22 @@ export const metadata: Metadata = {
 };
 
 export default function RegionsIndexPage() {
+  const productCounts = Object.fromEntries(
+    regions.map((region) => [region.id, getProductsByRegion(region.id).length]),
+  );
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 lg:px-6 lg:py-8">
       <h1 className="text-2xl font-bold text-lp-ink sm:text-3xl">지역</h1>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-lp-gray-700">
-        상품이 만들어진 곳입니다. 각 지역에서 무엇을 볼 수 있는지도 함께
-        정리했습니다.
+        상품이 만들어진 곳입니다. 지도에서 지역을 눌러보세요.
       </p>
 
-      <ul className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-6">
+        <KoreaMap regions={regions} productCounts={productCounts} />
+      </div>
+
+      <ul className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {regions.map((region) => (
           <li key={region.id}>
             <Link

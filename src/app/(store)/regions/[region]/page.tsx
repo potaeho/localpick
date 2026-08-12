@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
+import { KoreaMap } from "@/components/store/KoreaMap";
 import { ProductCard } from "@/components/store/ProductCard";
 import { VisitInfoDisclosure } from "@/components/store/VisitInfoDisclosure";
 import {
@@ -47,6 +48,16 @@ export default async function RegionPage({
       <p className="mt-4 max-w-2xl text-sm leading-relaxed text-lp-gray-900 sm:text-base">
         {region.description}
       </p>
+
+      <div className="mt-6">
+        <KoreaMap
+          regions={regions}
+          productCounts={Object.fromEntries(
+            regions.map((r) => [r.id, getProductsByRegion(r.id).length]),
+          )}
+          activeRegionId={region.id}
+        />
+      </div>
 
       {regionCreators.length > 0 && (
         <section className="mt-8">
