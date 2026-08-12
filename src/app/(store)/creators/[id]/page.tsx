@@ -64,14 +64,15 @@ export default async function CreatorPage({
                 {region.province} {region.name}
               </Link>
             )}
-            {" · "}
-            {creator.since}부터
+            {creator.since ? ` · ${creator.since}부터` : ""}
           </p>
         </div>
       </div>
 
       <section className="mt-8">
-        <h2 className="text-xs font-medium text-lp-gray-500">어떻게 시작했나</h2>
+        <h2 className="text-xs font-medium text-lp-gray-500">
+          {creator.kind === "brand" ? "어떻게 만드나" : "어떻게 시작했나"}
+        </h2>
         <p className="mt-3 leading-loose text-lp-gray-900">{creator.story}</p>
       </section>
 
@@ -81,7 +82,9 @@ export default async function CreatorPage({
 
       <section className="mt-10">
         <h2 className="text-lg font-bold text-lp-ink">
-          {creator.name}님이 만든 상품
+          {creator.kind === "brand"
+            ? `${creator.name}의 상품`
+            : `${creator.name}님이 만든 상품`}
         </h2>
         <ul className="mt-5 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3">
           {creatorProducts.map((product) => (

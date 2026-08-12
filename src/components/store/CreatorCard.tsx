@@ -16,9 +16,17 @@ export function CreatorCard({
   /** 생산자 이야기로 가는 링크 — 클릭 추적을 위해 부모가 주입한다 */
   children: React.ReactNode;
 }) {
+  const isBrand = creator.kind === "brand";
+  const place = region ? `${region.province} ${region.name}` : "";
+  const meta = [place, creator.since ? `${creator.since}부터` : ""]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
     <section className="rounded-xl border border-lp-gray-300 bg-white p-5">
-      <h2 className="text-xs font-medium text-lp-gray-500">만든 사람</h2>
+      <h2 className="text-xs font-medium text-lp-gray-500">
+        {isBrand ? "만든 곳" : "만든 사람"}
+      </h2>
 
       <div className="mt-3 flex items-start gap-4">
         <span
@@ -34,10 +42,7 @@ export function CreatorCard({
               {creator.title}
             </span>
           </p>
-          <p className="mt-0.5 text-sm text-lp-gray-500">
-            {region ? `${region.province} ${region.name}` : ""} · {creator.since}
-            부터
-          </p>
+          {meta && <p className="mt-0.5 text-sm text-lp-gray-500">{meta}</p>}
         </div>
       </div>
 

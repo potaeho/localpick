@@ -1,8 +1,10 @@
 import "server-only";
 
-import { NO_PURCHASE_EXPERIENCE } from "@/lib/survey-questions";
+import { NO_PURCHASE_EXPERIENCE, QUESTIONS } from "@/lib/survey-questions";
 import { storage } from "@/lib/store";
 import type {
+  AbandonedAnswer,
+  AbandonedSurveyRow,
   CampaignMetric,
   DashboardStats,
   EventType,
@@ -11,6 +13,8 @@ import type {
   MaskedInterview,
   MetricValue,
   ProductFunnelMetric,
+  SurveyAnswers,
+  SurveyProgress,
   SurveyQuestionSummary,
   SurveyResponse,
   TrackedEvent,
@@ -123,6 +127,69 @@ function campaignMetrics(events: TrackedEvent[]): CampaignMetric[] {
     .sort((a, b) => b.detailViews - a.detailViews);
 }
 
+/**
+ * 이탈 스냅샷의 답변을 사람이 읽을 수 있는 라벨:값 목록으로 펼친다.
+ * QUESTIONS 순서를 그대로 따라 설문 문항 순서와 나란히 읽힌다.
+ */
+function formatAbandonedAnswers(
+  answers: Partial<SurveyAnswers>,
+): { rows: AbandonedAnswer[]; answeredCount: number } {
+  const rows: AbandonedAnswer[] = [];
+  let answeredCount = 0;
+
+  for (const question of QUESTIONS) {
+    const value = answers[question.id];
+    if (value === undefined) continue;
+
+    if (question.kind === "boolean") {
+      if (typeof value !== "boolean") continue;
+      rows.push({ label: question.title, value: value ? question.yes : question.no });
+    } else if (question.kind === "multi") {
+      if (!Array.isArray(value) || value.length === 0) continue;
+      rows.push({ label: question.title, value: value.join(", ") });
+    } else {
+      if (typeof value !== "string" || !value) continue;
+      rows.push({ label: question.title, value });
+    }
+    answeredCount += 1;
+  }
+
+  if (answers.buyReasonDetail) {
+    rows.push({ label: "기타 이유", value: answers.buyReasonDetail });
+  }
+
+  return { rows, answeredCount };
+}
+
+/**
+ * 이탈한 시도만 남긴다. 완료된 시도는 saveProgress → deleteProgress 흐름으로
+ * 정리되지만, 정리가 실패했거나 경합이 있었을 경우를 대비해 dedupeKey로
+ * 완료된 설문과 한 번 더 대조한다.
+ */
+function abandonedSurveyRows(
+  progress: SurveyProgress[],
+  completedSurveys: SurveyResponse[],
+): AbandonedSurveyRow[] {
+  const completedDedupeKeys = new Set(completedSurveys.map((survey) => survey.dedupeKey));
+
+  return progress
+    .filter((entry) => !completedDedupeKeys.has(entry.dedupeKey))
+    .map((entry) => {
+      const { rows, answeredCount } = formatAbandonedAnswers(entry.answers);
+      return {
+        id: entry.dedupeKey,
+        ts: entry.ts,
+        trigger: entry.trigger,
+        productSlug: entry.productSlug,
+        device: entry.device,
+        utmCampaign: entry.utmCampaign,
+        answeredCount,
+        answers: rows,
+      };
+    })
+    .sort((a, b) => b.ts.localeCompare(a.ts));
+}
+
 function interviewRows(consents: InterviewConsent[], surveys: SurveyResponse[]): MaskedInterview[] {
   const surveyById = new Map(surveys.map((survey) => [survey.id, survey]));
   return consents
@@ -147,6 +214,7 @@ export function calculateDashboardStats(
   events: TrackedEvent[],
   surveys: SurveyResponse[],
   consents: InterviewConsent[],
+  progress: SurveyProgress[] = [],
 ): DashboardStats {
   const detailSessions = uniqueSessions(events, "product_view");
   const buySessions = uniqueSessions(events, "buy_click");
@@ -197,14 +265,16 @@ export function calculateDashboardStats(
     surveySummaries: createSurveySummaries(surveys),
     surveyResponses: [...surveys].sort((a, b) => b.ts.localeCompare(a.ts)),
     interviews: interviewRows(consents, surveys),
+    abandonedSurveys: abandonedSurveyRows(progress, surveys),
   };
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
-  const [events, surveys, consents] = await Promise.all([
+  const [events, surveys, consents, progress] = await Promise.all([
     storage.readEvents(),
     storage.readSurveys(),
     storage.readConsents(),
+    storage.readProgress(),
   ]);
-  return calculateDashboardStats(events, surveys, consents);
+  return calculateDashboardStats(events, surveys, consents, progress);
 }

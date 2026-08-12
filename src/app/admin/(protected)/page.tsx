@@ -7,6 +7,7 @@ import { FunnelChart } from "@/components/admin/FunnelChart";
 import { ProductFunnelTable } from "@/components/admin/ProductFunnelTable";
 import { InterviewList } from "@/components/admin/InterviewList";
 import { SurveyResponseList } from "@/components/admin/SurveyResponseList";
+import { AbandonedSurveyList } from "@/components/admin/AbandonedSurveyList";
 
 export const metadata: Metadata = {
   title: "실험 대시보드 - LOCAL PICK",
@@ -191,6 +192,16 @@ export default async function AdminDashboardPage() {
         description="인터뷰에 동의하고 연락처를 남긴 분들입니다. 연락처는 기본적으로 가려져 있습니다."
       >
         <InterviewList interviews={stats.interviews} />
+      </Section>
+
+      <Section
+        title="이탈된 응답"
+        description="설문을 끝내지 못하고 나갔지만, 그 전까지 답한 내용은 자동으로 남겨둔 것입니다. 완료 응답 집계에는 포함되지 않습니다."
+      >
+        <AbandonedSurveyList
+          rows={stats.abandonedSurveys}
+          productNames={productNames}
+        />
       </Section>
     </>
   );

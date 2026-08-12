@@ -18,11 +18,18 @@ export type Region = {
 
 export type Creator = {
   id: string;
+  /**
+   * 개인 생산자냐 지역 브랜드냐. 실제 상품이 개인 이름 대신 지역 브랜드
+   * ("전북 순창")로만 표기되는 경우 "brand"로 둔다. 화면 문구가 "만든 사람"/
+   * "…님이 만든 상품" 같은 개인 전제 표현을 피하도록 분기한다. 기본은 person.
+   */
+  kind?: "person" | "brand";
   name: string;
-  /** 생산자 직함 (예: 흑미 농부) */
+  /** 생산자 직함 (예: 흑미 농부) 또는 브랜드 분류 (예: 전통 장류) */
   title: string;
   regionId: string;
-  since: string;
+  /** 개인의 시작 연도. 지역 브랜드처럼 특정 연도가 없으면 생략한다. */
+  since?: string;
   /** 생산자 이야기 — 신뢰 가설 검증용 콘텐츠 */
   story: string;
   philosophy: string;
@@ -198,6 +205,28 @@ export type SurveyResponse = UtmParams &
   };
 
 /**
+ * 설문 도중 이탈해도 그때까지 고른 답변을 잃지 않기 위한 스냅샷.
+ *
+ * 완료된 설문(`SurveyResponse`)과 별도 테이블에 저장한다. 같은 테이블에
+ * 섞으면 "구매 이유" 같은 선택형 집계가 미완성 응답까지 세게 되어 왜곡된다.
+ * 완료 시 이 스냅샷은 삭제되므로, 남아있는 것은 전부 이탈한 시도다.
+ */
+export type SurveyProgress = UtmParams & {
+  /** session/trigger/product로 만든 키 — 같은 시도를 계속 upsert한다 */
+  dedupeKey: string;
+  sessionId: string;
+  /** 마지막 저장 시각 (ISO 8601) */
+  ts: string;
+  trigger: SurveyTrigger;
+  productSlug?: string;
+  device: DeviceType;
+  /** 그 순간까지 고른 값 그대로 — 완결성 검증을 하지 않는다 */
+  answers: Partial<SurveyAnswers>;
+  /** 마지막으로 답한 문항 — 어디서 멈췄는지 보여준다 */
+  lastQuestionId?: keyof SurveyAnswers;
+};
+
+/**
  * 인터뷰 연락처. 기획서 5단계에 따라 설문 응답과 **분리 저장**하며,
  * 별도 동의를 받은 뒤에만 수집한다.
  */
@@ -266,6 +295,22 @@ export type MaskedInterview = {
   utmCampaign?: string;
 };
 
+/** 이탈 시점까지 답한 문항을 사람이 읽을 수 있게 펼친 것 */
+export type AbandonedAnswer = { label: string; value: string };
+
+/** 설문을 끝내지 못하고 나간 시도 — 정량 집계에는 넣지 않고 목록으로만 보여준다 */
+export type AbandonedSurveyRow = {
+  id: string;
+  ts: string;
+  trigger: SurveyTrigger;
+  productSlug?: string;
+  device: DeviceType;
+  utmCampaign?: string;
+  /** 7문항 중 몇 개까지 답했는지 */
+  answeredCount: number;
+  answers: AbandonedAnswer[];
+};
+
 export type DashboardStats = {
   generatedAt: string;
   primaryKpis: MetricValue[];
@@ -276,4 +321,5 @@ export type DashboardStats = {
   surveySummaries: SurveyQuestionSummary[];
   surveyResponses: SurveyResponse[];
   interviews: MaskedInterview[];
+  abandonedSurveys: AbandonedSurveyRow[];
 };
