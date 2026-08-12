@@ -10,7 +10,13 @@ import { PriceDisplay } from "./PriceDisplay";
  * 후기 수·재구매 수·판매량은 표시하지 않는다. 실제로 판매한 적이 없어
  * 어떤 숫자를 적어도 조작이 되기 때문이다(기획서 9장).
  */
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({
+  product,
+  eagerImage = false,
+}: {
+  product: Product;
+  eagerImage?: boolean;
+}) {
   const region = getRegion(product.regionId);
   const creator = getCreator(product.creatorId);
 
@@ -24,6 +30,9 @@ export function ProductCard({ product }: { product: Product }) {
           slug={product.slug}
           kind={product.imageKind}
           label={product.name}
+          imageSrc={product.detailImages?.[0]}
+          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+          loading={eagerImage ? "eager" : undefined}
           className="aspect-square w-full transition-transform duration-300 group-hover:scale-105"
         />
         {region && (

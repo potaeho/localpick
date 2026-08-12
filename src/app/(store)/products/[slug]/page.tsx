@@ -83,6 +83,9 @@ export default async function ProductDetailPage({
               slug={product.slug}
               kind={product.imageKind}
               label={product.name}
+              imageSrc={product.detailImages?.[0]}
+              sizes="(max-width: 1024px) 100vw, 55vw"
+              loading="eager"
               className="aspect-square w-full"
             />
             {region && (

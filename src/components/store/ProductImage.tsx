@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import type { ProductImageKind } from "@/lib/types";
 
 /**
@@ -244,14 +246,35 @@ export function ProductImage({
   slug,
   kind,
   label,
+  imageSrc,
+  sizes = "(max-width: 768px) 50vw, 25vw",
+  loading,
   className = "",
 }: {
   slug: string;
   kind: ProductImageKind;
   /** 스크린리더용 설명 — 보통 상품명 */
   label: string;
+  /** 실제 상품 사진. 없으면 기존 일러스트를 사용한다. */
+  imageSrc?: string;
+  sizes?: string;
+  loading?: "eager" | "lazy";
   className?: string;
 }) {
+  if (imageSrc) {
+    return (
+      <Image
+        src={imageSrc}
+        alt={`${label} 대표 사진`}
+        width={960}
+        height={960}
+        sizes={sizes}
+        loading={loading}
+        className={`object-cover ${className}`}
+      />
+    );
+  }
+
   const palette = PALETTES[kind];
 
   /*

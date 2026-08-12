@@ -31,6 +31,8 @@ export default function CategoriesIndexPage() {
                     slug={items[0].slug}
                     kind={items[0].imageKind}
                     label={category.name}
+                    imageSrc={items[0].detailImages?.[0]}
+                    sizes="64px"
                     className="h-16 w-16 shrink-0 rounded-lg"
                   />
                 )}

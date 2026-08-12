@@ -58,9 +58,9 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
             </p>
           ) : (
             <ul className="mt-5 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
-              {results.map((product) => (
+              {results.map((product, index) => (
                 <li key={product.slug}>
-                  <ProductCard product={product} />
+                  <ProductCard product={product} eagerImage={index < 4} />
                 </li>
               ))}
             </ul>
@@ -92,9 +92,12 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
               </div>
 
               <ul className="mt-5 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
-                {items.map((product) => (
+                {items.map((product, index) => (
                   <li key={product.slug}>
-                    <ProductCard product={product} />
+                    <ProductCard
+                      product={product}
+                      eagerImage={category.id === categories[0]?.id && index < 4}
+                    />
                   </li>
                 ))}
               </ul>
