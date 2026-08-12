@@ -237,7 +237,14 @@ export type SurveyProgress = UtmParams & {
 };
 
 /**
- * 인터뷰 연락처. 기획서 5단계에 따라 설문 응답과 **분리 저장**하며,
+ * 이 연락처를 수집한 목적. 인터뷰 참여 의사와 무관하게 추첨 참여만을 위해
+ * 남기는 경우가 있으므로, 인터뷰 동의 여부를 나타내는 지표(KPI)가 추첨만
+ * 신청한 사람까지 "인터뷰 동의"로 세지 않도록 이 필드로 구분한다.
+ */
+export type ConsentPurpose = "interview" | "raffle";
+
+/**
+ * 인터뷰·추첨 연락처. 기획서 5단계에 따라 설문 응답과 **분리 저장**하며,
  * 별도 동의를 받은 뒤에만 수집한다.
  */
 export type InterviewConsent = {
@@ -250,6 +257,8 @@ export type InterviewConsent = {
   name: string;
   contact: string;
   contactType: "email" | "phone";
+  /** 이 연락처를 남긴 목적 (인터뷰 / 추첨, 중복 가능) */
+  purposes: ConsentPurpose[];
   /** 동의 시점에 표시된 고지 문구의 버전 */
   noticeVersion: string;
 };
@@ -301,6 +310,7 @@ export type MaskedInterview = {
   name: string;
   contactType: InterviewConsent["contactType"];
   maskedContact: string;
+  purposes: ConsentPurpose[];
   productSlug?: string;
   utmCampaign?: string;
 };

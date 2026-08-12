@@ -6,6 +6,7 @@ import type {
   AbandonedAnswer,
   AbandonedSurveyRow,
   CampaignMetric,
+  ConsentPurpose,
   DashboardStats,
   EventType,
   FunnelStep,
@@ -202,6 +203,10 @@ function interviewRows(consents: InterviewConsent[], surveys: SurveyResponse[]):
         name: consent.name ? `${consent.name.slice(0, 1)}${"•".repeat(Math.max(1, consent.name.length - 1))}` : "익명",
         contactType: consent.contactType,
         maskedContact: maskedContact(consent.contact, consent.contactType),
+        // 레거시 레코드(필드 도입 전)는 전부 인터뷰 동의로 수집된 것들이었다.
+        purposes: consent.purposes?.length
+          ? consent.purposes
+          : (["interview"] satisfies ConsentPurpose[]),
         productSlug: survey?.productSlug,
         utmCampaign: survey?.utmCampaign,
       };
@@ -223,7 +228,13 @@ export function calculateDashboardStats(
   const buyerPathSurveys = surveys.filter((survey) => survey.trigger === "buy_click");
   const buyerSurveyIds = new Set(buyerPathSurveys.map((survey) => survey.id));
   const buyerSurveySessions = new Set(buyerPathSurveys.map((survey) => survey.sessionId));
-  const buyerPathConsents = consents.filter((consent) => buyerSurveyIds.has(consent.surveyId));
+  // 추첨만 신청한 연락처는 인터뷰 동의 관련 KPI·퍼널에 섞이지 않는다 —
+  // 아래 "인터뷰 대상자" 목록(interviewRows)에서는 목적과 무관하게 계속 보인다.
+  const buyerPathConsents = consents.filter(
+    (consent) =>
+      buyerSurveyIds.has(consent.surveyId) &&
+      (consent.purposes?.length ? consent.purposes.includes("interview") : true),
+  );
   const buyerConsentSessions = new Set(buyerPathConsents.map((consent) => consent.sessionId));
   const experiencedBuyerSurveys = buyerPathSurveys.filter(
     (survey) => survey.purchaseExperience && survey.purchaseExperience !== NO_PURCHASE_EXPERIENCE,

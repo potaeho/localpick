@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 export type HeroSlide = {
   id: string;
-  theme: "orange" | "green" | "ink";
+  theme: "orange" | "green" | "ink" | "soil" | "gold" | "slate";
   eyebrow: string;
   title: string;
   subtitle: string;
@@ -17,6 +17,9 @@ const THEME_CLASSES: Record<HeroSlide["theme"], string> = {
   orange: "bg-gradient-to-br from-lp-orange-dark via-lp-orange to-[#c85a10]",
   green: "bg-gradient-to-br from-lp-green-dark via-lp-green to-[#0d3623]",
   ink: "bg-gradient-to-br from-lp-gray-900 via-lp-ink to-[#050505]",
+  soil: "bg-gradient-to-br from-[#4a3626] via-[#2e2013] to-lp-ink",
+  gold: "bg-gradient-to-br from-[#c98a1a] via-lp-orange to-lp-orange-dark",
+  slate: "bg-gradient-to-br from-lp-gray-700 via-lp-gray-900 to-lp-ink",
 };
 
 const AUTOPLAY_MS = 6000;
@@ -68,7 +71,7 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
             <div className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-black/10 blur-3xl" />
 
-            <div className="relative flex h-full flex-col justify-center px-6 py-12 sm:px-10 sm:py-16 lg:py-20">
+            <div className="relative flex h-full flex-col justify-center break-keep px-6 py-12 sm:px-10 sm:py-16 lg:py-20">
               <p className="text-xs font-semibold tracking-wide text-white/80 sm:text-sm">
                 {slide.eyebrow}
               </p>

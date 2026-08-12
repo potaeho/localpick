@@ -1,4 +1,4 @@
-import type { SurveyAnswers } from "./types";
+import type { SurveyAnswers, SurveyTrigger } from "./types";
 
 /**
  * 기획서 5단계의 7문항.
@@ -7,6 +7,10 @@ import type { SurveyAnswers } from "./types";
  * 가치 제안을 확인받는 것이 아니라, 소비자가 실제로 무엇을 보고 눌렀는지
  * 알아내는 것이기 때문이다. "생산자 정보를 믿을 만해서"와 "특별한 이유 없이
  * 궁금해서"가 같은 무게로 놓여 있어야 한다.
+ *
+ * 순서는 "이 상품" 얘기(Q1·Q2·Q6) → "평소 소비 습관" 얘기(Q3·Q4·Q5) →
+ * 인터뷰 참여 요청(Q7)으로 묶었다. 상품 얘기와 습관 얘기를 오가면
+ * 응답자가 매번 화제를 다시 떠올려야 해서 흐름이 끊긴다.
  */
 export type Question =
   | {
@@ -53,7 +57,8 @@ export const QUESTIONS: Question[] = [
     options: [
       "상품 자체가 마음에 들어서",
       "가격이 적당해 보여서",
-      "생산지나 생산자 정보를 믿을 만해서",
+      "원산지 정보를 믿을 만해서",
+      "만든 곳 정보를 믿을 만해서",
       "평소에 찾던 상품이라서",
       "특별한 이유 없이 궁금해서",
       "기타",
@@ -69,6 +74,18 @@ export const QUESTIONS: Question[] = [
     optional: true,
   },
   {
+    id: "regionInterest",
+    kind: "single",
+    title: "이 상품을 보고 나서 어떤 마음이 드셨나요?",
+    help: "가장 가까운 것 하나만 골라주세요.",
+    options: [
+      "상품을 만든 지역에 가보고 싶어졌다",
+      "만든 사람에 대해 더 알고 싶어졌다",
+      "상품에만 관심이 있다",
+      "잘 모르겠다",
+    ],
+  },
+  {
     id: "purchaseExperience",
     kind: "single",
     title: "온라인에서 지역 특산물이나 가공품을 사보신 적이 있나요?",
@@ -82,7 +99,7 @@ export const QUESTIONS: Question[] = [
   {
     id: "channels",
     kind: "multi",
-    title: "온라인에서 먹거리를 살 때 주로 어디를 이용하시나요?",
+    title: "온라인에서 지역 특산물이나 가공품을 살 때 주로 어디를 이용하시나요?",
     help: "여러 개 고르실 수 있습니다.",
     options: [
       "쿠팡",
@@ -97,7 +114,7 @@ export const QUESTIONS: Question[] = [
   {
     id: "trustFactors",
     kind: "multi",
-    title: "먹거리를 살 때 무엇을 보고 판단하시나요?",
+    title: "지역 특산물이나 가공품을 살 때 무엇을 보고 판단하시나요?",
     help: "여러 개 고르실 수 있습니다.",
     options: [
       "원산지 표시",
@@ -111,22 +128,38 @@ export const QUESTIONS: Question[] = [
     ],
   },
   {
-    id: "regionInterest",
-    kind: "single",
-    title: "이 상품을 보고 나서 어떤 마음이 드셨나요?",
-    options: [
-      "상품을 만든 지역에 가보고 싶어졌다",
-      "만든 사람에 대해 더 알고 싶어졌다",
-      "상품에만 관심이 있다",
-      "잘 모르겠다",
-    ],
-  },
-  {
     id: "interviewWilling",
     kind: "boolean",
     title: "짧은 인터뷰에 참여해주실 수 있나요?",
     help: "20~30분 정도 온라인으로 이야기를 나눕니다. 지금 결정하지 않으셔도 됩니다.",
     yes: "참여할 수 있어요",
-    no: "괜찮습니다",
+    no: "아니요, 다음에 할게요",
   },
 ];
+
+/**
+ * `browse_3`(구매 버튼을 누르지 않고 상품 3개를 둘러본) 경로는 아직 구매
+ * 의사를 밝히지 않은 상태이므로, "구매 버튼을 누른 이유"를 그대로 물으면
+ * 맞지 않는다. 이 트리거에서만 첫 문항의 제목과 선택지를 "더 알아보고 싶었던
+ * 이유"에 맞게 바꿔 내보낸다. 나머지 문항은 트리거와 무관하게 동일하다.
+ */
+export function questionsForTrigger(trigger: SurveyTrigger): Question[] {
+  if (trigger !== "browse_3") return QUESTIONS;
+
+  return QUESTIONS.map((question) => {
+    if (question.id !== "buyReason") return question;
+    return {
+      ...question,
+      title: "상품을 더 알아보고 싶었던 가장 큰 이유는 무엇인가요?",
+      options: [
+        "상품 자체가 마음에 들어서",
+        "가격이 궁금해서",
+        "원산지 정보를 믿을 만해서",
+        "만든 곳 정보를 믿을 만해서",
+        "평소에 관심있던 상품이라서",
+        "특별한 이유 없이 궁금해서",
+        "기타",
+      ],
+    };
+  });
+}

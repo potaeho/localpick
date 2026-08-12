@@ -11,9 +11,10 @@ import {
 } from "@/lib/products";
 
 /*
- * 배너는 세 가지 메시지를 번갈아 보여준다. 어떤 가치 제안(명절 선물 /
- * 지역 환원 / 신뢰·발견)이 통하는지는 2차 실험에서 나눠 검증할 대상이므로,
- * 1차 실험 단계에서는 하나로 단정하지 않고 로테이션으로 함께 노출한다.
+ * 배너는 여러 메시지를 번갈아 보여준다. 어떤 가치 제안(명절 선물 / 지역
+ * 환원 / 신뢰 / 제철 / 방문 / 발견)이 통하는지는 2차 실험에서 나눠 검증할
+ * 대상이므로, 1차 실험 단계에서는 하나로 단정하지 않고 로테이션으로 함께
+ * 노출한다.
  */
 const HERO_SLIDES: HeroSlide[] = [
   {
@@ -26,6 +27,15 @@ const HERO_SLIDES: HeroSlide[] = [
     cta: { label: "추석 선물 둘러보기", href: "/categories/cheong" },
   },
   {
+    id: "trust",
+    theme: "soil",
+    eyebrow: "생산자 이야기",
+    title: "이 상품, 누가 만들었는지 압니다",
+    subtitle:
+      "레시피가 아니라 사람을 소개합니다. 상품마다 생산자의 이름과 이야기를 확인할 수 있습니다.",
+    cta: { label: "정재훈님 이야기 보기", href: "/creators/gokseong-rice" },
+  },
+  {
     id: "give-back",
     theme: "green",
     eyebrow: "LOCAL PICK의 약속",
@@ -33,6 +43,31 @@ const HERO_SLIDES: HeroSlide[] = [
     subtitle:
       "여기서 산 만큼, 만든 이의 마을에 힘이 됩니다. 소비가 곧 지역을 응원하는 방법입니다.",
     cta: { label: "산지 이야기 보러가기", href: "/regions" },
+  },
+  {
+    id: "seasonal",
+    theme: "gold",
+    eyebrow: "지금 제철",
+    title: "지금 아니면 못 만나는 산지 소식",
+    subtitle:
+      "통영 굴은 11월부터 3월까지만 거둡니다. 제철에만 나는 맛을 놓치지 마세요.",
+    cta: { label: "통영 굴 보러가기", href: "/products/tongyeong-oyster-oil" },
+  },
+  {
+    id: "visit",
+    theme: "green",
+    eyebrow: "가보고 싶은 지역",
+    title: "먹어보고, 다녀오세요",
+    subtitle: "감귤 따기 체험부터 올레길까지 — 서귀포에서 만날 수 있는 것들.",
+    cta: { label: "서귀포 소개 보기", href: "/regions/jeju" },
+  },
+  {
+    id: "newcomer",
+    theme: "slate",
+    eyebrow: "처음이신가요",
+    title: "첫 로컬픽, 이렇게 시작하세요",
+    subtitle: "카테고리별로 나뉜 상품을 훑어보고, 관심 가는 지역부터 골라보세요.",
+    cta: { label: "카테고리 전체 보기", href: "/categories" },
   },
   {
     id: "intro",

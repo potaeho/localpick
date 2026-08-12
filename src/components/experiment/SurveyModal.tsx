@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Modal } from "./Modal";
 import { ConsentForm } from "./ConsentForm";
-import { QUESTIONS, type Question } from "@/lib/survey-questions";
+import { questionsForTrigger, type Question } from "@/lib/survey-questions";
 import { getDevice, getUtm, trackOnce } from "@/lib/events";
 import type { SurveyAnswers, SurveyTrigger } from "@/lib/types";
 
@@ -87,13 +87,15 @@ export function SurveyModal({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const questions = useMemo(() => questionsForTrigger(trigger), [trigger]);
+
   const steps = useMemo(() => {
     const grouped: Question[][] = [];
-    for (let i = 0; i < QUESTIONS.length; i += perStep) {
-      grouped.push(QUESTIONS.slice(i, i + perStep));
+    for (let i = 0; i < questions.length; i += perStep) {
+      grouped.push(questions.slice(i, i + perStep));
     }
     return grouped;
-  }, [perStep]);
+  }, [perStep, questions]);
 
   // StrictMode가 개발 중 effect를 두 번 실행하므로 한 번만 보내도록 막는다
   const startSent = useRef(false);
@@ -207,7 +209,8 @@ export function SurveyModal({
       }).catch(() => undefined);
 
       setSurveyId(id);
-      setPhase(answers.interviewWilling === true ? "consent" : "done");
+      // 인터뷰 참여 의사와 무관하게 추첨 참여 연락처는 모두에게 안내한다.
+      setPhase("consent");
     } catch {
       setError("저장에 실패했습니다. 잠시 후 다시 시도해 주세요.");
     } finally {
@@ -249,11 +252,6 @@ export function SurveyModal({
               <QuestionField
                 key={question.id}
                 question={question}
-                title={
-                  trigger === "browse_3" && question.id === "buyReason"
-                    ? "상품을 더 알아보고 싶었던 가장 큰 이유는 무엇인가요?"
-                    : undefined
-                }
                 answers={answers}
                 onSet={setAnswer}
                 onToggle={toggleMulti}
@@ -296,6 +294,7 @@ export function SurveyModal({
         <ConsentForm
           surveyId={surveyId}
           productSlug={productSlug}
+          interviewWilling={answers.interviewWilling === true}
           onDone={() => setPhase("done")}
           onSkip={() => setPhase("done")}
         />
@@ -325,13 +324,11 @@ export function SurveyModal({
 
 function QuestionField({
   question,
-  title,
   answers,
   onSet,
   onToggle,
 }: {
   question: Question;
-  title?: string;
   answers: AnswerMap;
   onSet: (id: keyof SurveyAnswers, value: unknown) => void;
   onToggle: (id: keyof SurveyAnswers, option: string) => void;
@@ -341,7 +338,7 @@ function QuestionField({
   return (
     <fieldset>
       <legend className="text-base font-bold leading-snug text-lp-ink">
-        {title ?? question.title}
+        {question.title}
       </legend>
       {question.help && (
         <p className="mt-1 text-sm text-lp-gray-500">{question.help}</p>
