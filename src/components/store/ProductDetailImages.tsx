@@ -19,7 +19,7 @@ export function ProductDetailImages({
   if (!images || images.length === 0) return null;
 
   return (
-    <section aria-label="상품 상세 설명" className="mt-4">
+    <section aria-label="상품 상세 설명">
       {/* 네이버 스마트스토어의 상세 이미지는 페이지 전체 폭이 아니라 가운데
           정렬된 좁은 컬럼(≈680px)으로 보인다. 부모 섹션이 max-w-6xl 전체를
           쓰다 보니 이미지가 그대로 늘어나 글자가 커지고 정보 전달력이
