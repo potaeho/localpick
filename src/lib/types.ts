@@ -72,6 +72,14 @@ export type Product = {
   tagline: string;
   categoryId: string;
   imageKind: ProductImageKind;
+  /**
+   * 스펙 테이블 아래 들어가는 이미지형 상세 설명 (브랜드 스토리, 제품 포인트 등을
+   * 담은 세로로 긴 포스터 이미지들). 네이버 스마트스토어 상세페이지의 "상품정보
+   * 표 아래 이어지는 이미지 설명" 구간을 재현한다. `public/product-details/
+   * <slug>/`에 둔 파일의 경로 목록이며, 순서대로 위에서 아래로 쌓인다.
+   * 아직 이미지가 없는 상품은 생략하면 이 구간이 그냥 렌더링되지 않는다.
+   */
+  detailImages?: string[];
   regionId: string;
   creatorId: string;
   /** 원산지 — 신뢰 가설의 핵심 필드 */

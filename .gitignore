@@ -43,3 +43,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 상세페이지 이미지 작업 원본 폴더 — 최종본만 public/product-details/로 복사해
+# 커밋한다. 여기는 원본·중복·미사용 시안이 쌓이는 곳이라 저장소에 올리지 않는다.
+/지역 별 이미지/
