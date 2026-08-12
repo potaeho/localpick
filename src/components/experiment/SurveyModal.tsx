@@ -226,6 +226,9 @@ export function SurveyModal({
             <p className="mt-1 text-sm text-lp-gray-700">
               {steps.length}단계 중 {currentStep + 1}단계 · 약 2분
             </p>
+            <p className="mt-1 text-xs text-lp-orange">
+              참여해 주신 분들 중 추첨을 통해 로컬 특산품을 보내드려요
+            </p>
             <div
               className="mt-3 h-1.5 overflow-hidden rounded-full bg-lp-gray-100"
               role="progressbar"
