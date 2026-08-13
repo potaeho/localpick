@@ -48,14 +48,14 @@ export default async function CreatorPage({
       <div className="flex items-start gap-5">
         <span
           aria-hidden="true"
-          className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-lp-green-light text-2xl font-bold text-lp-green"
+          className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lp-circle bg-lp-green-light text-2xl font-bold text-lp-green"
         >
           {creator.name.slice(0, 1)}
         </span>
         <div className="min-w-0">
-          <h1 className="text-2xl font-bold text-lp-ink">{creator.name}</h1>
+          <h1 className="text-lp-page-heading text-lp-ink">{creator.name}</h1>
           <p className="mt-1 text-lp-gray-700">{creator.title}</p>
-          <p className="mt-2 text-sm text-lp-gray-500">
+          <p className="mt-lp-sm text-sm text-lp-gray-500">
             {region && (
               <Link
                 href={`/regions/${region.id}`}
@@ -69,24 +69,24 @@ export default async function CreatorPage({
         </div>
       </div>
 
-      <section className="mt-8">
+      <section className="mt-lp-section">
         <h2 className="text-xs font-medium text-lp-gray-500">
           {creator.kind === "brand" ? "어떻게 만드나" : "어떻게 시작했나"}
         </h2>
-        <p className="mt-3 leading-loose text-lp-gray-900">{creator.story}</p>
+        <p className="mt-lp-md leading-loose text-lp-gray-900">{creator.story}</p>
       </section>
 
-      <blockquote className="mt-8 rounded-xl border-l-4 border-lp-orange bg-white p-5 leading-loose text-lp-gray-900">
+      <blockquote className="mt-lp-section rounded-lp-card border-l-4 border-lp-orange bg-white p-lp-xl leading-loose text-lp-gray-900">
         {creator.philosophy}
       </blockquote>
 
       <section className="mt-10">
-        <h2 className="text-lg font-bold text-lp-ink">
+        <h2 className="text-lp-heading text-lp-ink">
           {creator.kind === "brand"
             ? `${creator.name}의 상품`
             : `${creator.name}님이 만든 상품`}
         </h2>
-        <ul className="mt-5 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3">
+        <ul className="mt-lp-xl grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3">
           {creatorProducts.map((product) => (
             <li key={product.slug}>
               <ProductCard product={product} />

@@ -26,12 +26,12 @@ export function FilterNav() {
   const isHome = pathname === "/";
 
   return (
-    <nav aria-label="필터" className="mt-6 space-y-3">
+    <nav aria-label="필터" className="mt-lp-section space-y-lp-md">
       {/* 1차: 상품별 / 지역별 토글 */}
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-lp-xs">
         <Link
           href="/"
-          className={`inline-flex min-h-9 items-center rounded-full px-4 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2 ${
+          className={`inline-flex min-h-9 items-center rounded-lp-circle px-lp-lg text-lp-label transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2 ${
             viewMode === "product"
               ? "bg-lp-ink text-white"
               : "bg-lp-gray-100 text-lp-gray-700 hover:bg-lp-gray-300"
@@ -41,7 +41,7 @@ export function FilterNav() {
         </Link>
         <Link
           href="/regions"
-          className={`inline-flex min-h-9 items-center rounded-full px-4 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2 ${
+          className={`inline-flex min-h-9 items-center rounded-lp-circle px-lp-lg text-lp-label transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2 ${
             viewMode === "region"
               ? "bg-lp-ink text-white"
               : "bg-lp-gray-100 text-lp-gray-700 hover:bg-lp-gray-300"
@@ -53,14 +53,14 @@ export function FilterNav() {
 
       {/* 2차: 세부 칩 */}
       <div className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0">
-        <ul className="flex w-max gap-2 pb-1">
+        <ul className="flex w-max gap-lp-sm pb-lp-xs">
           {viewMode === "product" ? (
             <>
               <li>
                 <Link
                   href="/"
                   aria-current={isHome ? "page" : undefined}
-                  className={`inline-flex min-h-10 items-center rounded-full border px-4 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2 ${
+                  className={`inline-flex min-h-10 items-center rounded-lp-circle border px-lp-lg text-lp-label transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2 ${
                     isHome
                       ? "border-lp-green bg-lp-green text-white"
                       : "border-lp-gray-300 bg-white text-lp-gray-700 hover:border-lp-green hover:text-lp-green"
@@ -76,7 +76,7 @@ export function FilterNav() {
                     <Link
                       href={`/categories/${category.id}`}
                       aria-current={active ? "page" : undefined}
-                      className={`inline-flex min-h-10 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2 ${
+                      className={`inline-flex min-h-10 items-center gap-lp-xs rounded-lp-circle border px-lp-lg text-lp-label transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2 ${
                         active
                           ? "border-lp-green bg-lp-green text-white"
                           : "border-lp-gray-300 bg-white text-lp-gray-700 hover:border-lp-green hover:text-lp-green"
@@ -97,7 +97,7 @@ export function FilterNav() {
                 <Link
                   href="/regions"
                   aria-current={pathname === "/regions" ? "page" : undefined}
-                  className={`inline-flex min-h-10 items-center rounded-full border px-4 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2 ${
+                  className={`inline-flex min-h-10 items-center rounded-lp-circle border px-lp-lg text-lp-label transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2 ${
                     pathname === "/regions"
                       ? "border-lp-green bg-lp-green text-white"
                       : "border-lp-gray-300 bg-white text-lp-gray-700 hover:border-lp-green hover:text-lp-green"
@@ -113,7 +113,7 @@ export function FilterNav() {
                     <Link
                       href={`/regions/${region.id}`}
                       aria-current={active ? "page" : undefined}
-                      className={`inline-flex min-h-10 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2 ${
+                      className={`inline-flex min-h-10 items-center gap-lp-xs rounded-lp-circle border px-lp-lg text-lp-label transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2 ${
                         active
                           ? "border-lp-green bg-lp-green text-white"
                           : "border-lp-gray-300 bg-white text-lp-gray-700 hover:border-lp-green hover:text-lp-green"

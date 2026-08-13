@@ -20,11 +20,11 @@ export function OptionSelector({ product }: { product: Product }) {
   const [qty, setQty] = useState(1);
 
   return (
-    <div className="mt-4 rounded-lg border border-lp-gray-300 bg-lp-cream p-3">
-      <p className="mb-2 text-xs font-medium text-lp-gray-500">옵션 선택</p>
-      <div className="flex items-center justify-between gap-3">
+    <div className="mt-lp-lg rounded-lp-control border border-lp-gray-300 bg-lp-cream p-lp-md">
+      <p className="mb-lp-sm text-xs font-medium text-lp-gray-500">옵션 선택</p>
+      <div className="flex items-center justify-between gap-lp-md">
         <span className="text-sm text-lp-ink">{product.unit}</span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-lp-sm">
           <button
             type="button"
             onClick={() => setQty((v) => Math.max(1, v - 1))}
@@ -46,7 +46,7 @@ export function OptionSelector({ product }: { product: Product }) {
           </button>
         </div>
       </div>
-      <div className="mt-3 flex items-center justify-between border-t border-lp-gray-300 pt-3 text-sm">
+      <div className="mt-lp-md flex items-center justify-between border-t border-lp-gray-300 pt-lp-md text-sm">
         <span className="text-lp-gray-500">총 {qty}개</span>
         <span className="font-bold text-lp-ink">
           {formatPrice(product.priceSale * qty)}원

@@ -23,22 +23,22 @@ export function CreatorCard({
     .join(" · ");
 
   return (
-    <section className="rounded-xl border border-lp-gray-300 bg-white p-5">
+    <section className="rounded-lp-card border border-lp-gray-300 bg-white p-lp-xl">
       <h2 className="text-xs font-medium text-lp-gray-500">
         {isBrand ? "만든 곳" : "만든 사람"}
       </h2>
 
-      <div className="mt-3 flex items-start gap-4">
+      <div className="mt-lp-md flex items-start gap-lp-lg">
         <span
           aria-hidden="true"
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-lp-green-light text-lg font-bold text-lp-green"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lp-circle bg-lp-green-light text-lg font-bold text-lp-green"
         >
           {creator.name.slice(0, 1)}
         </span>
         <div className="min-w-0">
-          <p className="font-bold text-lp-ink">
+          <p className="text-lp-body font-bold text-lp-ink">
             {creator.name}
-            <span className="ml-2 text-sm font-normal text-lp-gray-700">
+            <span className="ml-lp-sm text-sm font-normal text-lp-gray-700">
               {creator.title}
             </span>
           </p>
@@ -46,11 +46,11 @@ export function CreatorCard({
         </div>
       </div>
 
-      <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-lp-gray-700">
+      <p className="mt-lp-lg line-clamp-3 text-sm leading-relaxed text-lp-gray-700">
         {creator.story}
       </p>
 
-      <div className="mt-4">{children}</div>
+      <div className="mt-lp-lg">{children}</div>
     </section>
   );
 }

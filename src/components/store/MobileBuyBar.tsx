@@ -8,8 +8,8 @@ import { BuyButton } from "./BuyButton";
  */
 export function MobileBuyBar({ product }: { product: Product }) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-lp-gray-300 bg-white px-4 pb-[env(safe-area-inset-bottom)] pt-3 shadow-[0_-8px_24px_rgba(0,0,0,0.06)] lg:hidden">
-      <div className="flex items-center gap-3 pb-3">
+    <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-lp-gray-300 bg-white px-lp-lg pb-[env(safe-area-inset-bottom)] pt-lp-md shadow-[0_-8px_24px_rgba(0,0,0,0.06)] lg:hidden">
+      <div className="flex items-center gap-lp-md pb-lp-md">
         <div className="min-w-0 shrink-0">
           <p className="text-xs text-lp-gray-500">판매가</p>
           <p className="text-lg font-bold text-lp-ink">

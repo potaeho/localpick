@@ -11,14 +11,14 @@ import { categories, getProductsByCategory } from "@/lib/products";
  */
 export function CategoryChips({ activeId }: { activeId?: string }) {
   return (
-    <nav aria-label="카테고리" className="mt-6">
+    <nav aria-label="카테고리" className="mt-lp-xxl">
       <div className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0">
-        <ul className="flex w-max gap-2 pb-1">
+        <ul className="flex w-max gap-lp-sm pb-lp-xs">
           <li>
             <Link
               href="/"
               aria-current={activeId ? undefined : "page"}
-              className={`inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2 ${
+              className={`inline-flex min-h-11 items-center rounded-lp-circle border px-lp-lg text-lp-label transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2 ${
                 activeId
                   ? "border-lp-gray-300 bg-white text-lp-gray-700 hover:border-lp-green hover:text-lp-green"
                   : "border-lp-green bg-lp-green text-white"
@@ -34,7 +34,7 @@ export function CategoryChips({ activeId }: { activeId?: string }) {
                 <Link
                   href={`/categories/${category.id}`}
                   aria-current={active ? "page" : undefined}
-                  className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2 ${
+                  className={`inline-flex min-h-11 items-center gap-lp-xs rounded-lp-circle border px-lp-lg text-lp-label transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2 ${
                     active
                       ? "border-lp-green bg-lp-green text-white"
                       : "border-lp-gray-300 bg-white text-lp-gray-700 hover:border-lp-green hover:text-lp-green"

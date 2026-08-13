@@ -431,7 +431,7 @@ export const products: Product[] = [
     seller: "LOCAL PICK",
     packaging: "상온 (밀폐 용기)",
     unit: "1개",
-    weight: "1kg (2,200kcal)",
+    weight: "1kg",
     expiry: "제조일로부터 12개월",
     process: [
       "전통 옹기에서 자연의 시간으로 발효·숙성합니다",
@@ -548,7 +548,7 @@ export const products: Product[] = [
     seller: "LOCAL PICK",
     packaging: "상온 (개별 파우치 30포)",
     unit: "1박스 (30포)",
-    weight: "총 2.4kg (포당 80ml)",
+    weight: "총 2,400ml (포당 80ml)",
     expiry: "제조일로부터 18개월",
     process: [
       "직접 기른 의성 마늘을 씁니다",

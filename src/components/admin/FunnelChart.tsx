@@ -10,8 +10,8 @@ export function FunnelChart({ steps }: { steps: FunnelStep[] }) {
             <span className="font-medium text-lp-ink">{step.label}</span>
             <span className="text-lp-gray-700">{step.value}명{step.previousValue !== undefined ? ` · 이전 단계의 ${((step.value / Math.max(1, step.previousValue)) * 100).toFixed(1)}%` : ""}</span>
           </div>
-          <div className="h-3 overflow-hidden rounded-full bg-lp-gray-100">
-            <div className="h-full rounded-full bg-lp-green" style={{ width: `${(step.value / maximum) * 100}%` }} />
+          <div className="h-3 overflow-hidden rounded-lp-circle bg-lp-gray-100">
+            <div className="h-full rounded-lp-circle bg-lp-green" style={{ width: `${(step.value / maximum) * 100}%` }} />
           </div>
         </div>
       ))}

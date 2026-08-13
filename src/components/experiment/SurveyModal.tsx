@@ -223,7 +223,7 @@ export function SurveyModal({
       {phase === "questions" && (
         <div className="flex flex-col">
           <div className="border-b border-lp-gray-100 px-6 pb-4 pt-6">
-            <h2 id="survey-title" className="text-lg font-bold text-lp-ink">
+            <h2 id="survey-title" className="text-lp-heading text-lp-ink">
               더 나은 로컬 상품 구매 경험을 위해
             </h2>
             <p className="mt-1 text-sm text-lp-gray-700">
@@ -233,7 +233,7 @@ export function SurveyModal({
               참여해 주신 분들 중 추첨을 통해 로컬 특산품을 보내드려요
             </p>
             <div
-              className="mt-3 h-1.5 overflow-hidden rounded-full bg-lp-gray-100"
+              className="mt-3 h-1.5 overflow-hidden rounded-lp-circle bg-lp-gray-100"
               role="progressbar"
               aria-valuenow={currentStep + 1}
               aria-valuemin={1}
@@ -241,7 +241,7 @@ export function SurveyModal({
               aria-label="설문 진행률"
             >
               <div
-                className="h-full rounded-full bg-lp-green transition-all"
+                className="h-full rounded-lp-circle bg-lp-green transition-all"
                 style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
               />
             </div>
@@ -265,12 +265,12 @@ export function SurveyModal({
             </p>
           )}
 
-          <div className="sticky bottom-0 flex gap-2 border-t border-lp-gray-100 bg-white px-6 py-4">
+          <div className="sticky bottom-0 flex gap-lp-sm border-t border-lp-gray-100 bg-white px-6 py-4">
             {currentStep > 0 && (
               <button
                 type="button"
                 onClick={() => setStep((s) => s - 1)}
-                className="h-12 rounded-lg border border-lp-gray-300 px-5 font-medium text-lp-gray-700 hover:bg-lp-gray-100"
+                className="h-12 rounded-lp-control border border-lp-gray-300 px-5 font-medium text-lp-gray-700 hover:bg-lp-gray-100"
               >
                 이전
               </button>
@@ -282,7 +282,7 @@ export function SurveyModal({
                 if (isLastStep) void submit();
                 else setStep((s) => Math.min(s + 1, steps.length - 1));
               }}
-              className="h-12 flex-1 rounded-lg bg-lp-green font-bold text-white hover:bg-lp-green-dark disabled:cursor-not-allowed disabled:bg-lp-gray-300"
+              className="h-12 flex-1 rounded-lp-control bg-lp-green text-lp-button text-white hover:bg-lp-green-dark disabled:cursor-not-allowed disabled:bg-lp-gray-300"
             >
               {submitting ? "저장하는 중…" : isLastStep ? "제출하기" : "다음"}
             </button>
@@ -302,7 +302,7 @@ export function SurveyModal({
 
       {phase === "done" && (
         <div className="px-6 py-10 text-center sm:px-8">
-          <h2 id="survey-title" className="text-lg font-bold text-lp-ink">
+          <h2 id="survey-title" className="text-lp-heading text-lp-ink">
             답변 감사합니다
           </h2>
           <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-lp-gray-700">
@@ -312,7 +312,7 @@ export function SurveyModal({
           <button
             type="button"
             onClick={onClose}
-            className="mt-7 h-12 w-full rounded-lg bg-lp-green font-bold text-white hover:bg-lp-green-dark"
+            className="mt-7 h-12 w-full rounded-lp-control bg-lp-green text-lp-button text-white hover:bg-lp-green-dark"
           >
             닫기
           </button>
@@ -349,7 +349,7 @@ function QuestionField({
           question.options.map((option) => (
             <label
               key={option}
-              className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 text-sm ${
+              className={`flex cursor-pointer items-center gap-lp-md rounded-lp-control border p-lp-md text-sm ${
                 value === option
                   ? "border-lp-green bg-lp-green-light text-lp-green"
                   : "border-lp-gray-300 text-lp-gray-900 hover:border-lp-green"
@@ -376,7 +376,7 @@ function QuestionField({
               }
               rows={2}
               placeholder="어떤 이유였는지 알려주세요"
-              className="w-full rounded-lg border border-lp-gray-300 p-3 text-sm focus:border-lp-green focus:outline-none"
+              className="w-full rounded-lp-control border border-lp-gray-300 p-lp-md text-sm focus:border-lp-green focus:outline-none"
             />
           )}
 
@@ -387,7 +387,7 @@ function QuestionField({
             return (
               <label
                 key={option}
-                className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 text-sm ${
+                className={`flex cursor-pointer items-center gap-lp-md rounded-lp-control border p-lp-md text-sm ${
                   checked
                     ? "border-lp-green bg-lp-green-light text-lp-green"
                     : "border-lp-gray-300 text-lp-gray-900 hover:border-lp-green"
@@ -410,12 +410,12 @@ function QuestionField({
             onChange={(event) => onSet(question.id, event.target.value)}
             rows={3}
             placeholder={question.placeholder}
-            className="w-full rounded-lg border border-lp-gray-300 p-3 text-sm focus:border-lp-green focus:outline-none"
+            className="w-full rounded-lp-control border border-lp-gray-300 p-lp-md text-sm focus:border-lp-green focus:outline-none"
           />
         )}
 
         {question.kind === "boolean" && (
-          <div className="flex gap-2">
+          <div className="flex gap-lp-sm">
             {[
               { label: question.yes, val: true },
               { label: question.no, val: false },
@@ -424,7 +424,7 @@ function QuestionField({
                 key={String(choice.val)}
                 type="button"
                 onClick={() => onSet(question.id, choice.val)}
-                className={`h-12 flex-1 rounded-lg border text-sm font-medium ${
+                className={`h-12 flex-1 rounded-lp-control border text-sm font-medium ${
                   value === choice.val
                     ? "border-lp-green bg-lp-green-light text-lp-green"
                     : "border-lp-gray-300 text-lp-gray-700 hover:border-lp-green"

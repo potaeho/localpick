@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "./Logo";
+import { SearchBox } from "./SearchBox";
 
 /**
  * 스토어 헤더.
@@ -20,65 +21,26 @@ export function Header() {
           <Logo className="shrink-0" />
         </Link>
 
-        <form action="/" className="ml-auto w-full max-w-md">
-          <div className="relative">
-            <label htmlFor="store-search" className="sr-only">
-              상품 검색
-            </label>
-            <input
-              id="store-search"
-              type="search"
-              name="q"
-              placeholder="지역이나 상품을 검색해보세요"
-              className="h-10 w-full rounded-full border border-lp-gray-300 bg-lp-gray-100 pl-4 pr-11 text-sm placeholder:text-lp-gray-500 focus:border-lp-green focus:bg-white focus:outline-none focus:ring-1 focus:ring-lp-green"
-            />
-            <button
-              type="submit"
-              aria-label="검색"
-              className="absolute right-1 top-1 flex h-8 w-9 items-center justify-center rounded-full text-lp-gray-700 hover:text-lp-green"
-            >
-              <svg
-                viewBox="0 0 20 20"
-                fill="none"
-                className="h-5 w-5"
-                aria-hidden="true"
-              >
-                <circle
-                  cx="9"
-                  cy="9"
-                  r="6"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-                <path
-                  d="M13.5 13.5 L17 17"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </button>
-          </div>
-        </form>
+        <SearchBox />
       </div>
 
       {/* 보기 모드 — 상품별 / 지역별 */}
       <nav aria-label="보기 모드" className="border-t border-lp-gray-100">
         <div className="mx-auto max-w-6xl px-4 lg:px-6">
-          <ul className="flex items-center gap-1 py-2">
+          <ul className="flex items-center gap-lp-xs py-lp-sm">
             <li>
               <Link
                 href="/"
-                className="block whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium text-lp-gray-700 hover:bg-lp-green-light hover:text-lp-green"
+                className="block whitespace-nowrap rounded-lp-circle px-lp-md py-lp-xs text-lp-label text-lp-gray-700 hover:bg-lp-green-light hover:text-lp-green"
               >
                 상품별
               </Link>
             </li>
-            <li aria-hidden="true" className="mx-1 h-4 w-px bg-lp-gray-300" />
+            <li aria-hidden="true" className="mx-lp-xs h-4 w-px bg-lp-gray-300" />
             <li>
               <Link
                 href="/regions"
-                className="block whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium text-lp-gray-700 hover:bg-lp-green-light hover:text-lp-green"
+                className="block whitespace-nowrap rounded-lp-circle px-lp-md py-lp-xs text-lp-label text-lp-gray-700 hover:bg-lp-green-light hover:text-lp-green"
               >
                 지역별
               </Link>

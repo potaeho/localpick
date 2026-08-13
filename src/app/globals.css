@@ -24,6 +24,55 @@
   --color-lp-gray-100: #f0f0ec;
 
   --font-sans: var(--font-noto-sans-kr), system-ui, sans-serif;
+
+  /*
+   * 타이포그래피 · 간격 · 라운드 스케일
+   * 배민(우아한형제들) 디자인 시스템의 역할별 스케일 구조를 색상은 제외하고
+   * 그대로 적용한다 (히어로/헤딩/버튼/본문/라벨 역할, 6~32px 간격, 8~16px 라운드).
+   */
+  --text-lp-hero: 3.75rem; /* 60px */
+  --text-lp-hero--line-height: 5.25rem; /* 84px */
+  --text-lp-hero--font-weight: 800;
+
+  --text-lp-heading: 1.5rem; /* 24px */
+  --text-lp-heading--line-height: normal;
+  --text-lp-heading--font-weight: 700;
+
+  --text-lp-button: 1rem; /* 16px */
+  --text-lp-button--line-height: 1.4rem; /* 22.4px */
+  --text-lp-button--font-weight: 700;
+
+  --text-lp-page-heading: 2.5rem; /* 40px */
+  --text-lp-page-heading--line-height: 3.25rem; /* 52px */
+  --text-lp-page-heading--font-weight: 700;
+  --text-lp-page-heading--letter-spacing: -0.075rem; /* -1.2px */
+
+  --text-lp-card-title: 1.5rem; /* 24px */
+  --text-lp-card-title--line-height: 2.25rem; /* 36px */
+  --text-lp-card-title--font-weight: 700;
+  --text-lp-card-title--letter-spacing: -0.025rem; /* -0.4px */
+
+  --text-lp-body: 1rem; /* 16px */
+  --text-lp-body--line-height: 1.5rem; /* 24px */
+  --text-lp-body--letter-spacing: -0.02rem; /* -0.32px */
+
+  --text-lp-label: 0.875rem; /* 14px */
+  --text-lp-label--line-height: 1.3125rem; /* 21px */
+  --text-lp-label--font-weight: 700;
+  --text-lp-label--letter-spacing: -0.02rem; /* -0.32px */
+
+  --spacing-lp-xs: 0.375rem; /* 6px */
+  --spacing-lp-sm: 0.5rem; /* 8px */
+  --spacing-lp-md: 0.75rem; /* 12px */
+  --spacing-lp-lg: 1rem; /* 16px */
+  --spacing-lp-xl: 1.25rem; /* 20px */
+  --spacing-lp-xxl: 1.5rem; /* 24px */
+  --spacing-lp-section: 2rem; /* 32px */
+
+  --radius-lp-control: 0.5rem; /* 8px */
+  --radius-lp-card: 0.75rem; /* 12px */
+  --radius-lp-media: 1rem; /* 16px */
+  --radius-lp-circle: 9999px;
 }
 
 body {

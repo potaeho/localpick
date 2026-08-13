@@ -38,7 +38,7 @@ export function SurveyResponseList({
 
   if (responses.length === 0) {
     return (
-      <p className="rounded-xl border border-dashed border-lp-gray-300 p-8 text-center text-sm text-lp-gray-500">
+      <p className="rounded-lp-card border border-dashed border-lp-gray-300 p-8 text-center text-sm text-lp-gray-500">
         아직 완료된 설문이 없습니다.
       </p>
     );
@@ -53,7 +53,7 @@ export function SurveyResponseList({
           return (
             <div
               key={summary.question}
-              className="rounded-xl border border-lp-gray-300 bg-white p-4"
+              className="rounded-lp-card border border-lp-gray-300 bg-white p-4"
             >
               <h3 className="text-sm font-bold text-lp-ink">
                 {summary.question}
@@ -70,9 +70,9 @@ export function SurveyResponseList({
                         {answer.count}
                       </span>
                     </div>
-                    <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-lp-gray-100">
+                    <div className="mt-1 h-1.5 overflow-hidden rounded-lp-circle bg-lp-gray-100">
                       <div
-                        className="h-full rounded-full bg-lp-green"
+                        className="h-full rounded-lp-circle bg-lp-green"
                         style={{
                           width: `${total ? (answer.count / total) * 100 : 0}%`,
                         }}
@@ -99,7 +99,7 @@ export function SurveyResponseList({
             id="survey-product-filter"
             value={productFilter}
             onChange={(event) => setProductFilter(event.target.value)}
-            className="h-10 rounded-lg border border-lp-gray-300 bg-white px-3 text-sm"
+            className="h-10 rounded-lp-control border border-lp-gray-300 bg-white px-lp-md text-sm"
           >
             <option value="all">전체 ({responses.length}건)</option>
             {slugsInData.map((slug) => (
@@ -115,7 +115,7 @@ export function SurveyResponseList({
           {filtered.map((response) => (
             <li
               key={response.id}
-              className="rounded-xl border border-lp-gray-300 bg-white p-4"
+              className="rounded-lp-card border border-lp-gray-300 bg-white p-4"
             >
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs text-lp-gray-500">
                 <span>{new Date(response.ts).toLocaleString("ko-KR")}</span>

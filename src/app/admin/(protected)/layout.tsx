@@ -24,7 +24,7 @@ export default async function AdminProtectedLayout({
   return (
     <div className="min-h-dvh bg-lp-cream">
       <header className="border-b border-lp-gray-300 bg-white">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 lg:px-6">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-lp-lg px-4 lg:px-6">
           <div className="min-w-0">
             <p className="truncate text-sm font-bold text-lp-ink">
               LOCAL PICK 페이크도어 실험 대시보드
@@ -33,10 +33,10 @@ export default async function AdminProtectedLayout({
               태두리 내부용 · 개인정보 포함
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-lp-sm">
             <Link
               href="/"
-              className="hidden h-9 items-center rounded-lg border border-lp-gray-300 px-3 text-sm text-lp-gray-700 hover:bg-lp-gray-100 sm:inline-flex"
+              className="hidden h-9 items-center rounded-lp-control border border-lp-gray-300 px-lp-md text-sm text-lp-gray-700 hover:bg-lp-gray-100 sm:inline-flex"
             >
               스토어 보기
             </Link>

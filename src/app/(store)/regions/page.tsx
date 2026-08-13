@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { KoreaMap } from "@/components/store/KoreaMap";
 import { FilterNav } from "@/components/store/FilterNav";
+import { ProductCard } from "@/components/store/ProductCard";
 import { getProductsByRegion, regions } from "@/lib/products";
 
 export const metadata: Metadata = {
@@ -10,46 +10,43 @@ export const metadata: Metadata = {
 };
 
 export default function RegionsIndexPage() {
-  const productCounts = Object.fromEntries(
-    regions.map((region) => [region.id, getProductsByRegion(region.id).length]),
-  );
-
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 lg:px-6 lg:py-8">
-      <h1 className="text-2xl font-bold text-lp-ink sm:text-3xl">지역</h1>
-      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-lp-gray-700">
-        상품이 만들어진 곳입니다. 지도에서 지역을 눌러보세요.
-      </p>
-
       <FilterNav />
 
-      <div className="mt-6">
-        <KoreaMap regions={regions} productCounts={productCounts} />
-      </div>
+      {regions.map((region) => {
+        const items = getProductsByRegion(region.id);
+        if (items.length === 0) return null;
 
-      <ul className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {regions.map((region) => (
-          <li key={region.id}>
-            <Link
-              href={`/regions/${region.id}`}
-              className="flex h-full flex-col rounded-xl border border-lp-gray-300 bg-white p-5 hover:border-lp-green focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
-            >
-              <span className="text-xs text-lp-gray-500">
-                {region.province}
-              </span>
-              <span className="mt-1 text-lg font-bold text-lp-ink">
-                {region.name}
-              </span>
-              <span className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-lp-gray-700">
-                {region.description}
-              </span>
-              <span className="mt-4 text-xs text-lp-green">
-                상품 {getProductsByRegion(region.id).length}개
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+        return (
+          <section key={region.id} className="mt-12">
+            <div className="flex items-baseline justify-between gap-lp-lg">
+              <div className="min-w-0">
+                <h2 className="text-lp-heading text-lp-ink">
+                  {region.name}
+                </h2>
+                <p className="mt-1 text-sm text-lp-gray-500">
+                  {region.province}
+                </p>
+              </div>
+              <Link
+                href={`/regions/${region.id}`}
+                className="shrink-0 text-sm text-lp-gray-700 underline underline-offset-4 hover:text-lp-green"
+              >
+                전체보기
+              </Link>
+            </div>
+
+            <ul className="mt-5 grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
+              {items.map((product) => (
+                <li key={product.slug}>
+                  <ProductCard product={product} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        );
+      })}
     </div>
   );
 }

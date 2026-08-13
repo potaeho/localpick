@@ -27,7 +27,7 @@ export function SpecTable({ product }: { product: Product }) {
   return (
     <dl className="divide-y divide-lp-gray-100 border-y border-lp-gray-100 text-sm">
       {rows.map(([label, value]) => (
-        <div key={label} className="flex gap-4 py-3">
+        <div key={label} className="flex gap-lp-lg py-lp-md">
           <dt className="w-24 shrink-0 text-lp-gray-500">{label}</dt>
           <dd className="flex-1 leading-relaxed text-lp-gray-900">{value}</dd>
         </div>

@@ -78,18 +78,18 @@ export default async function ProductDetailPage({
           같은 섹션에 두고, 양쪽 높이가 과도하게 벌어지지 않게 요약 정보만 둔다. */}
       <section className="py-6 lg:py-8" aria-labelledby="product-title">
         <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)] lg:gap-12">
-          <div className="relative overflow-hidden rounded-xl bg-lp-gray-100">
+          <div className="relative overflow-hidden rounded-lp-card bg-lp-gray-100">
             <ProductImage
               slug={product.slug}
               kind={product.imageKind}
               label={product.name}
-              imageSrc={product.detailImages?.[0]}
+              imageSrc={product.cardImage ?? product.detailImages?.[0]}
               sizes="(max-width: 1024px) 100vw, 55vw"
               loading="eager"
               className="aspect-square w-full"
             />
             {region && (
-              <span className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-sm font-medium text-lp-green">
+              <span className="absolute left-3 top-3 rounded-lp-circle bg-white/95 px-3 py-1 text-sm font-medium text-lp-green">
                 {region.province} {region.name}
               </span>
             )}
@@ -122,7 +122,7 @@ export default async function ProductDetailPage({
 
               <h1
                 id="product-title"
-                className="mt-4 text-2xl font-bold leading-snug text-lp-ink lg:text-[1.75rem]"
+                className="mt-lp-lg text-lp-card-title leading-snug text-lp-ink"
               >
                 {product.name}
               </h1>
@@ -171,7 +171,7 @@ export default async function ProductDetailPage({
           </p>
           <h2
             id="product-details-title"
-            className="mt-2 text-xl font-bold text-lp-ink lg:text-2xl"
+            className="mt-2 text-lp-heading text-lp-ink"
           >
             상품 상세정보
           </h2>
@@ -187,7 +187,7 @@ export default async function ProductDetailPage({
               productName={product.name}
             />
 
-            <section className="rounded-xl border border-lp-gray-300 bg-white p-5 lg:p-6">
+            <section className="rounded-lp-card border border-lp-gray-300 bg-white p-5 lg:p-6">
               <h3 className="text-base font-bold text-lp-ink">상품 기본 정보</h3>
               <div className="mt-4">
                 <SpecTable product={product} />
@@ -202,7 +202,7 @@ export default async function ProductDetailPage({
                   eventType="creator_story_click"
                   productSlug={product.slug}
                   creatorId={creator.id}
-                  className="inline-flex min-h-11 items-center rounded-lg border border-lp-green px-4 text-sm font-medium text-lp-green hover:bg-lp-green-light focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
+                  className="inline-flex min-h-11 items-center rounded-lp-control border border-lp-green px-lp-lg text-sm font-medium text-lp-green hover:bg-lp-green-light focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
                 >
                   생산자 이야기 보기
                 </TrackedLink>
@@ -210,14 +210,14 @@ export default async function ProductDetailPage({
             )}
 
             {/* 생산·가공 방식 */}
-            <section className="rounded-xl border border-lp-gray-300 bg-white p-5">
+            <section className="rounded-lp-card border border-lp-gray-300 bg-white p-5">
               <h3 className="text-xs font-medium text-lp-gray-500">
                 어떻게 만드나요
               </h3>
               <ol className="mt-3 space-y-3">
                 {product.process.map((step, index) => (
                   <li key={step} className="flex gap-3 text-sm leading-relaxed">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-lp-green-light text-xs font-bold text-lp-green">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lp-circle bg-lp-green-light text-xs font-bold text-lp-green">
                       {index + 1}
                     </span>
                     <span className="text-lp-gray-900">{step}</span>
@@ -234,7 +234,7 @@ export default async function ProductDetailPage({
                   eventType="region_info_click"
                   productSlug={product.slug}
                   regionId={region.id}
-                  className="inline-flex min-h-11 items-center rounded-lg border border-lp-green px-4 text-sm font-medium text-lp-green hover:bg-lp-green-light focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
+                  className="inline-flex min-h-11 items-center rounded-lp-control border border-lp-green px-lp-lg text-sm font-medium text-lp-green hover:bg-lp-green-light focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
                 >
                   {region.name} 알아보기
                 </TrackedLink>
@@ -242,7 +242,7 @@ export default async function ProductDetailPage({
             )}
 
             {/* 교환·환불 */}
-            <section className="rounded-xl border border-lp-gray-300 bg-white p-5">
+            <section className="rounded-lp-card border border-lp-gray-300 bg-white p-5">
               <h3 className="text-xs font-medium text-lp-gray-500">
                 교환 · 환불
               </h3>
@@ -253,7 +253,7 @@ export default async function ProductDetailPage({
           </div>
 
           {/* PC에서는 상세 내용을 읽는 동안 구매 옵션이 우측에서 따라온다. */}
-          <aside className="sticky top-28 hidden rounded-xl border border-lp-gray-300 bg-white p-5 shadow-sm lg:block">
+          <aside className="sticky top-28 hidden rounded-lp-card border border-lp-gray-300 bg-white p-5 shadow-sm lg:block">
             <p className="text-xs text-lp-gray-500">현재 보고 있는 상품</p>
             <p className="mt-1 font-bold leading-snug text-lp-ink">
               {product.name}

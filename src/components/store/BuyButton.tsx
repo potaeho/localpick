@@ -15,7 +15,7 @@ export function BuyButton({ productSlug }: { productSlug: string }) {
     <button
       type="button"
       onClick={() => buyClick(productSlug)}
-      className="h-14 w-full rounded-lg bg-lp-green text-base font-bold text-white transition-colors hover:bg-lp-green-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
+      className="h-14 w-full rounded-lp-control bg-lp-green text-lp-button text-white transition-colors hover:bg-lp-green-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
     >
       구매하기
     </button>

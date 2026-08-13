@@ -79,7 +79,7 @@ export function ConsentForm({
   return (
     <div className="flex flex-col">
       <div className="border-b border-lp-gray-100 px-6 pb-4 pt-6">
-        <h2 id="survey-title" className="text-lg font-bold text-lp-ink">
+        <h2 id="survey-title" className="text-lp-heading text-lp-ink">
           {interviewWilling
             ? "인터뷰 · 추첨 참여 연락처를 남겨주세요"
             : "추첨 참여를 위해 연락처를 남겨주세요"}
@@ -93,7 +93,7 @@ export function ConsentForm({
 
       <div className="space-y-5 px-6 py-6">
         {!consentAvailable && (
-          <p role="alert" className="rounded-lg bg-lp-gray-100 p-3 text-sm text-lp-gray-900">
+          <p role="alert" className="rounded-lp-control bg-lp-gray-100 p-3 text-sm text-lp-gray-900">
             공개 문의 채널이 설정되기 전까지 연락처를 받을 수 없습니다.
           </p>
         )}
@@ -110,7 +110,7 @@ export function ConsentForm({
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder="예: 김OO"
-            className="mt-2 h-12 w-full rounded-lg border border-lp-gray-300 px-3 text-sm focus:border-lp-green focus:outline-none"
+            className="mt-lp-sm h-12 w-full rounded-lp-control border border-lp-gray-300 px-lp-md text-sm focus:border-lp-green focus:outline-none"
           />
         </div>
 
@@ -118,7 +118,7 @@ export function ConsentForm({
           <span className="block text-sm font-medium text-lp-ink">
             연락 방법
           </span>
-          <div className="mt-2 flex gap-2">
+          <div className="mt-lp-sm flex gap-lp-sm">
             {(
               [
                 { type: "email", label: "이메일" },
@@ -130,7 +130,7 @@ export function ConsentForm({
                 type="button"
                 onClick={() => setContactType(option.type)}
                 aria-pressed={contactType === option.type}
-                className={`h-10 flex-1 rounded-lg border text-sm font-medium ${
+                className={`h-10 flex-1 rounded-lp-control border text-sm font-medium ${
                   contactType === option.type
                     ? "border-lp-green bg-lp-green-light text-lp-green"
                     : "border-lp-gray-300 text-lp-gray-700"
@@ -154,15 +154,15 @@ export function ConsentForm({
             placeholder={
               contactType === "email" ? "name@example.com" : "010-0000-0000"
             }
-            className="mt-2 h-12 w-full rounded-lg border border-lp-gray-300 px-3 text-sm focus:border-lp-green focus:outline-none"
+            className="mt-lp-sm h-12 w-full rounded-lp-control border border-lp-gray-300 px-lp-md text-sm focus:border-lp-green focus:outline-none"
           />
         </div>
 
-        <div className="rounded-lg bg-lp-gray-100 p-4">
+        <div className="rounded-lp-control bg-lp-gray-100 p-lp-lg">
           <h3 className="text-sm font-bold text-lp-ink">
             개인정보 수집 · 이용 안내
           </h3>
-          <dl className="mt-3 space-y-2.5">
+          <dl className="mt-lp-md space-y-2.5">
             {notice.map((item) => (
               <div key={item.label}>
                 <dt className="text-xs font-medium text-lp-gray-500">
@@ -176,7 +176,7 @@ export function ConsentForm({
           </dl>
         </div>
 
-        <label className="flex cursor-pointer items-start gap-3 text-sm text-lp-gray-900">
+        <label className="flex cursor-pointer items-start gap-lp-md text-sm text-lp-gray-900">
           <input
             type="checkbox"
             checked={agreed}
@@ -194,19 +194,19 @@ export function ConsentForm({
         </p>
       )}
 
-      <div className="sticky bottom-0 flex flex-col gap-2 border-t border-lp-gray-100 bg-white px-6 py-4">
+      <div className="sticky bottom-0 flex flex-col gap-lp-sm border-t border-lp-gray-100 bg-white px-6 py-4">
         <button
           type="button"
           disabled={!consentAvailable || !agreed || !contact.trim() || submitting}
           onClick={() => void submit()}
-          className="h-12 rounded-lg bg-lp-green font-bold text-white hover:bg-lp-green-dark disabled:cursor-not-allowed disabled:bg-lp-gray-300"
+          className="h-12 rounded-lp-control bg-lp-green text-lp-button text-white hover:bg-lp-green-dark disabled:cursor-not-allowed disabled:bg-lp-gray-300"
         >
           {submitting ? "저장하는 중…" : "연락처 남기기"}
         </button>
         <button
           type="button"
           onClick={onSkip}
-          className="h-11 rounded-lg text-sm font-medium text-lp-gray-700 hover:bg-lp-gray-100"
+          className="h-11 rounded-lp-control text-sm font-medium text-lp-gray-700 hover:bg-lp-gray-100"
         >
           지금은 건너뛰기
         </button>

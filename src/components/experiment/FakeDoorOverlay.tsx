@@ -22,11 +22,11 @@ export function FakeDoorOverlay({
   return (
     <Modal open={open} onClose={onClose} labelledBy="fakedoor-title">
       <div className="p-6 sm:p-8">
-        <h2 id="fakedoor-title" className="text-lg font-bold text-lp-ink">
+        <h2 id="fakedoor-title" className="text-lp-heading text-lp-ink">
           이 상품은 아직 판매 전입니다
         </h2>
 
-        <div className="mt-4 space-y-3 text-sm leading-relaxed text-lp-gray-900">
+        <div className="mt-lp-lg space-y-lp-md text-sm leading-relaxed text-lp-gray-900">
           <p>
             이 상품은 현재 정식 판매 전 수요를 확인하고 있습니다. 실제 주문과
             결제는 진행되지 않았습니다.
@@ -38,12 +38,12 @@ export function FakeDoorOverlay({
           </p>
         </div>
 
-        <div className="mt-7 flex flex-col gap-2 sm:flex-row-reverse">
+        <div className="mt-7 flex flex-col gap-lp-sm sm:flex-row-reverse">
           {onSurvey && (
             <button
               type="button"
               onClick={onSurvey}
-              className="h-12 flex-1 rounded-lg bg-lp-green font-bold text-white hover:bg-lp-green-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
+              className="h-12 flex-1 rounded-lp-control bg-lp-green text-lp-button text-white hover:bg-lp-green-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
             >
               설문 참여하기 (2분)
             </button>
@@ -51,7 +51,7 @@ export function FakeDoorOverlay({
           <button
             type="button"
             onClick={onClose}
-            className="h-12 flex-1 rounded-lg border border-lp-gray-300 font-medium text-lp-gray-700 hover:bg-lp-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
+            className="h-12 flex-1 rounded-lp-control border border-lp-gray-300 text-base font-medium text-lp-gray-700 hover:bg-lp-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
           >
             {onSurvey ? "괜찮아요" : "확인"}
           </button>

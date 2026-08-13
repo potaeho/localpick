@@ -14,22 +14,22 @@ export function Footer() {
   return (
     <footer className="mt-16 border-t border-lp-gray-300 bg-white">
       <div className="mx-auto max-w-6xl px-4 py-10 lg:px-6">
-        <div className="flex flex-col gap-8 sm:flex-row sm:justify-between">
+        <div className="flex flex-col gap-lp-section sm:flex-row sm:justify-between">
           <div className="max-w-sm">
-            <span className="flex items-center gap-2 text-lp-green">
+            <span className="flex items-center gap-lp-sm text-lp-green">
               <LogoMark className="h-8 w-6" />
               <span className="text-lg font-bold tracking-tight">
                 LOCAL PICK
               </span>
             </span>
-            <p className="mt-3 text-sm leading-relaxed text-lp-gray-700">
+            <p className="mt-lp-md text-lp-body text-lp-gray-700">
               누가, 어디서, 어떻게 만들었는지 확인할 수 있는 로컬 상품을
               모았습니다.
             </p>
           </div>
 
           <nav aria-label="푸터 메뉴">
-            <ul className="flex flex-col gap-2 text-sm text-lp-gray-700">
+            <ul className="flex flex-col gap-lp-sm text-lp-body text-lp-gray-700">
               <li>
                 <Link href="/regions" className="hover:text-lp-green">
                   지역별 보기

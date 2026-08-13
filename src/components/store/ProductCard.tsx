@@ -25,7 +25,7 @@ export function ProductCard({
       href={`/products/${product.slug}`}
       className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
     >
-      <div className="relative overflow-hidden rounded-lg bg-lp-gray-100">
+      <div className="relative overflow-hidden rounded-lp-card bg-lp-gray-100">
         <ProductImage
           slug={product.slug}
           kind={product.imageKind}
@@ -36,7 +36,7 @@ export function ProductCard({
           className="aspect-square w-full transition-transform duration-300 group-hover:scale-105"
         />
         {region && (
-          <span className="absolute left-2 top-2 rounded-full bg-white/95 px-2 py-0.5 text-xs font-medium text-lp-green">
+          <span className="absolute left-2 top-2 rounded-lp-circle bg-white/95 px-2 py-0.5 text-xs font-medium text-lp-green">
             {region.name}
           </span>
         )}
@@ -52,11 +52,11 @@ export function ProductCard({
         {creator && (
           <p className="mt-1 text-xs text-lp-gray-700">{creator.name}</p>
         )}
-        <div className="mt-1.5">
+        <div className="mt-lp-xs">
           <PriceDisplay product={product} />
         </div>
         {product.badges.length > 0 && (
-          <ul className="mt-1.5 flex flex-wrap gap-1">
+          <ul className="mt-lp-xs flex flex-wrap gap-1">
             {product.badges.map((badge) => (
               <li
                 key={badge}

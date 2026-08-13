@@ -16,7 +16,7 @@ export function AbandonedSurveyList({
 }) {
   if (rows.length === 0) {
     return (
-      <p className="rounded-xl border border-dashed border-lp-gray-300 p-8 text-center text-sm text-lp-gray-500">
+      <p className="rounded-lp-card border border-dashed border-lp-gray-300 p-8 text-center text-sm text-lp-gray-500">
         이탈한 설문 시도가 없습니다.
       </p>
     );
@@ -30,7 +30,7 @@ export function AbandonedSurveyList({
         {rows.map((row) => (
           <li
             key={row.id}
-            className="rounded-xl border border-lp-gray-300 bg-white p-4"
+            className="rounded-lp-card border border-lp-gray-300 bg-white p-4"
           >
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs text-lp-gray-500">
               <span>{new Date(row.ts).toLocaleString("ko-KR")}</span>

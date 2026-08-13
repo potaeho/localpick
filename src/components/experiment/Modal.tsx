@@ -88,7 +88,7 @@ export function Modal({
         aria-modal="true"
         aria-labelledby={labelledBy}
         tabIndex={-1}
-        className="relative flex max-h-[90dvh] w-full flex-col overflow-y-auto rounded-t-2xl bg-white shadow-xl outline-none sm:max-w-lg sm:rounded-2xl"
+        className="relative flex max-h-[90dvh] w-full flex-col overflow-y-auto rounded-t-lp-media bg-white shadow-xl outline-none sm:max-w-lg sm:rounded-lp-media"
       >
         {children}
       </div>

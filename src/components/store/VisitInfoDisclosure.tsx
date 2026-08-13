@@ -30,11 +30,11 @@ export function VisitInfoDisclosure({
   };
 
   return (
-    <section className="mt-8 rounded-xl border border-lp-green-light bg-lp-green-light p-5 sm:p-6">
-      <h2 className="text-lg font-bold text-lp-green">
+    <section className="mt-8 rounded-lp-card border border-lp-green-light bg-lp-green-light p-lp-xl sm:p-lp-xxl">
+      <h2 className="text-lp-heading text-lp-green">
         {regionName}에 가면 무엇을 할 수 있나요
       </h2>
-      <p className="mt-2 text-sm leading-relaxed text-lp-gray-900">
+      <p className="mt-lp-sm text-sm leading-relaxed text-lp-gray-900">
         이 상품을 만든 곳을 직접 가볼 수 있습니다.
       </p>
 
@@ -43,17 +43,17 @@ export function VisitInfoDisclosure({
         onClick={toggleVisitInfo}
         aria-controls={contentId}
         aria-expanded={open}
-        className="mt-4 min-h-11 rounded-lg bg-lp-green px-5 py-2.5 text-sm font-bold text-white hover:bg-lp-green-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
+        className="mt-lp-lg min-h-11 rounded-lp-control bg-lp-green px-lp-xl py-2.5 text-lp-button text-white hover:bg-lp-green-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
       >
         {open ? "방문 정보 접기" : "방문 정보 받아보기"}
       </button>
 
       {open && (
-        <ul id={contentId} className="mt-4 space-y-3">
+        <ul id={contentId} className="mt-lp-lg space-y-lp-md">
           {items.map((item) => (
             <li
               key={item}
-              className="flex gap-3 rounded-lg bg-white p-4 text-sm leading-relaxed text-lp-gray-900"
+              className="flex gap-lp-md rounded-lp-control bg-white p-lp-lg text-sm leading-relaxed text-lp-gray-900"
             >
               <span aria-hidden="true" className="text-lp-orange">
                 ●

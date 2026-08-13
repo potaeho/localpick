@@ -17,7 +17,7 @@ export function LogoutButton() {
         router.replace("/admin/login");
         router.refresh();
       }}
-      className="inline-flex h-9 items-center rounded-lg border border-lp-gray-300 px-3 text-sm text-lp-gray-700 hover:bg-lp-gray-100 disabled:opacity-50"
+      className="inline-flex h-9 items-center rounded-lp-control border border-lp-gray-300 px-lp-md text-sm text-lp-gray-700 hover:bg-lp-gray-100 disabled:opacity-50"
     >
       로그아웃
     </button>

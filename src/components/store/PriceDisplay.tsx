@@ -18,7 +18,7 @@ export function PriceDisplay({
 
   return (
     <div>
-      <div className="flex items-baseline gap-1.5">
+      <div className="flex items-baseline gap-lp-xs">
         {rate > 0 && (
           <span
             className={`font-bold text-lp-orange ${detail ? "text-2xl" : "text-sm"}`}
