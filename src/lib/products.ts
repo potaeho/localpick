@@ -1047,28 +1047,63 @@ export function getProductsByCreator(creatorId: string): Product[] {
   return products.filter((p) => p.creatorId === creatorId);
 }
 
-/** 상품명·설명·지역·카테고리를 대상으로 하는 단순 검색 */
+/**
+ * 상품명·설명·지역·카테고리·생산자·원재료를 대상으로 하는 검색.
+ *
+ * 두 가지를 개선했다.
+ * 1. 예전에는 검색어 전체를 하나의 부분 문자열로 찾았다. "고창 복분자"처럼
+ *    단어가 서로 다른 필드(지역명 / 상품명)에 나뉘어 있으면 정확히 그 순서로
+ *    붙어 있지 않은 이상 매치되지 않았다. 이제는 공백으로 토큰을 나눠 각
+ *    토큰이 (필드가 달라도) 전부 등장하는지를 본다 — AND 검색.
+ * 2. 결과 순서가 배열 순서 그대로였다. 이제 상품명에 매치된 결과를 설명·
+ *    원재료에만 매치된 결과보다 앞에 오도록 관련도 순으로 정렬한다.
+ */
 export function searchProducts(query: string): Product[] {
-  const q = query.trim().toLowerCase();
-  if (!q) return products;
+  const tokens = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return products;
 
-  return products.filter((p) => {
+  const scored = products.flatMap((p) => {
     const region = getRegion(p.regionId);
     const category = getCategory(p.categoryId);
     const creator = getCreator(p.creatorId);
-    const haystack = [
-      p.name,
-      p.tagline,
-      p.origin,
-      category?.name ?? "",
+
+    const nameField = p.name.toLowerCase();
+    const primaryFields = [p.tagline, p.origin, category?.name ?? ""]
+      .join(" ")
+      .toLowerCase();
+    const secondaryFields = [
       region?.name ?? "",
       region?.province ?? "",
       creator?.name ?? "",
+      creator?.title ?? "",
+      p.badges.join(" "),
+      p.notes,
     ]
       .join(" ")
       .toLowerCase();
-    return haystack.includes(q);
+
+    // 모든 토큰이 (필드 어디든) 등장해야 후보로 남는다
+    const matchesAllTokens = tokens.every((token) =>
+      [nameField, primaryFields, secondaryFields].some((field) =>
+        field.includes(token),
+      ),
+    );
+    if (!matchesAllTokens) return [];
+
+    // 상품명에 걸린 토큰 수가 많을수록, 설명·부가정보보다 우선 노출한다
+    const nameMatchCount = tokens.filter((token) =>
+      nameField.includes(token),
+    ).length;
+    const score =
+      nameMatchCount * 100 +
+      (nameField.startsWith(tokens[0] ?? "") ? 10 : 0);
+
+    return [{ product: p, score }];
   });
+
+  return scored
+    .sort((a, b) => b.score - a.score)
+    .map((entry) => entry.product);
 }
 
 /** 할인율(%) — 소수점 버림 */

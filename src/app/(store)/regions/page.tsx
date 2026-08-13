@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { KoreaMap } from "@/components/store/KoreaMap";
+import { FilterNav } from "@/components/store/FilterNav";
 import { getProductsByRegion, regions } from "@/lib/products";
 
 export const metadata: Metadata = {
@@ -19,6 +20,8 @@ export default function RegionsIndexPage() {
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-lp-gray-700">
         상품이 만들어진 곳입니다. 지도에서 지역을 눌러보세요.
       </p>
+
+      <FilterNav />
 
       <div className="mt-6">
         <KoreaMap regions={regions} productCounts={productCounts} />

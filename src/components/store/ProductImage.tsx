@@ -20,7 +20,7 @@ type Palette = {
   line: string;
 };
 
-const PALETTES: Record<ProductImageKind, Palette> = {
+export const PALETTES: Record<ProductImageKind, Palette> = {
   jar: { bg: "#F6EFE4", body: "#C4562F", bodyDark: "#A3421F", accent: "#F0A44E", line: "#1B5E3F" },
   bottle: { bg: "#F0E9F0", body: "#7B3F63", bodyDark: "#5E2C4B", accent: "#C78BB0", line: "#1B5E3F" },
   pouch: { bg: "#EDF0E4", body: "#5B7A52", bodyDark: "#44603C", accent: "#A8C08F", line: "#1B5E3F" },

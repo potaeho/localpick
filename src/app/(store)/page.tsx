@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/store/ProductCard";
-import { CategoryChips } from "@/components/store/CategoryChips";
+import { FilterNav } from "@/components/store/FilterNav";
 import { HeroBanner, type HeroSlide } from "@/components/store/HeroBanner";
 import {
   categories,
@@ -10,70 +10,87 @@ import {
   searchProducts,
 } from "@/lib/products";
 
-/*
- * 배너는 여러 메시지를 번갈아 보여준다. 어떤 가치 제안(명절 선물 / 지역
- * 환원 / 신뢰 / 제철 / 방문 / 발견)이 통하는지는 2차 실험에서 나눠 검증할
- * 대상이므로, 1차 실험 단계에서는 하나로 단정하지 않고 로테이션으로 함께
- * 노출한다.
- */
 const HERO_SLIDES: HeroSlide[] = [
   {
     id: "chuseok",
     theme: "orange",
-    eyebrow: "추석 선물 미리 준비하기",
-    title: "올 추석, 뜻깊은 선물을 미리 예약하세요",
+    eyebrow: "추석 선물 세트",
+    title: "올 추석,\n정성을 담아 전하세요",
     subtitle:
-      "받는 분의 고향을 떠올리게 하는 로컬 상품으로 명절 인사를 전해보세요.",
-    cta: { label: "추석 선물 둘러보기", href: "/categories/cheong" },
+      "어르신께 드리기 좋은 건강 먹거리를 미리 준비하세요.",
+    cta: { label: "추석 선물 둘러보기", href: "/categories/produce" },
     image: { src: "/hero/chuseok.jpg", alt: "홍천 아까시 벌꿀을 담은 유리병" },
+    sideLabel: "추석 선물 세트",
+    featuredProducts: [
+      { name: "산청 반건시 곶감", href: "/products/sancheong-gotgam" },
+      { name: "산청 곶감정과", href: "/products/sancheong-gotgam-jeonggwa" },
+      { name: "의성 흑마늘 진액", href: "/products/uiseong-black-garlic" },
+      { name: "홍천 벌꿀", href: "/products/hongcheon-acacia-honey" },
+    ],
   },
   {
-    id: "trust",
-    theme: "soil",
-    eyebrow: "생산자 이야기",
-    title: "이 상품, 누가 만들었는지 압니다",
-    subtitle:
-      "레시피가 아니라 사람을 소개합니다. 상품마다 생산자의 이름과 이야기를 확인할 수 있습니다.",
-    cta: { label: "정재훈님 이야기 보기", href: "/creators/gokseong-rice" },
-    image: { src: "/hero/trust.jpg", alt: "나무 그릇에 담긴 곡성 유기농 흑미" },
-  },
-  {
-    id: "give-back",
-    theme: "green",
-    eyebrow: "LOCAL PICK의 약속",
-    title: "구매 금액의 일부, 그 지역으로 돌아갑니다",
-    subtitle:
-      "여기서 산 만큼, 만든 이의 마을에 힘이 됩니다. 소비가 곧 지역을 응원하는 방법입니다.",
-    cta: { label: "산지 이야기 보러가기", href: "/regions" },
-    image: { src: "/hero/give-back.jpg", alt: "섬진강을 따라 펼쳐진 곡성의 논과 산" },
-  },
-  {
-    id: "seasonal",
+    id: "summer-meal",
     theme: "gold",
-    eyebrow: "지금 제철",
-    title: "지금 아니면 못 만나는 산지 소식",
+    eyebrow: "여름 보양식",
+    title: "무더운 여름,\n기운 나는 한 끼",
     subtitle:
-      "통영 굴은 11월부터 3월까지만 거둡니다. 제철에만 나는 맛을 놓치지 마세요.",
-    cta: { label: "통영 굴 보러가기", href: "/products/tongyeong-oyster-oil" },
-    image: { src: "/hero/seasonal.jpg", alt: "통영 굴을 올린 오일 파스타" },
+      "집에서 간편하게 즐기는 보양 한상을 준비했습니다.",
+    cta: { label: "보양식 보러가기", href: "/categories/processed" },
+    image: { src: "/hero/trust.jpg", alt: "나무 그릇에 담긴 곡성 유기농 흑미" },
+    sideLabel: "여름 보양 한상",
+    featuredProducts: [
+      { name: "춘천 닭갈비 밀키트", href: "/products/chuncheon-dakgalbi-kit" },
+      { name: "곡성 유기농 흑미", href: "/products/gokseong-black-rice" },
+      { name: "영월 건조 곤드레", href: "/products/yeongwol-gondre" },
+    ],
   },
   {
-    id: "visit",
+    id: "fermented",
+    theme: "soil",
+    eyebrow: "전통 발효 기획전",
+    title: "시간이 빚어낸\n깊은 맛",
+    subtitle:
+      "장인의 손끝에서 천천히 발효된 전통 식품을 만나보세요.",
+    cta: { label: "발효 식품 보기", href: "/categories/processed" },
+    image: { src: "/hero/give-back.jpg", alt: "섬진강을 따라 펼쳐진 곡성의 논과 산" },
+    sideLabel: "전통 발효 기획전",
+    featuredProducts: [
+      { name: "순창 재래식 고추장", href: "/products/sunchang-gochujang" },
+      { name: "고창 복분자 식초", href: "/products/gochang-bokbunja-vinegar" },
+      { name: "고창 복분자잼", href: "/products/gochang-bokbunja-jam" },
+    ],
+  },
+  {
+    id: "sea",
     theme: "green",
-    eyebrow: "가보고 싶은 지역",
-    title: "먹어보고, 다녀오세요",
-    subtitle: "감귤 따기 체험부터 올레길까지 — 서귀포에서 만날 수 있는 것들.",
-    cta: { label: "서귀포 소개 보기", href: "/regions/jeju" },
-    image: { src: "/hero/visit.jpg", alt: "반으로 자른 제주 노지감귤" },
+    eyebrow: "산지 직송",
+    title: "바다에서 식탁까지,\n산지 직송 해산물",
+    subtitle:
+      "완도 앞바다, 영덕 갯바위, 통영 앞바다에서 온 맛.",
+    cta: { label: "해산물 보러가기", href: "/categories/seafood" },
+    image: { src: "/hero/intro.jpg", alt: "대바구니에 담긴 완도 다시마" },
+    sideLabel: "바다의 맛",
+    featuredProducts: [
+      { name: "완도 다시마", href: "/products/wando-dasima" },
+      { name: "영덕 돌미역", href: "/products/yeongdeok-dolmiyeok" },
+      { name: "통영 굴 오일절임", href: "/products/tongyeong-oyster-oil" },
+    ],
   },
   {
-    id: "newcomer",
+    id: "drink",
     theme: "slate",
-    eyebrow: "처음이신가요",
-    title: "첫 로컬픽, 이렇게 시작하세요",
-    subtitle: "카테고리별로 나뉜 상품을 훑어보고, 관심 가는 지역부터 골라보세요.",
-    cta: { label: "카테고리 전체 보기", href: "/categories" },
-    image: { src: "/hero/newcomer.jpg", alt: "속을 반으로 가른 경주 찰보리빵" },
+    eyebrow: "차 · 꿀 · 청",
+    title: "하루 한 잔,\n자연이 담긴 여유",
+    subtitle:
+      "하동의 녹차, 홍천의 벌꿀, 제주의 감귤청으로 한 잔의 여유를.",
+    cta: { label: "음료 보러가기", href: "/categories/cheong" },
+    image: { src: "/hero/visit.jpg", alt: "반으로 자른 제주 노지감귤" },
+    sideLabel: "차·꿀·청",
+    featuredProducts: [
+      { name: "하동 우전 녹차", href: "/products/hadong-woojeon-tea" },
+      { name: "홍천 아까시 벌꿀", href: "/products/hongcheon-acacia-honey" },
+      { name: "제주 노지감귤청", href: "/products/jeju-citrus-cheong" },
+    ],
   },
   {
     id: "intro",
@@ -81,10 +98,11 @@ const HERO_SLIDES: HeroSlide[] = [
     eyebrow: "LOCAL PICK",
     title: "지역에서 만든 것들",
     subtitle:
-      "전국 각지의 생산자가 직접 기르고 만든 상품입니다. 누가 어디서 어떻게 만들었는지 상품마다 확인할 수 있습니다.",
+      "전국 각지의 생산자가 직접 기르고 만든 상품입니다.",
     note: `${categories.length}개 카테고리 · ${regions.length}개 지역 · 상품 ${products.length}개`,
     cta: { label: "카테고리 둘러보기", href: "/categories" },
-    image: { src: "/hero/intro.jpg", alt: "대바구니에 담긴 완도 다시마" },
+    image: { src: "/hero/newcomer.jpg", alt: "속을 반으로 가른 경주 찰보리빵" },
+    sideLabel: "LOCAL PICK 소개",
   },
 ];
 
@@ -97,7 +115,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
     <div className="mx-auto max-w-6xl px-4 py-6 lg:px-6 lg:py-8">
       <HeroBanner slides={HERO_SLIDES} />
 
-      <CategoryChips />
+      <FilterNav />
 
       {query ? (
         <section className="mt-10">

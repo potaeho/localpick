@@ -12,8 +12,9 @@ export type HeroSlide = {
   subtitle: string;
   note?: string;
   cta: { label: string; href: string };
-  /** 배너 컨셉에 맞는 실사 — 모든 슬라이드에서 같은 크기의 카드로 노출한다 */
   image: { src: string; alt: string };
+  sideLabel: string;
+  featuredProducts?: { name: string; href: string }[];
 };
 
 const THEME_CLASSES: Record<HeroSlide["theme"], string> = {
@@ -27,14 +28,6 @@ const THEME_CLASSES: Record<HeroSlide["theme"], string> = {
 
 const AUTOPLAY_MS = 6000;
 
-/**
- * 자동으로 순환하는 메인 배너.
- *
- * 배경은 사진 대신 브랜드 그라데이션 + 도형으로 만든 그래픽을 쓴다 — 사진을
- * 전체 배경으로 늘려 억지로 채우면 어색해지기 때문이다. 대신 배너 컨셉에
- * 맞는 실사를 모든 슬라이드에서 동일한 크기의 카드로 보여줘, 사진은
- * "증거", 배경은 "톤"을 맡도록 역할을 나눴다.
- */
 export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -42,7 +35,9 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
 
   useEffect(() => {
     if (paused || slides.length <= 1) return;
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     if (reduceMotion) return;
 
     timerRef.current = setInterval(() => {
@@ -56,64 +51,116 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
 
   return (
     <section
-      className="relative isolate overflow-hidden rounded-xl text-white"
+      className="relative isolate overflow-hidden rounded-xl"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
-      <div className="relative min-h-[300px] sm:min-h-[360px] lg:min-h-[400px]">
-        {slides.map((slide, i) => (
-          <div
-            key={slide.id}
-            aria-hidden={i !== index}
-            className={`absolute inset-0 ${THEME_CLASSES[slide.theme]} transition-opacity duration-700 ease-out ${
-              i === index ? "opacity-100" : "pointer-events-none opacity-0"
-            }`}
-          >
-            {/* 배경 도형 — 은은한 원형 블롭으로 시즌 배너 느낌만 준다 */}
-            <div className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-black/10 blur-3xl" />
+      <div className="flex">
+        {/* ── 메인 배너 영역 ── */}
+        <div className="relative min-h-[300px] flex-1 text-white sm:min-h-[360px] lg:min-h-[400px]">
+          {slides.map((slide, i) => (
+            <div
+              key={slide.id}
+              aria-hidden={i !== index}
+              className={`absolute inset-0 ${THEME_CLASSES[slide.theme]} transition-opacity duration-700 ease-out ${
+                i === index
+                  ? "opacity-100"
+                  : "pointer-events-none opacity-0"
+              }`}
+            >
+              <div className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-black/10 blur-3xl" />
 
-            <div className="relative flex h-full flex-col items-start justify-center gap-6 break-keep px-6 py-12 sm:px-10 sm:py-16 lg:flex-row lg:items-center lg:justify-between lg:py-0">
-              <div>
-                <p className="text-xs font-semibold tracking-wide text-white/80 sm:text-sm">
-                  {slide.eyebrow}
-                </p>
-                <h1 className="mt-2 max-w-lg text-2xl font-bold leading-snug sm:text-4xl">
-                  {slide.title}
-                </h1>
-                <p className="mt-3 max-w-md text-sm leading-relaxed text-white/90 sm:text-base">
-                  {slide.subtitle}
-                </p>
-                {slide.note && (
-                  <p className="mt-6 text-sm text-white/75">{slide.note}</p>
-                )}
-                <Link
-                  href={slide.cta.href}
-                  className="mt-7 inline-flex w-fit items-center rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-lp-ink transition hover:bg-white/90"
-                >
-                  {slide.cta.label}
-                </Link>
+              <div className="relative flex h-full flex-col items-start justify-center gap-6 break-keep px-6 py-12 sm:px-10 sm:py-16 lg:flex-row lg:items-center lg:justify-between lg:py-0">
+                <div className="flex-1">
+                  <p className="text-xs font-semibold tracking-wide text-white/80 sm:text-sm">
+                    {slide.eyebrow}
+                  </p>
+                  <h1 className="mt-2 max-w-lg whitespace-pre-line text-2xl font-bold leading-snug sm:text-4xl">
+                    {slide.title}
+                  </h1>
+                  <p className="mt-3 max-w-md text-sm leading-relaxed text-white/90 sm:text-base">
+                    {slide.subtitle}
+                  </p>
+
+                  {slide.featuredProducts &&
+                    slide.featuredProducts.length > 0 && (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {slide.featuredProducts.map((product) => (
+                          <Link
+                            key={product.href}
+                            href={product.href}
+                            className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm transition hover:bg-white/30"
+                          >
+                            {product.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+
+                  {slide.note && (
+                    <p className="mt-6 text-sm text-white/75">{slide.note}</p>
+                  )}
+
+                  <Link
+                    href={slide.cta.href}
+                    className="mt-7 inline-flex w-fit items-center rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-lp-ink transition hover:bg-white/90"
+                  >
+                    {slide.cta.label}
+                  </Link>
+                </div>
+
+                <div className="relative hidden h-56 w-56 shrink-0 overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/25 sm:block lg:h-64 lg:w-64">
+                  <Image
+                    src={slide.image.src}
+                    alt={slide.image.alt}
+                    fill
+                    sizes="256px"
+                    className="object-cover"
+                  />
+                </div>
               </div>
+            </div>
+          ))}
+        </div>
 
-              {/* 슬라이드마다 같은 크기의 카드로 컨셉에 맞는 실사를 보여준다 */}
-              <div className="relative hidden h-56 w-56 shrink-0 overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/25 sm:block lg:h-64 lg:w-64">
+        {/* ── 우측 사이드바 (데스크탑 전용) ── */}
+        <nav
+          aria-label="배너 탐색"
+          className="hidden w-52 flex-col border-l border-lp-gray-200 bg-white lg:flex"
+        >
+          {slides.map((slide, i) => (
+            <button
+              key={slide.id}
+              type="button"
+              onClick={() => setIndex(i)}
+              aria-current={i === index ? "true" : undefined}
+              className={`flex flex-1 items-center gap-3 border-b border-lp-gray-100 px-4 text-left text-sm transition ${
+                i === index
+                  ? "border-l-[3px] border-l-lp-green bg-lp-cream font-medium text-lp-ink"
+                  : "border-l-[3px] border-l-transparent text-lp-gray-700 hover:bg-lp-gray-50"
+              }`}
+            >
+              <span className="line-clamp-2 flex-1">{slide.sideLabel}</span>
+              <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded">
                 <Image
                   src={slide.image.src}
-                  alt={slide.image.alt}
+                  alt=""
                   fill
-                  sizes="256px"
+                  sizes="40px"
                   className="object-cover"
                 />
               </div>
-            </div>
-          </div>
-        ))}
+            </button>
+          ))}
+        </nav>
       </div>
 
+      {/* ── 모바일 인디케이터 ── */}
       {slides.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-2">
+        <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-2 lg:hidden">
           {slides.map((slide, i) => (
             <button
               key={slide.id}
@@ -122,7 +169,9 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
               aria-current={i === index}
               onClick={() => setIndex(i)}
               className={`h-1.5 rounded-full transition-all ${
-                i === index ? "w-6 bg-white" : "w-1.5 bg-white/50 hover:bg-white/75"
+                i === index
+                  ? "w-6 bg-white"
+                  : "w-1.5 bg-white/50 hover:bg-white/75"
               }`}
             />
           ))}

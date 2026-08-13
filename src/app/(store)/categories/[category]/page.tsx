@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import { ProductCard } from "@/components/store/ProductCard";
-import { CategoryChips } from "@/components/store/CategoryChips";
+import { FilterNav } from "@/components/store/FilterNav";
 import {
   categories,
   getCategory,
@@ -44,7 +44,7 @@ export default async function CategoryPage({
         {category.description}
       </p>
 
-      <CategoryChips activeId={category.id} />
+      <FilterNav />
 
       <section className="mt-8">
         <h2 className="sr-only">{category.name} 상품 목록</h2>
