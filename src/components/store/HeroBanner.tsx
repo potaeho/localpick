@@ -61,7 +61,7 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
     >
       <div className="flex">
         {/* ── 메인 배너 영역 ── */}
-        <div className="relative aspect-[2.2/1] flex-1 text-white sm:aspect-[2.5/1] lg:aspect-[2.8/1]">
+        <div className="relative aspect-[1.5/1] flex-1 text-white sm:aspect-[1.8/1] lg:aspect-[2.2/1]">
           {slides.map((slide, i) => (
             <div
               key={slide.id}
@@ -85,7 +85,7 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
               {/* 텍스트 가독성을 위한 그라데이션 오버레이 */}
               <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-black/20" />
 
-              <div className="relative flex h-full flex-col justify-center break-keep px-8 py-12 sm:px-14 sm:py-16 lg:px-20 lg:py-20">
+              <div className="relative flex h-full flex-col justify-center break-keep px-6 py-4 sm:px-8 sm:py-6 lg:px-12 lg:py-8">
                 <p className="text-xs font-semibold tracking-wider text-white/80 sm:text-sm">
                   {slide.eyebrow}
                 </p>
@@ -101,7 +101,7 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
                 {/* 상품 썸네일 */}
                 {slide.featuredProducts &&
                   slide.featuredProducts.length > 0 && (
-                    <div className="mt-5 flex items-center gap-3">
+                    <div className="mt-5 hidden items-center gap-3 sm:flex">
                       {slide.featuredProducts.map((product) => (
                         <Link
                           key={product.href}

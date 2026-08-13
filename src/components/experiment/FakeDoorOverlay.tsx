@@ -39,7 +39,7 @@ export function FakeDoorOverlay({
         </div>
 
         <div className="mt-7 flex flex-col gap-lp-sm sm:flex-row-reverse">
-          {onSurvey && (
+          {onSurvey ? (
             <button
               type="button"
               onClick={onSurvey}
@@ -47,14 +47,15 @@ export function FakeDoorOverlay({
             >
               설문 참여하기 (2분)
             </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onClose}
+              className="h-12 flex-1 rounded-lp-control border border-lp-gray-300 text-base font-medium text-lp-gray-700 hover:bg-lp-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
+            >
+              확인
+            </button>
           )}
-          <button
-            type="button"
-            onClick={onClose}
-            className="h-12 flex-1 rounded-lp-control border border-lp-gray-300 text-base font-medium text-lp-gray-700 hover:bg-lp-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
-          >
-            {onSurvey ? "괜찮아요" : "확인"}
-          </button>
         </div>
       </div>
     </Modal>

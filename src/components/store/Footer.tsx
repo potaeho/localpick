@@ -12,9 +12,9 @@ import { LogoMark } from "./Logo";
  */
 export function Footer() {
   return (
-    <footer className="mt-16 border-t border-lp-gray-300 bg-white">
-      <div className="mx-auto max-w-6xl px-4 py-10 lg:px-6">
-        <div className="flex flex-col gap-lp-section sm:flex-row sm:justify-between">
+    <footer className="mt-16 border-t border-lp-gray-300 bg-lp-gray-100">
+      <div className="mx-auto max-w-6xl px-4 py-lp-section lg:px-6 lg:py-12">
+        <div className="grid gap-lp-section sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-lp-xxl lg:grid-cols-[minmax(0,1fr)_auto_auto]">
           <div className="max-w-sm">
             <span className="flex items-center gap-lp-sm text-lp-green">
               <LogoMark className="h-8 w-6" />
@@ -29,7 +29,10 @@ export function Footer() {
           </div>
 
           <nav aria-label="푸터 메뉴">
-            <ul className="flex flex-col gap-lp-sm text-lp-body text-lp-gray-700">
+            <p className="text-lp-label font-bold text-lp-gray-900">
+              바로가기
+            </p>
+            <ul className="mt-lp-md flex flex-col gap-lp-sm text-lp-body text-lp-gray-700">
               <li>
                 <Link href="/regions" className="hover:text-lp-green">
                   지역별 보기
@@ -40,6 +43,14 @@ export function Footer() {
                   생산자 보기
                 </Link>
               </li>
+            </ul>
+          </nav>
+
+          <div>
+            <p className="text-lp-label font-bold text-lp-gray-900">
+              고객센터
+            </p>
+            <ul className="mt-lp-md flex flex-col gap-lp-sm text-lp-body text-lp-gray-700">
               <li>
                 {PRIVACY_CONTACT ? (
                   <a
@@ -53,10 +64,10 @@ export function Footer() {
                 )}
               </li>
             </ul>
-          </nav>
+          </div>
         </div>
 
-        <p className="mt-8 border-t border-lp-gray-100 pt-6 text-xs text-lp-gray-500">
+        <p className="mt-lp-section border-t border-lp-gray-300 pt-lp-lg text-xs text-lp-gray-500">
           © {new Date().getFullYear()} 태두리 · LOCAL PICK
         </p>
       </div>
