@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import { KoreaMap } from "@/components/store/KoreaMap";
+import { FilterNav } from "@/components/store/FilterNav";
 import { ProductCard } from "@/components/store/ProductCard";
 import { VisitInfoDisclosure } from "@/components/store/VisitInfoDisclosure";
 import {
@@ -48,6 +49,8 @@ export default async function RegionPage({
       <p className="mt-4 max-w-2xl text-sm leading-relaxed text-lp-gray-900 sm:text-base">
         {region.description}
       </p>
+
+      <FilterNav />
 
       <div className="mt-6">
         <KoreaMap

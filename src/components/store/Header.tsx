@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Logo } from "./Logo";
-import { categories } from "@/lib/products";
 
 /**
  * 스토어 헤더.
@@ -63,34 +62,25 @@ export function Header() {
         </form>
       </div>
 
-      {/* 카테고리 네비 — 가로 스크롤로 모바일에서도 전체 접근 가능 */}
-      <nav aria-label="카테고리" className="border-t border-lp-gray-100">
-        <div className="mx-auto max-w-6xl overflow-x-auto px-4 lg:px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {/* 보기 모드 — 상품별 / 지역별 */}
+      <nav aria-label="보기 모드" className="border-t border-lp-gray-100">
+        <div className="mx-auto max-w-6xl px-4 lg:px-6">
           <ul className="flex items-center gap-1 py-2">
             <li>
               <Link
                 href="/"
                 className="block whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium text-lp-gray-700 hover:bg-lp-green-light hover:text-lp-green"
               >
-                전체
+                상품별
               </Link>
             </li>
-            {categories.map((category) => (
-              <li key={category.id}>
-                <Link
-                  href={`/categories/${category.id}`}
-                  className="block whitespace-nowrap rounded-full px-3 py-1.5 text-sm text-lp-gray-700 hover:bg-lp-green-light hover:text-lp-green"
-                >
-                  {category.name}
-                </Link>
-              </li>
-            ))}
+            <li aria-hidden="true" className="mx-1 h-4 w-px bg-lp-gray-300" />
             <li>
               <Link
                 href="/regions"
-                className="block whitespace-nowrap rounded-full px-3 py-1.5 text-sm text-lp-gray-700 hover:bg-lp-green-light hover:text-lp-green"
+                className="block whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium text-lp-gray-700 hover:bg-lp-green-light hover:text-lp-green"
               >
-                지역별 보기
+                지역별
               </Link>
             </li>
           </ul>
