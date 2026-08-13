@@ -906,6 +906,13 @@ export const products: Product[] = [
     tagline: "지리산 바람에 자연 건조한 반건시",
     categoryId: "produce",
     imageKind: "persimmon",
+    detailImages: [
+      "/product-details/sancheong-gotgam/1.png",
+      "/product-details/sancheong-gotgam/2.png",
+      "/product-details/sancheong-gotgam/3.png",
+      "/product-details/sancheong-gotgam/4.png",
+      "/product-details/sancheong-gotgam/5.png",
+    ],
     regionId: "sancheong",
     creatorId: "sancheong-gotgam",
     origin: "국산 (경상남도 산청군)",
