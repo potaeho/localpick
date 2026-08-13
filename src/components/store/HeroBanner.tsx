@@ -23,7 +23,7 @@ export type HeroSlide = {
   badge?: string;
   note?: string;
   cta: { label: string; href: string };
-  image: { src: string; alt: string };
+  image: { src: string; alt: string; position?: string };
   sideLabel: string;
   featuredProducts?: FeaturedProduct[];
 };
@@ -79,6 +79,7 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
                 fill
                 sizes="(max-width: 1024px) 100vw, 75vw"
                 className="object-cover"
+                style={slide.image.position ? { objectPosition: slide.image.position } : undefined}
                 priority={i === 0}
               />
               {/* 텍스트 가독성을 위한 그라데이션 오버레이 */}

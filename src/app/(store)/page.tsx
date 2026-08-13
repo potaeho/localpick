@@ -46,7 +46,7 @@ const HERO_SLIDES: HeroSlide[] = [
     title: "시간이 빚어낸\n깊은 맛",
     subtitle: "장인의 손끝에서 천천히 발효된 전통 식품을 만나보세요.",
     cta: { label: "발효 식품 보기", href: "/categories/processed" },
-    image: { src: "/hero/fermented.png", alt: "순창 고추장 항아리와 복분자 식초, 복분자잼" },
+    image: { src: "/hero/fermented.png", alt: "순창 고추장 항아리와 복분자 식초, 복분자잼", position: "70% center" },
     sideLabel: "전통 발효 기획전",
     featuredProducts: [
       { name: "순창 고추장", slug: "sunchang-gochujang", href: "/products/sunchang-gochujang", imageKind: "jar" },
@@ -74,7 +74,7 @@ const HERO_SLIDES: HeroSlide[] = [
     title: "하루 한 잔,\n자연이 담긴 여유",
     subtitle: "하동의 녹차, 홍천의 벌꿀, 제주의 감귤청으로 한 잔의 여유를.",
     cta: { label: "음료 보러가기", href: "/categories/cheong" },
-    image: { src: "/hero/drink.png", alt: "아까시 벌꿀, 감귤청, 하동 녹차 한 잔" },
+    image: { src: "/hero/drink.png", alt: "아까시 벌꿀, 감귤청, 하동 녹차 한 잔", position: "60% center" },
     sideLabel: "차·꿀·청",
     featuredProducts: [
       { name: "하동 녹차", slug: "hadong-woojeon-tea", href: "/products/hadong-woojeon-tea", imageKind: "tea" },
@@ -108,7 +108,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       {query ? (
         <section className="mt-10">
           <div className="flex items-baseline justify-between gap-4">
-            <h2 className="text-lg font-bold text-lp-ink">
+            <h2 className="text-lp-heading text-lp-ink">
               &lsquo;{query}&rsquo; 검색 결과{" "}
               <span className="text-lp-gray-500">{results.length}개</span>
             </h2>
@@ -143,10 +143,10 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
             <section key={category.id} className="mt-12">
               <div className="flex items-baseline justify-between gap-4">
                 <div className="min-w-0">
-                  <h2 className="text-lg font-bold text-lp-ink">
+                  <h2 className="text-lp-heading text-lp-ink">
                     {category.name}
                   </h2>
-                  <p className="mt-1 text-sm text-lp-gray-500">
+                  <p className="mt-lp-xs text-sm text-lp-gray-500">
                     {category.description}
                   </p>
                 </div>
