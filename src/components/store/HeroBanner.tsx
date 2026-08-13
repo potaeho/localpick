@@ -61,7 +61,7 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
     >
       <div className="flex">
         {/* ── 메인 배너 영역 ── */}
-        <div className="relative min-h-[300px] flex-1 text-white sm:min-h-[360px] lg:min-h-[400px]">
+        <div className="relative aspect-[2.2/1] flex-1 text-white sm:aspect-[2.5/1] lg:aspect-[2.8/1]">
           {slides.map((slide, i) => (
             <div
               key={slide.id}
@@ -90,7 +90,7 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
                   {slide.eyebrow}
                 </p>
 
-                <h1 className="mt-2 max-w-md whitespace-pre-line text-3xl font-black leading-tight sm:text-[2.75rem] sm:leading-tight lg:text-lp-hero">
+                <h1 className="mt-2 max-w-md whitespace-pre-line text-3xl font-black leading-tight sm:text-[2.75rem] sm:leading-tight lg:text-5xl lg:leading-tight">
                   {slide.title}
                 </h1>
 
@@ -137,9 +137,10 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
 
                 <Link
                   href={slide.cta.href}
-                  className="mt-6 inline-flex w-fit items-center rounded-lp-circle bg-white px-lp-xl py-lp-sm text-lp-button text-lp-ink shadow-md transition hover:bg-white/90"
+                  className="mt-6 inline-flex w-fit items-center gap-1.5 rounded-lg bg-lp-green px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-lp-green-dark sm:text-base"
                 >
                   {slide.cta.label}
+                  <span aria-hidden="true">&rarr;</span>
                 </Link>
               </div>
             </div>
