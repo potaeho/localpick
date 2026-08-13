@@ -84,12 +84,12 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
               {/* 텍스트 가독성을 위한 그라데이션 오버레이 */}
               <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-black/20" />
 
-              <div className="relative flex h-full flex-col justify-center break-keep px-6 py-10 sm:px-10 sm:py-14">
+              <div className="relative flex h-full flex-col justify-center break-keep px-8 py-12 sm:px-14 sm:py-16 lg:px-20 lg:py-20">
                 <p className="text-xs font-semibold tracking-wider text-white/80 sm:text-sm">
                   {slide.eyebrow}
                 </p>
 
-                <h1 className="mt-2 max-w-md whitespace-pre-line text-3xl font-black leading-tight sm:text-[2.75rem] sm:leading-tight lg:text-5xl lg:leading-tight">
+                <h1 className="mt-2 max-w-md whitespace-pre-line text-3xl font-black leading-tight sm:text-[2.75rem] sm:leading-tight lg:text-lp-hero">
                   {slide.title}
                 </h1>
 
@@ -136,7 +136,7 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
 
                 <Link
                   href={slide.cta.href}
-                  className="mt-6 inline-flex w-fit items-center rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-lp-ink shadow-md transition hover:bg-white/90"
+                  className="mt-6 inline-flex w-fit items-center rounded-lp-circle bg-white px-lp-xl py-lp-sm text-lp-button text-lp-ink shadow-md transition hover:bg-white/90"
                 >
                   {slide.cta.label}
                 </Link>
