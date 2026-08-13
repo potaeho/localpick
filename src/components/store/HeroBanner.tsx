@@ -4,26 +4,28 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
+import type { ProductImageKind } from "@/lib/types";
+
+import { ProductImage } from "./ProductImage";
+
+export type FeaturedProduct = {
+  name: string;
+  href: string;
+  slug: string;
+  imageKind: ProductImageKind;
+};
+
 export type HeroSlide = {
   id: string;
-  theme: "orange" | "green" | "ink" | "soil" | "gold" | "slate";
   eyebrow: string;
   title: string;
   subtitle: string;
+  badge?: string;
   note?: string;
   cta: { label: string; href: string };
   image: { src: string; alt: string };
   sideLabel: string;
-  featuredProducts?: { name: string; href: string }[];
-};
-
-const THEME_CLASSES: Record<HeroSlide["theme"], string> = {
-  orange: "bg-gradient-to-br from-lp-orange-dark via-lp-orange to-[#c85a10]",
-  green: "bg-gradient-to-br from-lp-green-dark via-lp-green to-[#0d3623]",
-  ink: "bg-gradient-to-br from-lp-gray-900 via-lp-ink to-[#050505]",
-  soil: "bg-gradient-to-br from-[#4a3626] via-[#2e2013] to-lp-ink",
-  gold: "bg-gradient-to-br from-[#c98a1a] via-lp-orange to-lp-orange-dark",
-  slate: "bg-gradient-to-br from-lp-gray-700 via-lp-gray-900 to-lp-ink",
+  featuredProducts?: FeaturedProduct[];
 };
 
 const AUTOPLAY_MS = 6000;
@@ -64,63 +66,80 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
             <div
               key={slide.id}
               aria-hidden={i !== index}
-              className={`absolute inset-0 ${THEME_CLASSES[slide.theme]} transition-opacity duration-700 ease-out ${
+              className={`absolute inset-0 transition-opacity duration-700 ease-out ${
                 i === index
                   ? "opacity-100"
                   : "pointer-events-none opacity-0"
               }`}
             >
-              <div className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-              <div className="pointer-events-none absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-black/10 blur-3xl" />
+              {/* 배경 실사 이미지 */}
+              <Image
+                src={slide.image.src}
+                alt=""
+                fill
+                sizes="(max-width: 1024px) 100vw, 75vw"
+                className="object-cover"
+                priority={i === 0}
+              />
+              {/* 텍스트 가독성을 위한 그라데이션 오버레이 */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-black/20" />
 
-              <div className="relative flex h-full flex-col items-start justify-center gap-6 break-keep px-6 py-12 sm:px-10 sm:py-16 lg:flex-row lg:items-center lg:justify-between lg:py-0">
-                <div className="flex-1">
-                  <p className="text-xs font-semibold tracking-wide text-white/80 sm:text-sm">
-                    {slide.eyebrow}
-                  </p>
-                  <h1 className="mt-2 max-w-lg whitespace-pre-line text-2xl font-bold leading-snug sm:text-4xl">
-                    {slide.title}
-                  </h1>
-                  <p className="mt-3 max-w-md text-sm leading-relaxed text-white/90 sm:text-base">
-                    {slide.subtitle}
-                  </p>
+              <div className="relative flex h-full flex-col justify-center break-keep px-6 py-10 sm:px-10 sm:py-14">
+                <p className="text-xs font-semibold tracking-wider text-white/80 sm:text-sm">
+                  {slide.eyebrow}
+                </p>
 
-                  {slide.featuredProducts &&
-                    slide.featuredProducts.length > 0 && (
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {slide.featuredProducts.map((product) => (
-                          <Link
-                            key={product.href}
-                            href={product.href}
-                            className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm transition hover:bg-white/30"
-                          >
+                <h1 className="mt-2 max-w-md whitespace-pre-line text-3xl font-black leading-tight sm:text-[2.75rem] sm:leading-tight lg:text-5xl lg:leading-tight">
+                  {slide.title}
+                </h1>
+
+                <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/90 sm:text-base lg:text-lg">
+                  {slide.subtitle}
+                </p>
+
+                {/* 상품 썸네일 */}
+                {slide.featuredProducts &&
+                  slide.featuredProducts.length > 0 && (
+                    <div className="mt-5 flex items-center gap-3">
+                      {slide.featuredProducts.map((product) => (
+                        <Link
+                          key={product.href}
+                          href={product.href}
+                          className="group flex flex-col items-center gap-1.5"
+                        >
+                          <div className="h-16 w-16 overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-white/30 transition group-hover:scale-105 sm:h-20 sm:w-20">
+                            <ProductImage
+                              slug={product.slug}
+                              kind={product.imageKind}
+                              label={product.name}
+                              sizes="80px"
+                            />
+                          </div>
+                          <span className="max-w-[5rem] truncate text-[10px] text-white/80 sm:text-xs">
                             {product.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-
-                  {slide.note && (
-                    <p className="mt-6 text-sm text-white/75">{slide.note}</p>
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
                   )}
 
-                  <Link
-                    href={slide.cta.href}
-                    className="mt-7 inline-flex w-fit items-center rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-lp-ink transition hover:bg-white/90"
-                  >
-                    {slide.cta.label}
-                  </Link>
-                </div>
+                {/* 뱃지 */}
+                {slide.badge && (
+                  <div className="absolute bottom-6 right-6 rounded-xl bg-lp-green px-5 py-2.5 text-lg font-black text-white shadow-lg sm:bottom-8 sm:right-8 sm:text-xl">
+                    {slide.badge}
+                  </div>
+                )}
 
-                <div className="relative hidden h-56 w-56 shrink-0 overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/25 sm:block lg:h-64 lg:w-64">
-                  <Image
-                    src={slide.image.src}
-                    alt={slide.image.alt}
-                    fill
-                    sizes="256px"
-                    className="object-cover"
-                  />
-                </div>
+                {slide.note && (
+                  <p className="mt-5 text-sm text-white/75">{slide.note}</p>
+                )}
+
+                <Link
+                  href={slide.cta.href}
+                  className="mt-6 inline-flex w-fit items-center rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-lp-ink shadow-md transition hover:bg-white/90"
+                >
+                  {slide.cta.label}
+                </Link>
               </div>
             </div>
           ))}

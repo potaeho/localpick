@@ -411,6 +411,7 @@ export const products: Product[] = [
     tagline: "전통 옹기에서 발효한 깊고 진한 감칠맛",
     categoryId: "processed",
     imageKind: "jar",
+    cardImage: "/product-cards/sunchang-gochujang.jpg",
     detailImages: [
       "/product-details/sunchang-gochujang/1.png",
       "/product-details/sunchang-gochujang/2.png",
@@ -451,6 +452,7 @@ export const products: Product[] = [
     tagline: "국내산 닭다리살과 특제 양념으로 완성한 정통 닭갈비",
     categoryId: "processed",
     imageKind: "mealkit",
+    cardImage: "/product-cards/chuncheon-dakgalbi-kit.jpg",
     detailImages: [
       "/product-details/chuncheon-dakgalbi-kit/1.png",
       "/product-details/chuncheon-dakgalbi-kit/2.png",
@@ -488,6 +490,7 @@ export const products: Product[] = [
     tagline: "살짝 훈연해 올리브유에 담근 제철 굴",
     categoryId: "processed",
     imageKind: "jar",
+    cardImage: "/product-cards/tongyeong-oyster-oil.jpg",
     detailImages: [
       "/product-details/tongyeong-oyster-oil/1.png",
       "/product-details/tongyeong-oyster-oil/2.png",
@@ -525,6 +528,7 @@ export const products: Product[] = [
     tagline: "한 달 가까이 숙성한 흑마늘을 달인 진액",
     categoryId: "processed",
     imageKind: "garlic",
+    cardImage: "/product-cards/uiseong-black-garlic.jpg",
     detailImages: [
       "/product-details/uiseong-black-garlic/1.png",
       "/product-details/uiseong-black-garlic/2.png",
@@ -563,6 +567,7 @@ export const products: Product[] = [
     tagline: "자연이 빚고 시간이 완성한 건강한 발효 식초",
     categoryId: "processed",
     imageKind: "bottle",
+    cardImage: "/product-cards/gochang-bokbunja-vinegar.jpg",
     detailImages: [
       "/product-details/gochang-bokbunja-vinegar/1.png",
       "/product-details/gochang-bokbunja-vinegar/2.png",
@@ -602,6 +607,7 @@ export const products: Product[] = [
     tagline: "껍질째 담근 노지 감귤청",
     categoryId: "cheong",
     imageKind: "citrus",
+    cardImage: "/product-cards/jeju-citrus-cheong.jpg",
     detailImages: [
       "/product-details/jeju-citrus-cheong/1.png",
       "/product-details/jeju-citrus-cheong/2.png",
@@ -639,6 +645,7 @@ export const products: Product[] = [
     tagline: "설탕물을 먹이지 않고 채밀한 아까시꿀",
     categoryId: "cheong",
     imageKind: "honey",
+    cardImage: "/product-cards/hongcheon-acacia-honey.jpg",
     detailImages: [
       "/product-details/hongcheon-acacia-honey/1.png",
       "/product-details/hongcheon-acacia-honey/2.png",
@@ -676,6 +683,7 @@ export const products: Product[] = [
     tagline: "펙틴 없이 열매만 졸인 잼",
     categoryId: "cheong",
     imageKind: "jar",
+    cardImage: "/product-cards/gochang-bokbunja-jam.jpg",
     detailImages: [
       "/product-details/gochang-bokbunja-jam/1.png",
       "/product-details/gochang-bokbunja-jam/2.png",
@@ -715,6 +723,7 @@ export const products: Product[] = [
     tagline: "국산 팥소를 얇게 감싸 구운 찰보리빵",
     categoryId: "snack",
     imageKind: "bread",
+    cardImage: "/product-cards/gyeongju-barley-bread.jpg",
     detailImages: [
       "/product-details/gyeongju-barley-bread/1.png",
       "/product-details/gyeongju-barley-bread/2.png",
@@ -752,6 +761,7 @@ export const products: Product[] = [
     tagline: "곶감을 한 번 더 조려 만든 정과",
     categoryId: "snack",
     imageKind: "persimmon",
+    cardImage: "/product-cards/sancheong-gotgam-jeonggwa.jpg",
     detailImages: [
       "/product-details/sancheong-gotgam-jeonggwa/1.png",
       "/product-details/sancheong-gotgam-jeonggwa/2.png",
@@ -791,6 +801,7 @@ export const products: Product[] = [
     tagline: "가마솥에 아홉 번 덖은 첫물 녹차",
     categoryId: "tea",
     imageKind: "tea",
+    cardImage: "/product-cards/hadong-woojeon-tea.jpg",
     detailImages: [
       "/product-details/hadong-woojeon-tea/1.png",
       "/product-details/hadong-woojeon-tea/2.png",
@@ -830,6 +841,7 @@ export const products: Product[] = [
     tagline: "우렁이 농법으로 지은 유기농 흑미",
     categoryId: "grain",
     imageKind: "grain",
+    cardImage: "/product-cards/gokseong-black-rice.jpg",
     detailImages: [
       "/product-details/gokseong-black-rice/1.png",
       "/product-details/gokseong-black-rice/2.png",
@@ -869,6 +881,7 @@ export const products: Product[] = [
     tagline: "5월 어린잎만 골라 말린 고랭지 곤드레",
     categoryId: "produce",
     imageKind: "greens",
+    cardImage: "/product-cards/yeongwol-gondre.jpg",
     detailImages: [
       "/product-details/yeongwol-gondre/1.png",
       "/product-details/yeongwol-gondre/2.png",
@@ -906,6 +919,7 @@ export const products: Product[] = [
     tagline: "지리산 바람에 자연 건조한 반건시",
     categoryId: "produce",
     imageKind: "persimmon",
+    cardImage: "/product-cards/sancheong-gotgam.jpg",
     detailImages: [
       "/product-details/sancheong-gotgam/1.png",
       "/product-details/sancheong-gotgam/2.png",
@@ -945,6 +959,7 @@ export const products: Product[] = [
     tagline: "조류 빠른 자리에서 천천히 키운 다시마",
     categoryId: "seafood",
     imageKind: "kelp",
+    cardImage: "/product-cards/wando-dasima.jpg",
     detailImages: [
       "/product-details/wando-dasima/1.png",
       "/product-details/wando-dasima/2.png",
@@ -982,6 +997,7 @@ export const products: Product[] = [
     tagline: "해녀가 갯바위에서 직접 채취한 자연산",
     categoryId: "seafood",
     imageKind: "kelp",
+    cardImage: "/product-cards/yeongdeok-dolmiyeok.jpg",
     detailImages: [
       "/product-details/yeongdeok-dolmiyeok/1.png",
       "/product-details/yeongdeok-dolmiyeok/2.png",

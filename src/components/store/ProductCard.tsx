@@ -30,7 +30,7 @@ export function ProductCard({
           slug={product.slug}
           kind={product.imageKind}
           label={product.name}
-          imageSrc={product.detailImages?.[0]}
+          imageSrc={product.cardImage ?? product.detailImages?.[0]}
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
           loading={eagerImage ? "eager" : undefined}
           className="aspect-square w-full transition-transform duration-300 group-hover:scale-105"
