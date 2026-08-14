@@ -989,7 +989,7 @@ export const products: Product[] = [
     notes:
       "표면의 흰 가루는 다시마의 만니톨 성분으로, 곰팡이가 아닙니다. 물에 씻지 말고 마른 행주로 닦아 사용해 주세요.",
     refundPolicy: COMMON_REFUND,
-    badges: [],
+    badges: ["완도산 100%"],
   },
   {
     slug: "yeongdeok-dolmiyeok",
