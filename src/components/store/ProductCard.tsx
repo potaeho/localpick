@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Product } from "@/lib/types";
-import { getCreator, getRegion } from "@/lib/products";
+import { getRegion } from "@/lib/products";
 import { ProductImage } from "./ProductImage";
 import { PriceDisplay } from "./PriceDisplay";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,7 +10,8 @@ import { Badge } from "@/components/ui/badge";
  * 상품 카드.
  *
  * 후기 수·재구매 수·판매량은 표시하지 않는다. 실제로 판매한 적이 없어
- * 어떤 숫자를 적어도 조작이 되기 때문이다(기획서 9장).
+ * 어떤 숫자를 적어도 조작이 되기 때문이다(기획서 9장). 생산자 이름은 카드
+ * 단계에서는 굳이 필요하지 않은 정보라 상세 페이지에서만 보여준다.
  */
 export function ProductCard({
   product,
@@ -20,7 +21,6 @@ export function ProductCard({
   eagerImage?: boolean;
 }) {
   const region = getRegion(product.regionId);
-  const creator = getCreator(product.creatorId);
 
   return (
     <Link
@@ -45,21 +45,20 @@ export function ProductCard({
           )}
         </div>
 
-        <CardContent className="px-0 pt-2.5">
-          <h3 className="line-clamp-2 text-sm leading-snug text-lp-gray-900 group-hover:text-lp-green">
+        <CardContent className="px-0 pt-lp-md">
+          <h3 className="line-clamp-2 text-sm font-medium leading-snug text-lp-gray-900 group-hover:text-lp-green">
             {product.name}
           </h3>
-          <p className="mt-1 line-clamp-1 text-xs text-lp-gray-500">
+          <p className="mt-lp-sm line-clamp-1 text-xs leading-relaxed text-lp-gray-500">
             {product.tagline}
           </p>
-          {creator && (
-            <p className="mt-1 text-xs text-lp-gray-700">{creator.name}</p>
-          )}
-          <div className="mt-lp-xs">
+
+          <div className="mt-lp-lg">
             <PriceDisplay product={product} />
           </div>
+
           {product.badges.length > 0 && (
-            <ul className="mt-lp-xs flex flex-wrap gap-1">
+            <ul className="mt-lp-md flex flex-wrap gap-1">
               {product.badges.map((badge) => (
                 <li key={badge}>
                   <Badge
