@@ -3,6 +3,8 @@ import type { Product } from "@/lib/types";
 import { getCreator, getRegion } from "@/lib/products";
 import { ProductImage } from "./ProductImage";
 import { PriceDisplay } from "./PriceDisplay";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 /**
  * 상품 카드.
@@ -25,49 +27,53 @@ export function ProductCard({
       href={`/products/${product.slug}`}
       className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
     >
-      <div className="relative overflow-hidden rounded-lp-card bg-lp-gray-100">
-        <ProductImage
-          slug={product.slug}
-          kind={product.imageKind}
-          label={product.name}
-          imageSrc={product.cardImage ?? product.detailImages?.[0]}
-          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-          loading={eagerImage ? "eager" : undefined}
-          className="aspect-square w-full transition-transform duration-300 group-hover:scale-105"
-        />
-        {region && (
-          <span className="absolute left-2 top-2 rounded-lp-circle bg-white/95 px-2 py-0.5 text-xs font-medium text-lp-green">
-            {region.name}
-          </span>
-        )}
-      </div>
-
-      <div className="mt-2.5">
-        <h3 className="line-clamp-2 text-sm leading-snug text-lp-gray-900 group-hover:text-lp-green">
-          {product.name}
-        </h3>
-        <p className="mt-1 line-clamp-1 text-xs text-lp-gray-500">
-          {product.tagline}
-        </p>
-        {creator && (
-          <p className="mt-1 text-xs text-lp-gray-700">{creator.name}</p>
-        )}
-        <div className="mt-lp-xs">
-          <PriceDisplay product={product} />
+      <Card size="sm" className="rounded-lp-card p-0 shadow-none">
+        <div className="relative overflow-hidden rounded-lp-card bg-lp-gray-100">
+          <ProductImage
+            slug={product.slug}
+            kind={product.imageKind}
+            label={product.name}
+            imageSrc={product.cardImage ?? product.detailImages?.[0]}
+            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+            loading={eagerImage ? "eager" : undefined}
+            className="aspect-square w-full transition-transform duration-300 group-hover:scale-105"
+          />
+          {region && (
+            <Badge className="absolute left-2 top-2 bg-white/95 text-lp-green hover:bg-white/95">
+              {region.name}
+            </Badge>
+          )}
         </div>
-        {product.badges.length > 0 && (
-          <ul className="mt-lp-xs flex flex-wrap gap-1">
-            {product.badges.map((badge) => (
-              <li
-                key={badge}
-                className="rounded border border-lp-green-light bg-lp-green-light px-1.5 py-0.5 text-[11px] text-lp-green"
-              >
-                {badge}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+
+        <CardContent className="px-0 pt-2.5">
+          <h3 className="line-clamp-2 text-sm leading-snug text-lp-gray-900 group-hover:text-lp-green">
+            {product.name}
+          </h3>
+          <p className="mt-1 line-clamp-1 text-xs text-lp-gray-500">
+            {product.tagline}
+          </p>
+          {creator && (
+            <p className="mt-1 text-xs text-lp-gray-700">{creator.name}</p>
+          )}
+          <div className="mt-lp-xs">
+            <PriceDisplay product={product} />
+          </div>
+          {product.badges.length > 0 && (
+            <ul className="mt-lp-xs flex flex-wrap gap-1">
+              {product.badges.map((badge) => (
+                <li key={badge}>
+                  <Badge
+                    variant="outline"
+                    className="border-lp-green-light bg-lp-green-light text-[11px] text-lp-green"
+                  >
+                    {badge}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
     </Link>
   );
 }

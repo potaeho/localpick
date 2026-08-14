@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Modal } from "./Modal";
 import { ConsentForm } from "./ConsentForm";
+import { Button } from "@/components/ui/button";
 import { questionsForTrigger, type Question } from "@/lib/survey-questions";
 import { getDevice, getUtm, trackOnce } from "@/lib/events";
 import type { SurveyAnswers, SurveyTrigger } from "@/lib/types";
@@ -267,25 +268,26 @@ export function SurveyModal({
 
           <div className="sticky bottom-0 flex gap-lp-sm border-t border-lp-gray-100 bg-white px-6 py-4">
             {currentStep > 0 && (
-              <button
+              <Button
                 type="button"
+                variant="outline"
                 onClick={() => setStep((s) => s - 1)}
-                className="h-12 rounded-lp-control border border-lp-gray-300 px-5 font-medium text-lp-gray-700 hover:bg-lp-gray-100"
+                className="h-12 rounded-lp-control border-lp-gray-300 px-5 font-medium text-lp-gray-700"
               >
                 이전
-              </button>
+              </Button>
             )}
-            <button
+            <Button
               type="button"
               disabled={!canAdvance || submitting}
               onClick={() => {
                 if (isLastStep) void submit();
                 else setStep((s) => Math.min(s + 1, steps.length - 1));
               }}
-              className="h-12 flex-1 rounded-lp-control bg-lp-green text-lp-button text-white hover:bg-lp-green-dark disabled:cursor-not-allowed disabled:bg-lp-gray-300"
+              className="h-12 flex-1 rounded-lp-control text-lp-button disabled:bg-lp-gray-300"
             >
               {submitting ? "저장하는 중…" : isLastStep ? "제출하기" : "다음"}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -309,13 +311,13 @@ export function SurveyModal({
             남겨주신 이야기는 로컬 상품을 어떻게 소개하면 좋을지 정하는 데
             쓰겠습니다.
           </p>
-          <button
+          <Button
             type="button"
             onClick={onClose}
-            className="mt-7 h-12 w-full rounded-lp-control bg-lp-green text-lp-button text-white hover:bg-lp-green-dark"
+            className="mt-7 h-12 w-full rounded-lp-control text-lp-button"
           >
             닫기
-          </button>
+          </Button>
         </div>
       )}
     </Modal>

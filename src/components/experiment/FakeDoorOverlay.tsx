@@ -1,6 +1,7 @@
 "use client";
 
 import { Modal } from "./Modal";
+import { Button } from "@/components/ui/button";
 
 /**
  * 페이크도어 공개 안내.
@@ -40,21 +41,22 @@ export function FakeDoorOverlay({
 
         <div className="mt-7 flex flex-col gap-lp-sm sm:flex-row-reverse">
           {onSurvey ? (
-            <button
+            <Button
               type="button"
               onClick={onSurvey}
-              className="h-12 flex-1 rounded-lp-control bg-lp-green text-lp-button text-white hover:bg-lp-green-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
+              className="h-12 flex-1 rounded-lp-control text-lp-button"
             >
               설문 참여하기 (2분)
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={onClose}
-              className="h-12 flex-1 rounded-lp-control border border-lp-gray-300 text-base font-medium text-lp-gray-700 hover:bg-lp-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
+              className="h-12 flex-1 rounded-lp-control border-lp-gray-300 text-base font-medium text-lp-gray-700"
             >
               확인
-            </button>
+            </Button>
           )}
         </div>
       </div>

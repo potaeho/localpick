@@ -1,5 +1,14 @@
 import type { MaskedInterview } from "@/lib/types";
 import { MaskedContact } from "./MaskedContact";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 function PurposeBadge({ purposes }: { purposes: MaskedInterview["purposes"] }) {
   const label = purposes.includes("interview")
@@ -8,12 +17,56 @@ function PurposeBadge({ purposes }: { purposes: MaskedInterview["purposes"] }) {
       : "인터뷰"
     : "추첨만";
   return (
-    <span className="rounded border border-lp-green-light bg-lp-green-light px-1.5 py-0.5 text-[11px] text-lp-green">
+    <Badge
+      variant="outline"
+      className="border-lp-green-light bg-lp-green-light text-[11px] text-lp-green"
+    >
       {label}
-    </span>
+    </Badge>
   );
 }
 
 export function InterviewList({ interviews }: { interviews: MaskedInterview[] }) {
-  return <div className="overflow-x-auto rounded-lp-card border border-lp-gray-200"><table className="w-full min-w-150 text-left text-sm"><thead className="bg-lp-cream text-lp-gray-700"><tr><th className="p-lp-md">동의 시각</th><th className="p-lp-md">목적</th><th className="p-lp-md">이름</th><th className="p-lp-md">연락처</th><th className="p-lp-md">상품</th><th className="p-lp-md">캠페인</th></tr></thead><tbody>{interviews.map((interview) => <tr key={interview.id} className="border-t border-lp-gray-100"><td className="p-lp-md">{new Date(interview.ts).toLocaleString("ko-KR")}</td><td className="p-lp-md"><PurposeBadge purposes={interview.purposes} /></td><td className="p-lp-md">{interview.name}</td><td className="p-lp-md"><MaskedContact interviewId={interview.id} maskedContact={interview.maskedContact} /></td><td className="p-lp-md">{interview.productSlug ?? "—"}</td><td className="p-lp-md">{interview.utmCampaign ?? "—"}</td></tr>)}</tbody></table>{!interviews.length && <p className="p-6 text-center text-sm text-lp-gray-500">동의한 연락처가 없습니다.</p>}</div>;
+  return (
+    <div className="min-w-150 overflow-hidden rounded-lp-card border border-lp-gray-200">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-lp-cream text-lp-gray-700 hover:bg-lp-cream">
+            <TableHead>동의 시각</TableHead>
+            <TableHead>목적</TableHead>
+            <TableHead>이름</TableHead>
+            <TableHead>연락처</TableHead>
+            <TableHead>상품</TableHead>
+            <TableHead>캠페인</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {interviews.map((interview) => (
+            <TableRow key={interview.id} className="border-lp-gray-100">
+              <TableCell>
+                {new Date(interview.ts).toLocaleString("ko-KR")}
+              </TableCell>
+              <TableCell>
+                <PurposeBadge purposes={interview.purposes} />
+              </TableCell>
+              <TableCell>{interview.name}</TableCell>
+              <TableCell>
+                <MaskedContact
+                  interviewId={interview.id}
+                  maskedContact={interview.maskedContact}
+                />
+              </TableCell>
+              <TableCell>{interview.productSlug ?? "—"}</TableCell>
+              <TableCell>{interview.utmCampaign ?? "—"}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      {!interviews.length && (
+        <p className="p-6 text-center text-sm text-lp-gray-500">
+          동의한 연락처가 없습니다.
+        </p>
+      )}
+    </div>
+  );
 }

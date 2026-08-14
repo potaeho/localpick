@@ -1,4 +1,5 @@
 import type { Region } from "@/lib/types";
+import { Card, CardContent } from "@/components/ui/card";
 
 /**
  * 상품 상세의 생산지역 카드.
@@ -15,17 +16,19 @@ export function RegionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-lp-card border border-lp-gray-300 bg-white p-lp-xl">
-      <h2 className="text-xs font-medium text-lp-gray-500">만든 곳</h2>
+    <Card className="rounded-lp-card border-lp-gray-300 shadow-none [--card-spacing:--spacing(5)]">
+      <CardContent>
+        <h2 className="text-xs font-medium text-lp-gray-500">만든 곳</h2>
 
-      <p className="mt-lp-md text-lp-card-title text-lp-ink">
-        {region.province} {region.name}
-      </p>
-      <p className="mt-lp-sm line-clamp-3 text-sm leading-relaxed text-lp-gray-700">
-        {region.description}
-      </p>
+        <p className="mt-lp-md text-lp-card-title text-lp-ink">
+          {region.province} {region.name}
+        </p>
+        <p className="mt-lp-sm line-clamp-3 text-sm leading-relaxed text-lp-gray-700">
+          {region.description}
+        </p>
 
-      <div className="mt-lp-lg">{children}</div>
-    </section>
+        <div className="mt-lp-lg">{children}</div>
+      </CardContent>
+    </Card>
   );
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { categories, getProductsByCategory } from "@/lib/products";
+import { Badge } from "@/components/ui/badge";
 
 /**
  * 카테고리 칩 — 스토어를 훑는 1차 축.
@@ -15,40 +16,35 @@ export function CategoryChips({ activeId }: { activeId?: string }) {
       <div className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0">
         <ul className="flex w-max gap-lp-sm pb-lp-xs">
           <li>
-            <Link
-              href="/"
-              aria-current={activeId ? undefined : "page"}
-              className={`inline-flex min-h-11 items-center rounded-lp-circle border px-lp-lg text-lp-label transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2 ${
-                activeId
-                  ? "border-lp-gray-300 bg-white text-lp-gray-700 hover:border-lp-green hover:text-lp-green"
-                  : "border-lp-green bg-lp-green text-white"
-              }`}
+            <Badge
+              asChild
+              variant={activeId ? "outline" : "default"}
+              className="min-h-11 rounded-lp-circle px-lp-lg text-lp-label focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
             >
-              전체
-            </Link>
+              <Link href="/" aria-current={activeId ? undefined : "page"}>
+                전체
+              </Link>
+            </Badge>
           </li>
           {categories.map((category) => {
             const active = category.id === activeId;
             return (
               <li key={category.id}>
-                <Link
-                  href={`/categories/${category.id}`}
-                  aria-current={active ? "page" : undefined}
-                  className={`inline-flex min-h-11 items-center gap-lp-xs rounded-lp-circle border px-lp-lg text-lp-label transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2 ${
-                    active
-                      ? "border-lp-green bg-lp-green text-white"
-                      : "border-lp-gray-300 bg-white text-lp-gray-700 hover:border-lp-green hover:text-lp-green"
-                  }`}
+                <Badge
+                  asChild
+                  variant={active ? "default" : "outline"}
+                  className="min-h-11 gap-lp-xs rounded-lp-circle px-lp-lg text-lp-label focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
                 >
-                  {category.name}
-                  <span
-                    className={
-                      active ? "text-white/70" : "text-lp-gray-500"
-                    }
+                  <Link
+                    href={`/categories/${category.id}`}
+                    aria-current={active ? "page" : undefined}
                   >
-                    {getProductsByCategory(category.id).length}
-                  </span>
-                </Link>
+                    {category.name}
+                    <span className={active ? "text-white/70" : "text-lp-gray-500"}>
+                      {getProductsByCategory(category.id).length}
+                    </span>
+                  </Link>
+                </Badge>
               </li>
             );
           })}

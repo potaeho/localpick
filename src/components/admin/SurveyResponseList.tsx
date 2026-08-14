@@ -2,6 +2,15 @@
 
 import { useMemo, useState } from "react";
 import type { SurveyQuestionSummary, SurveyResponse } from "@/lib/types";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 /**
  * 설문 응답 — 문항별 집계와 주관식 원문.
@@ -51,37 +60,39 @@ export function SurveyResponseList({
         {summaries.map((summary) => {
           const total = summary.answers.reduce((sum, a) => sum + a.count, 0);
           return (
-            <div
+            <Card
               key={summary.question}
-              className="rounded-lp-card border border-lp-gray-300 bg-white p-4"
+              className="rounded-lp-card border-lp-gray-300 shadow-none [--card-spacing:--spacing(4)]"
             >
-              <h3 className="text-sm font-bold text-lp-ink">
-                {summary.question}
-              </h3>
-              <ul className="mt-3 space-y-2">
-                {summary.answers.length === 0 && (
-                  <li className="text-xs text-lp-gray-500">응답 없음</li>
-                )}
-                {summary.answers.map((answer) => (
-                  <li key={answer.value}>
-                    <div className="flex items-baseline justify-between gap-2 text-xs">
-                      <span className="text-lp-gray-900">{answer.value}</span>
-                      <span className="shrink-0 tabular-nums text-lp-gray-500">
-                        {answer.count}
-                      </span>
-                    </div>
-                    <div className="mt-1 h-1.5 overflow-hidden rounded-lp-circle bg-lp-gray-100">
-                      <div
-                        className="h-full rounded-lp-circle bg-lp-green"
-                        style={{
-                          width: `${total ? (answer.count / total) * 100 : 0}%`,
-                        }}
-                      />
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              <CardContent>
+                <h3 className="text-sm font-bold text-lp-ink">
+                  {summary.question}
+                </h3>
+                <ul className="mt-3 space-y-2">
+                  {summary.answers.length === 0 && (
+                    <li className="text-xs text-lp-gray-500">응답 없음</li>
+                  )}
+                  {summary.answers.map((answer) => (
+                    <li key={answer.value}>
+                      <div className="flex items-baseline justify-between gap-2 text-xs">
+                        <span className="text-lp-gray-900">{answer.value}</span>
+                        <span className="shrink-0 tabular-nums text-lp-gray-500">
+                          {answer.count}
+                        </span>
+                      </div>
+                      <div className="mt-1 h-1.5 overflow-hidden rounded-lp-circle bg-lp-gray-100">
+                        <div
+                          className="h-full rounded-lp-circle bg-lp-green"
+                          style={{
+                            width: `${total ? (answer.count / total) * 100 : 0}%`,
+                          }}
+                        />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
           );
         })}
       </div>
@@ -95,63 +106,72 @@ export function SurveyResponseList({
           >
             상품 필터
           </label>
-          <select
-            id="survey-product-filter"
-            value={productFilter}
-            onChange={(event) => setProductFilter(event.target.value)}
-            className="h-10 rounded-lp-control border border-lp-gray-300 bg-white px-lp-md text-sm"
-          >
-            <option value="all">전체 ({responses.length}건)</option>
-            {slugsInData.map((slug) => (
-              <option key={slug} value={slug}>
-                {productNames[slug] ?? slug}
-              </option>
-            ))}
-          </select>
+          <Select value={productFilter} onValueChange={setProductFilter}>
+            <SelectTrigger
+              id="survey-product-filter"
+              className="h-10 rounded-lp-control border-lp-gray-300 bg-white px-lp-md text-sm"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">전체 ({responses.length}건)</SelectItem>
+              {slugsInData.map((slug) => (
+                <SelectItem key={slug} value={slug}>
+                  {productNames[slug] ?? slug}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <span className="text-sm text-lp-gray-500">{filtered.length}건</span>
         </div>
 
         <ul className="mt-4 space-y-3">
           {filtered.map((response) => (
-            <li
-              key={response.id}
-              className="rounded-lp-card border border-lp-gray-300 bg-white p-4"
-            >
-              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs text-lp-gray-500">
-                <span>{new Date(response.ts).toLocaleString("ko-KR")}</span>
-                <span>
-                  {response.productSlug
-                    ? (productNames[response.productSlug] ??
-                      response.productSlug)
-                    : "상품 없음"}
-                </span>
-                <span className="rounded bg-lp-gray-100 px-1.5 py-0.5">
-                  {response.trigger === "buy_click"
-                    ? "구매 클릭"
-                    : "탐색 3개 후"}
-                </span>
-                <span>{response.device === "mobile" ? "모바일" : "데스크탑"}</span>
-                {response.utmCampaign && <span>{response.utmCampaign}</span>}
-              </div>
+            <li key={response.id}>
+              <Card className="rounded-lp-card border-lp-gray-300 shadow-none [--card-spacing:--spacing(4)]">
+                <CardContent>
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs text-lp-gray-500">
+                    <span>{new Date(response.ts).toLocaleString("ko-KR")}</span>
+                    <span>
+                      {response.productSlug
+                        ? (productNames[response.productSlug] ??
+                          response.productSlug)
+                        : "상품 없음"}
+                    </span>
+                    <Badge variant="secondary" className="text-lp-gray-700">
+                      {response.trigger === "buy_click"
+                        ? "구매 클릭"
+                        : "탐색 3개 후"}
+                    </Badge>
+                    <span>
+                      {response.device === "mobile" ? "모바일" : "데스크탑"}
+                    </span>
+                    {response.utmCampaign && <span>{response.utmCampaign}</span>}
+                  </div>
 
-              <dl className="mt-3 space-y-2 text-sm">
-                <Row label="누른 이유">
-                  {response.buyReason}
-                  {response.buyReasonDetail && ` — ${response.buyReasonDetail}`}
-                </Row>
-                {response.useContext && (
-                  <Row label="쓰려던 상황">{response.useContext}</Row>
-                )}
-                <Row label="구매 경험">{response.purchaseExperience}</Row>
-                <Row label="이용 채널">{response.channels.join(", ") || "-"}</Row>
-                <Row label="판단 기준">
-                  {response.trustFactors.join(", ") || "-"}
-                </Row>
-                <Row label="지역·생산자">{response.regionInterest}</Row>
-                <Row label="인터뷰 의사">
-                  {response.interviewWilling ? "있음" : "없음"}
-                </Row>
-              </dl>
+                  <dl className="mt-3 space-y-2 text-sm">
+                    <Row label="누른 이유">
+                      {response.buyReason}
+                      {response.buyReasonDetail &&
+                        ` — ${response.buyReasonDetail}`}
+                    </Row>
+                    {response.useContext && (
+                      <Row label="쓰려던 상황">{response.useContext}</Row>
+                    )}
+                    <Row label="구매 경험">{response.purchaseExperience}</Row>
+                    <Row label="이용 채널">
+                      {response.channels.join(", ") || "-"}
+                    </Row>
+                    <Row label="판단 기준">
+                      {response.trustFactors.join(", ") || "-"}
+                    </Row>
+                    <Row label="지역·생산자">{response.regionInterest}</Row>
+                    <Row label="인터뷰 의사">
+                      {response.interviewWilling ? "있음" : "없음"}
+                    </Row>
+                  </dl>
+                </CardContent>
+              </Card>
             </li>
           ))}
         </ul>

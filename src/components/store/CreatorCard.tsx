@@ -1,4 +1,5 @@
 import type { Creator, Region } from "@/lib/types";
+import { Card, CardContent } from "@/components/ui/card";
 
 /**
  * 상품 상세의 생산자 카드.
@@ -23,34 +24,36 @@ export function CreatorCard({
     .join(" · ");
 
   return (
-    <section className="rounded-lp-card border border-lp-gray-300 bg-white p-lp-xl">
-      <h2 className="text-xs font-medium text-lp-gray-500">
-        {isBrand ? "만든 곳" : "만든 사람"}
-      </h2>
+    <Card className="rounded-lp-card border-lp-gray-300 shadow-none [--card-spacing:--spacing(5)]">
+      <CardContent>
+        <h2 className="text-xs font-medium text-lp-gray-500">
+          {isBrand ? "만든 곳" : "만든 사람"}
+        </h2>
 
-      <div className="mt-lp-md flex items-start gap-lp-lg">
-        <span
-          aria-hidden="true"
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lp-circle bg-lp-green-light text-lg font-bold text-lp-green"
-        >
-          {creator.name.slice(0, 1)}
-        </span>
-        <div className="min-w-0">
-          <p className="text-lp-body font-bold text-lp-ink">
-            {creator.name}
-            <span className="ml-lp-sm text-sm font-normal text-lp-gray-700">
-              {creator.title}
-            </span>
-          </p>
-          {meta && <p className="mt-0.5 text-sm text-lp-gray-500">{meta}</p>}
+        <div className="mt-lp-md flex items-start gap-lp-lg">
+          <span
+            aria-hidden="true"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lp-circle bg-lp-green-light text-lg font-bold text-lp-green"
+          >
+            {creator.name.slice(0, 1)}
+          </span>
+          <div className="min-w-0">
+            <p className="text-lp-body font-bold text-lp-ink">
+              {creator.name}
+              <span className="ml-lp-sm text-sm font-normal text-lp-gray-700">
+                {creator.title}
+              </span>
+            </p>
+            {meta && <p className="mt-0.5 text-sm text-lp-gray-500">{meta}</p>}
+          </div>
         </div>
-      </div>
 
-      <p className="mt-lp-lg line-clamp-3 text-sm leading-relaxed text-lp-gray-700">
-        {creator.story}
-      </p>
+        <p className="mt-lp-lg line-clamp-3 text-sm leading-relaxed text-lp-gray-700">
+          {creator.story}
+        </p>
 
-      <div className="mt-lp-lg">{children}</div>
-    </section>
+        <div className="mt-lp-lg">{children}</div>
+      </CardContent>
+    </Card>
   );
 }

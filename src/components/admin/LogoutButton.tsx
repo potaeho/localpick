@@ -3,13 +3,16 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
+
 export function LogoutButton() {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
 
   return (
-    <button
+    <Button
       type="button"
+      variant="outline"
       disabled={busy}
       onClick={async () => {
         setBusy(true);
@@ -17,9 +20,9 @@ export function LogoutButton() {
         router.replace("/admin/login");
         router.refresh();
       }}
-      className="inline-flex h-9 items-center rounded-lp-control border border-lp-gray-300 px-lp-md text-sm text-lp-gray-700 hover:bg-lp-gray-100 disabled:opacity-50"
+      className="h-9 rounded-lp-control"
     >
       로그아웃
-    </button>
+    </Button>
   );
 }

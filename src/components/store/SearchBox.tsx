@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getRegion, products, searchProducts } from "@/lib/products";
 import { ProductImage } from "./ProductImage";
+import { Input } from "@/components/ui/input";
 
 const MAX_SUGGESTIONS = 6;
 
@@ -103,7 +104,7 @@ export function SearchBox() {
           <label htmlFor="store-search" className="sr-only">
             상품 검색
           </label>
-          <input
+          <Input
             id="store-search"
             type="search"
             name="q"
@@ -121,7 +122,7 @@ export function SearchBox() {
             aria-expanded={showDropdown}
             aria-controls="store-search-suggestions"
             aria-autocomplete="list"
-            className="h-10 w-full rounded-full border border-lp-gray-300 bg-lp-gray-100 pl-4 pr-11 text-sm placeholder:text-lp-gray-500 focus:border-lp-green focus:bg-white focus:outline-none focus:ring-1 focus:ring-lp-green"
+            className="h-10 rounded-full bg-lp-gray-100 pl-4 pr-11 focus-visible:border-lp-green focus-visible:bg-white focus-visible:ring-lp-green"
           />
           <button
             type="submit"
