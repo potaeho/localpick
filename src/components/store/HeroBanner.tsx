@@ -83,7 +83,7 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
 
   return (
     <section
-      className="relative isolate overflow-hidden rounded-xl"
+      className="relative isolate overflow-hidden rounded-[20px]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
@@ -222,7 +222,7 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
 
       {/* ── 모바일 인디케이터 ── */}
       {slides.length > 1 && (
-        <div className="flex items-center justify-center gap-2 rounded-b-xl border-t border-lp-gray-200 bg-lp-cream py-3 lg:hidden">
+        <div className="flex items-center justify-center gap-2 rounded-b-[20px] border-t border-lp-gray-200 bg-lp-cream py-3 lg:hidden">
           {slides.map((slide, i) => (
             <button
               key={slide.id}

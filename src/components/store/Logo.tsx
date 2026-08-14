@@ -25,11 +25,13 @@ export function LogoMark({ className = "h-8 w-6" }: { className?: string }) {
 export function Logo({ className = "" }: { className?: string }) {
   return (
     <span
-      className={`flex items-center gap-2 ${className}`}
+      className={`flex items-center gap-1.5 sm:gap-2 ${className}`}
       style={{ color: "#1b5e3f" }}
     >
-      <LogoMark className="h-9 w-7 shrink-0" />
-      <span className="text-xl font-bold tracking-tight">LOCAL PICK</span>
+      <LogoMark className="h-7 w-6 shrink-0 sm:h-9 sm:w-7" />
+      <span className="whitespace-nowrap text-base font-bold tracking-tight sm:text-xl">
+        LOCAL PICK
+      </span>
     </span>
   );
 }
