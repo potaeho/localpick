@@ -21,13 +21,13 @@ export function PriceDisplay({
       <div className="flex items-baseline gap-lp-xs">
         {rate > 0 && (
           <span
-            className={`font-bold text-lp-orange ${detail ? "text-2xl" : "text-sm"}`}
+            className={`font-bold text-red-600 ${detail ? "text-2xl" : "text-sm"}`}
           >
             {rate}%
           </span>
         )}
         <span
-          className={`font-bold text-lp-ink ${detail ? "text-2xl" : "text-sm"}`}
+          className={`font-bold ${rate > 0 ? "text-red-600" : "text-lp-ink"} ${detail ? "text-2xl" : "text-sm"}`}
         >
           {formatPrice(product.priceSale)}
           <span className={detail ? "text-xl" : "text-sm"}>원</span>
