@@ -1,7 +1,9 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { FilterNav } from "@/components/store/FilterNav";
+import { HeroBanner } from "@/components/store/HeroBanner";
 import { ProductCard } from "@/components/store/ProductCard";
+import { HERO_SLIDES } from "@/lib/hero-slides";
 import { getProductsByRegion, regions } from "@/lib/products";
 
 export const metadata: Metadata = {
@@ -12,6 +14,8 @@ export const metadata: Metadata = {
 export default function RegionsIndexPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 lg:px-6 lg:py-8">
+      <HeroBanner slides={HERO_SLIDES} />
+
       <FilterNav />
 
       {regions.map((region) => {
