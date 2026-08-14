@@ -136,7 +136,7 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
                     {slide.title}
                   </h1>
 
-                  <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/90 sm:text-base lg:text-lg">
+                  <p className="mt-3 line-clamp-2 min-h-[2lh] max-w-sm text-sm leading-relaxed text-white/90 sm:text-base lg:text-lg">
                     {slide.subtitle}
                   </p>
 
