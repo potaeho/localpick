@@ -27,7 +27,7 @@ export function FilterNav() {
   const isHome = pathname === "/";
 
   return (
-    <nav aria-label="필터" className="mt-lp-section space-y-lp-md">
+    <nav aria-label="필터" className="mt-lp-lg space-y-lp-md">
       {/* 1차: 상품별 / 지역별 토글 */}
       <div className="flex items-center gap-lp-xs">
         <Badge

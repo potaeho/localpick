@@ -41,7 +41,7 @@ export function AbandonedSurveyList({
                       : "상품 없음"}
                   </span>
                   <Badge variant="secondary" className="text-lp-gray-700">
-                    {row.trigger === "buy_click" ? "구매 클릭" : "탐색 3개 후"}
+                    {row.trigger === "buy_click" ? "구매 클릭" : "탐색 2개 후"}
                   </Badge>
                   <span>{row.device === "mobile" ? "모바일" : "데스크탑"}</span>
                   {row.utmCampaign && <span>{row.utmCampaign}</span>}

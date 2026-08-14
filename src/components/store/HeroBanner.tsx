@@ -91,7 +91,10 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
     >
       <div className="flex">
         {/* ── 메인 배너 영역 ── */}
-        <div className="relative min-h-[220px] flex-1 touch-none overflow-hidden text-white sm:min-h-[340px] lg:min-h-[420px]">
+        {/* 아래 인디케이터 바는 배경색이 페이지와 같아 보이지 않으므로, 사진
+            영역 자체의 아래 모서리도 위와 같은 곡률로 깎아준다. 데스크탑은
+            인디케이터가 없고 섹션 자체가 잘라내므로 필요 없다. */}
+        <div className="relative min-h-[220px] flex-1 touch-none overflow-hidden rounded-b-[20px] text-white sm:min-h-[340px] lg:min-h-[420px] lg:rounded-b-none">
           <div
             ref={trackRef}
             className="absolute inset-0 flex"

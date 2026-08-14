@@ -19,7 +19,7 @@ const BUY_CLICKED_KEY = "lp_buy_clicked";
 const SURVEY_SHOWN_KEY = "lp_survey_shown";
 
 /** 설문 보조 트리거가 발동하는 서로 다른 상품 조회 수 */
-const BROWSE_THRESHOLD = 3;
+const BROWSE_THRESHOLD = 2;
 
 function readJson<T>(key: string, fallback: T): T {
   try {
