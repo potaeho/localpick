@@ -68,7 +68,7 @@ export function Footer() {
         </div>
 
         <p className="mt-lp-section border-t border-lp-gray-300 pt-lp-lg text-xs text-lp-gray-500">
-          © {new Date().getFullYear()} 태두리 · LOCAL PICK
+          © {new Date().getFullYear()} LOCAL PICK
         </p>
       </div>
     </footer>
