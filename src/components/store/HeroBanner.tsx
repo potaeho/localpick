@@ -61,10 +61,8 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
             <div
               key={slide.id}
               aria-hidden={i !== index}
-              className={`absolute inset-0 transition-opacity duration-700 ease-out ${
-                i === index
-                  ? "opacity-100"
-                  : "pointer-events-none opacity-0"
+              className={`absolute inset-0 ${
+                i === index ? "" : "invisible pointer-events-none"
               }`}
             >
               {/* 배경 실사 이미지 */}

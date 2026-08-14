@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 const TABS = [
   { href: "/", label: "홈" },
   { href: "/categories", label: "카테고리" },
   { href: "/regions", label: "지역" },
-  { href: "/creators", label: "생산자" },
 ] as const;
 
 /**
@@ -34,15 +34,17 @@ export function MobileTabBar() {
               : pathname.startsWith(tab.href);
           return (
             <li key={tab.href} className="flex-1">
-              <Link
-                href={tab.href}
-                aria-current={active ? "page" : undefined}
-                className={`flex h-14 items-center justify-center text-sm font-medium ${
+              <Button
+                asChild
+                variant="ghost"
+                className={`h-14 w-full rounded-none text-sm font-medium hover:bg-transparent ${
                   active ? "text-lp-green" : "text-lp-gray-500"
                 }`}
               >
-                {tab.label}
-              </Link>
+                <Link href={tab.href} aria-current={active ? "page" : undefined}>
+                  {tab.label}
+                </Link>
+              </Button>
             </li>
           );
         })}
