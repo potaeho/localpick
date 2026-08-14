@@ -13,6 +13,19 @@ export const metadata: Metadata = {
   title: "LOCAL PICK",
   description:
     "생산자와 생산지를 확인할 수 있는 로컬 특산물 스토어. 전국 각지의 로컬 크리에이터가 만든 상품을 만나보세요.",
+  openGraph: {
+    title: "LOCAL PICK",
+    description:
+      "생산자와 생산지를 확인할 수 있는 로컬 특산물 스토어. 전국 각지의 로컬 크리에이터가 만든 상품을 만나보세요.",
+    images: [{ url: "/og-image.png", width: 1254, height: 1254 }],
+  },
+  twitter: {
+    card: "summary",
+    title: "LOCAL PICK",
+    description:
+      "생산자와 생산지를 확인할 수 있는 로컬 특산물 스토어. 전국 각지의 로컬 크리에이터가 만든 상품을 만나보세요.",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
