@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Product } from "@/lib/types";
-import { getRegion } from "@/lib/products";
+import { formatPrice, getRegion } from "@/lib/products";
 import { ProductImage } from "./ProductImage";
 import { PriceDisplay } from "./PriceDisplay";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,7 +27,10 @@ export function ProductCard({
       href={`/products/${product.slug}`}
       className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
     >
-      <Card size="sm" className="rounded-lp-card p-0 shadow-none">
+      <Card
+        size="sm"
+        className="rounded-lp-card border border-lp-gray-200 p-lp-sm shadow-none ring-0"
+      >
         <div className="relative overflow-hidden rounded-lp-card bg-lp-gray-100">
           <ProductImage
             slug={product.slug}
@@ -45,7 +48,7 @@ export function ProductCard({
           )}
         </div>
 
-        <CardContent className="px-0 pt-lp-md">
+        <CardContent className="px-lp-xs pt-lp-md">
           <h3 className="line-clamp-2 text-sm font-medium leading-snug text-lp-gray-900 group-hover:text-lp-green">
             {product.name}
           </h3>
@@ -56,6 +59,14 @@ export function ProductCard({
           <div className="mt-lp-lg">
             <PriceDisplay product={product} />
           </div>
+
+          <p className="mt-lp-xs line-clamp-1 text-xs text-lp-gray-500">
+            {product.shippingFee === 0
+              ? "무료배송"
+              : `배송비 ${formatPrice(product.shippingFee)}원`}
+            {" · "}
+            {product.deliveryEta}
+          </p>
 
           {product.badges.length > 0 && (
             <ul className="mt-lp-md flex flex-wrap gap-1">
