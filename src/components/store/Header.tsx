@@ -23,31 +23,6 @@ export function Header() {
 
         <SearchBox />
       </div>
-
-      {/* 보기 모드 — 상품별 / 지역별 */}
-      <nav aria-label="보기 모드" className="border-t border-lp-gray-100">
-        <div className="mx-auto max-w-6xl px-4 lg:px-6">
-          <ul className="flex items-center gap-lp-xs py-lp-sm">
-            <li>
-              <Link
-                href="/"
-                className="block whitespace-nowrap rounded-lp-circle px-lp-md py-lp-xs text-lp-label text-lp-gray-700 hover:bg-lp-green-light hover:text-lp-green"
-              >
-                상품별
-              </Link>
-            </li>
-            <li aria-hidden="true" className="mx-lp-xs h-4 w-px bg-lp-gray-300" />
-            <li>
-              <Link
-                href="/regions"
-                className="block whitespace-nowrap rounded-lp-circle px-lp-md py-lp-xs text-lp-label text-lp-gray-700 hover:bg-lp-green-light hover:text-lp-green"
-              >
-                지역별
-              </Link>
-            </li>
-          </ul>
-        </div>
-      </nav>
     </header>
   );
 }

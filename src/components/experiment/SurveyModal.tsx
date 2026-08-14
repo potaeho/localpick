@@ -422,18 +422,19 @@ function QuestionField({
               { label: question.yes, val: true },
               { label: question.no, val: false },
             ].map((choice) => (
-              <button
+              <Button
                 key={String(choice.val)}
                 type="button"
+                variant="outline"
                 onClick={() => onSet(question.id, choice.val)}
-                className={`h-12 flex-1 rounded-lp-control border text-sm font-medium ${
+                className={`h-12 flex-1 rounded-lp-control text-sm font-medium ${
                   value === choice.val
-                    ? "border-lp-green bg-lp-green-light text-lp-green"
-                    : "border-lp-gray-300 text-lp-gray-700 hover:border-lp-green"
+                    ? "border-lp-green bg-lp-green-light text-lp-green hover:bg-lp-green-light"
+                    : "border-lp-gray-300 text-lp-gray-700"
                 }`}
               >
                 {choice.label}
-              </button>
+              </Button>
             ))}
           </div>
         )}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { track } from "@/lib/events";
+import { Button } from "@/components/ui/button";
 
 /**
  * 지역 방문 정보 펼치기.
@@ -38,15 +39,15 @@ export function VisitInfoDisclosure({
         이 상품을 만든 곳을 직접 가볼 수 있습니다.
       </p>
 
-      <button
+      <Button
         type="button"
         onClick={toggleVisitInfo}
         aria-controls={contentId}
         aria-expanded={open}
-        className="mt-lp-lg min-h-11 rounded-lp-control bg-lp-green px-lp-xl py-2.5 text-lp-button text-white hover:bg-lp-green-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
+        className="mt-lp-lg min-h-11 rounded-lp-control px-lp-xl py-2.5 text-lp-button"
       >
         {open ? "방문 정보 접기" : "방문 정보 받아보기"}
-      </button>
+      </Button>
 
       {open && (
         <ul id={contentId} className="mt-lp-lg space-y-lp-md">

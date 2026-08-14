@@ -5,6 +5,9 @@ import { useMemo, useState } from "react";
 import { PRIVACY_CONTACT, getPrivacyNotice } from "@/lib/consent";
 import { getDevice } from "@/lib/events";
 import type { ConsentPurpose } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 
 /**
  * 인터뷰·추첨 연락처 수집 — 설문과 분리된 별도 화면.
@@ -104,13 +107,13 @@ export function ConsentForm({
           >
             어떻게 불러드리면 될까요
           </label>
-          <input
+          <Input
             id="consent-name"
             type="text"
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder="예: 김OO"
-            className="mt-lp-sm h-12 w-full rounded-lp-control border border-lp-gray-300 px-lp-md text-sm focus:border-lp-green focus:outline-none"
+            className="mt-lp-sm h-12 rounded-lp-control border-lp-gray-300 px-lp-md text-sm focus-visible:border-lp-green"
           />
         </div>
 
@@ -125,25 +128,26 @@ export function ConsentForm({
                 { type: "phone", label: "휴대전화" },
               ] as const
             ).map((option) => (
-              <button
+              <Button
                 key={option.type}
                 type="button"
+                variant="outline"
                 onClick={() => setContactType(option.type)}
                 aria-pressed={contactType === option.type}
-                className={`h-10 flex-1 rounded-lp-control border text-sm font-medium ${
+                className={`h-10 flex-1 rounded-lp-control text-sm font-medium ${
                   contactType === option.type
-                    ? "border-lp-green bg-lp-green-light text-lp-green"
+                    ? "border-lp-green bg-lp-green-light text-lp-green hover:bg-lp-green-light"
                     : "border-lp-gray-300 text-lp-gray-700"
                 }`}
               >
                 {option.label}
-              </button>
+              </Button>
             ))}
           </div>
           <label htmlFor="consent-contact" className="sr-only">
             {contactType === "email" ? "이메일 주소" : "휴대전화번호"}
           </label>
-          <input
+          <Input
             id="consent-contact"
             type={contactType === "email" ? "email" : "tel"}
             inputMode={contactType === "email" ? "email" : "tel"}
@@ -154,7 +158,7 @@ export function ConsentForm({
             placeholder={
               contactType === "email" ? "name@example.com" : "010-0000-0000"
             }
-            className="mt-lp-sm h-12 w-full rounded-lp-control border border-lp-gray-300 px-lp-md text-sm focus:border-lp-green focus:outline-none"
+            className="mt-lp-sm h-12 rounded-lp-control border-lp-gray-300 px-lp-md text-sm focus-visible:border-lp-green"
           />
         </div>
 
@@ -177,11 +181,10 @@ export function ConsentForm({
         </div>
 
         <label className="flex cursor-pointer items-start gap-lp-md text-sm text-lp-gray-900">
-          <input
-            type="checkbox"
+          <Checkbox
             checked={agreed}
-            onChange={(event) => setAgreed(event.target.checked)}
-            className="mt-0.5 h-4 w-4 shrink-0 accent-lp-green"
+            onCheckedChange={(checked) => setAgreed(checked === true)}
+            className="mt-0.5 shrink-0 data-checked:border-lp-green data-checked:bg-lp-green"
           />
           위 내용을 확인했고, {purposeLabel}를 위한 개인정보 수집·이용에
           동의합니다.
@@ -195,21 +198,22 @@ export function ConsentForm({
       )}
 
       <div className="sticky bottom-0 flex flex-col gap-lp-sm border-t border-lp-gray-100 bg-white px-6 py-4">
-        <button
+        <Button
           type="button"
           disabled={!consentAvailable || !agreed || !contact.trim() || submitting}
           onClick={() => void submit()}
-          className="h-12 rounded-lp-control bg-lp-green text-lp-button text-white hover:bg-lp-green-dark disabled:cursor-not-allowed disabled:bg-lp-gray-300"
+          className="h-12 rounded-lp-control text-lp-button disabled:bg-lp-gray-300"
         >
           {submitting ? "저장하는 중…" : "연락처 남기기"}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="ghost"
           onClick={onSkip}
-          className="h-11 rounded-lp-control text-sm font-medium text-lp-gray-700 hover:bg-lp-gray-100"
+          className="h-11 rounded-lp-control text-sm font-medium text-lp-gray-700"
         >
           지금은 건너뛰기
-        </button>
+        </Button>
       </div>
     </div>
   );
