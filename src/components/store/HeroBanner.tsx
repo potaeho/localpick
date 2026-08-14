@@ -25,10 +25,29 @@ export type HeroSlide = {
 
 const AUTOPLAY_MS = 6000;
 
+const SWIPE_THRESHOLD_PX = 40;
+
 export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const touchStartX = useRef<number | null>(null);
+
+  function goTo(delta: number) {
+    setIndex((current) => (current + delta + slides.length) % slides.length);
+  }
+
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null || slides.length <= 1) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    if (deltaX > SWIPE_THRESHOLD_PX) goTo(-1);
+    else if (deltaX < -SWIPE_THRESHOLD_PX) goTo(1);
+    touchStartX.current = null;
+  }
 
   useEffect(() => {
     if (paused || slides.length <= 1) return;
@@ -56,7 +75,11 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
     >
       <div className="flex">
         {/* ── 메인 배너 영역 ── */}
-        <div className="relative min-h-[220px] flex-1 text-white sm:min-h-[340px] lg:min-h-[420px]">
+        <div
+          className="relative min-h-[220px] flex-1 touch-pan-y text-white sm:min-h-[340px] lg:min-h-[420px]"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
           {slides.map((slide, i) => (
             <div
               key={slide.id}
@@ -175,7 +198,7 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
 
       {/* ── 모바일 인디케이터 ── */}
       {slides.length > 1 && (
-        <div className="flex items-center justify-center gap-2 border-t border-lp-gray-200 bg-white py-3 lg:hidden">
+        <div className="flex items-center justify-center gap-2 rounded-b-xl border-t border-lp-gray-200 bg-white py-3 lg:hidden">
           {slides.map((slide, i) => (
             <button
               key={slide.id}
