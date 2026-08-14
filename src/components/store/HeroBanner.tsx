@@ -4,15 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-import type { ProductImageKind } from "@/lib/types";
-
-import { ProductImage } from "./ProductImage";
-
 export type FeaturedProduct = {
   name: string;
   href: string;
-  slug: string;
-  imageKind: ProductImageKind;
+  cardImage: string;
 };
 
 export type HeroSlide = {
@@ -61,7 +56,7 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
     >
       <div className="flex">
         {/* ── 메인 배너 영역 ── */}
-        <div className="relative aspect-[1.5/1] flex-1 text-white sm:aspect-[1.8/1] lg:aspect-[2.2/1]">
+        <div className="relative min-h-[220px] flex-1 text-white sm:min-h-[340px] lg:min-h-[420px]">
           {slides.map((slide, i) => (
             <div
               key={slide.id}
@@ -101,19 +96,20 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
                 {/* 상품 썸네일 */}
                 {slide.featuredProducts &&
                   slide.featuredProducts.length > 0 && (
-                    <div className="mt-5 hidden items-center gap-3 sm:flex">
+                    <div className="mt-4 hidden items-center gap-3 sm:flex">
                       {slide.featuredProducts.map((product) => (
                         <Link
                           key={product.href}
                           href={product.href}
                           className="group flex flex-col items-center gap-1.5"
                         >
-                          <div className="h-16 w-16 overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-white/30 transition group-hover:scale-105 sm:h-20 sm:w-20">
-                            <ProductImage
-                              slug={product.slug}
-                              kind={product.imageKind}
-                              label={product.name}
+                          <div className="relative h-16 w-16 overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-white/30 transition group-hover:scale-105 sm:h-20 sm:w-20">
+                            <Image
+                              src={product.cardImage}
+                              alt={product.name}
+                              fill
                               sizes="80px"
+                              className="object-cover"
                             />
                           </div>
                           <span className="max-w-[5rem] truncate text-[10px] text-white/80 sm:text-xs">
@@ -137,7 +133,7 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
 
                 <Link
                   href={slide.cta.href}
-                  className="mt-6 inline-flex w-fit items-center gap-1.5 rounded-lg bg-lp-green px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-lp-green-dark sm:text-base"
+                  className="mt-4 inline-flex w-fit items-center gap-1.5 rounded-lg bg-lp-green px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-lp-green-dark sm:text-base"
                 >
                   {slide.cta.label}
                   <span aria-hidden="true">&rarr;</span>

@@ -20,10 +20,10 @@ const HERO_SLIDES: HeroSlide[] = [
     image: { src: "/hero/chuseok.png", alt: "대나무 트레이에 담긴 곶감, 흑마늘 진액, 벌꿀 추석 선물 세트" },
     sideLabel: "추석 선물 세트",
     featuredProducts: [
-      { name: "산청 곶감", slug: "sancheong-gotgam", href: "/products/sancheong-gotgam", imageKind: "persimmon" },
-      { name: "곶감정과", slug: "sancheong-gotgam-jeonggwa", href: "/products/sancheong-gotgam-jeonggwa", imageKind: "persimmon" },
-      { name: "흑마늘 진액", slug: "uiseong-black-garlic", href: "/products/uiseong-black-garlic", imageKind: "garlic" },
-      { name: "벌꿀", slug: "hongcheon-acacia-honey", href: "/products/hongcheon-acacia-honey", imageKind: "honey" },
+      { name: "산청 곶감", href: "/products/sancheong-gotgam", cardImage: "/product-cards/sancheong-gotgam.jpg" },
+      { name: "곶감정과", href: "/products/sancheong-gotgam-jeonggwa", cardImage: "/product-cards/sancheong-gotgam-jeonggwa.jpg" },
+      { name: "흑마늘 진액", href: "/products/uiseong-black-garlic", cardImage: "/product-cards/uiseong-black-garlic.jpg" },
+      { name: "벌꿀", href: "/products/hongcheon-acacia-honey", cardImage: "/product-cards/hongcheon-acacia-honey.jpg" },
     ],
   },
   {
@@ -35,9 +35,9 @@ const HERO_SLIDES: HeroSlide[] = [
     image: { src: "/hero/summer-meal.png", alt: "치즈 닭갈비와 흑미, 곤드레나물 보양 한상" },
     sideLabel: "여름 보양 한상",
     featuredProducts: [
-      { name: "닭갈비 밀키트", slug: "chuncheon-dakgalbi-kit", href: "/products/chuncheon-dakgalbi-kit", imageKind: "mealkit" },
-      { name: "유기농 흑미", slug: "gokseong-black-rice", href: "/products/gokseong-black-rice", imageKind: "grain" },
-      { name: "건조 곤드레", slug: "yeongwol-gondre", href: "/products/yeongwol-gondre", imageKind: "greens" },
+      { name: "닭갈비 밀키트", href: "/products/chuncheon-dakgalbi-kit", cardImage: "/product-cards/chuncheon-dakgalbi-kit.jpg" },
+      { name: "유기농 흑미", href: "/products/gokseong-black-rice", cardImage: "/product-cards/gokseong-black-rice.jpg" },
+      { name: "건조 곤드레", href: "/products/yeongwol-gondre", cardImage: "/product-cards/yeongwol-gondre.jpg" },
     ],
   },
   {
@@ -49,9 +49,9 @@ const HERO_SLIDES: HeroSlide[] = [
     image: { src: "/hero/fermented.png", alt: "순창 고추장 항아리와 복분자 식초, 복분자잼", position: "70% center" },
     sideLabel: "전통 발효 기획전",
     featuredProducts: [
-      { name: "순창 고추장", slug: "sunchang-gochujang", href: "/products/sunchang-gochujang", imageKind: "jar" },
-      { name: "복분자 식초", slug: "gochang-bokbunja-vinegar", href: "/products/gochang-bokbunja-vinegar", imageKind: "bottle" },
-      { name: "복분자잼", slug: "gochang-bokbunja-jam", href: "/products/gochang-bokbunja-jam", imageKind: "jar" },
+      { name: "순창 고추장", href: "/products/sunchang-gochujang", cardImage: "/product-cards/sunchang-gochujang.jpg" },
+      { name: "복분자 식초", href: "/products/gochang-bokbunja-vinegar", cardImage: "/product-cards/gochang-bokbunja-vinegar.jpg" },
+      { name: "복분자잼", href: "/products/gochang-bokbunja-jam", cardImage: "/product-cards/gochang-bokbunja-jam.jpg" },
     ],
   },
   {
@@ -63,9 +63,9 @@ const HERO_SLIDES: HeroSlide[] = [
     image: { src: "/hero/sea.png", alt: "얼음 위 완도 다시마, 돌미역, 통영 굴 해산물" },
     sideLabel: "바다의 맛",
     featuredProducts: [
-      { name: "완도 다시마", slug: "wando-dasima", href: "/products/wando-dasima", imageKind: "kelp" },
-      { name: "영덕 돌미역", slug: "yeongdeok-dolmiyeok", href: "/products/yeongdeok-dolmiyeok", imageKind: "kelp" },
-      { name: "통영 굴", slug: "tongyeong-oyster-oil", href: "/products/tongyeong-oyster-oil", imageKind: "jar" },
+      { name: "완도 다시마", href: "/products/wando-dasima", cardImage: "/product-cards/wando-dasima.jpg" },
+      { name: "영덕 돌미역", href: "/products/yeongdeok-dolmiyeok", cardImage: "/product-cards/yeongdeok-dolmiyeok.jpg" },
+      { name: "통영 굴", href: "/products/tongyeong-oyster-oil", cardImage: "/product-cards/tongyeong-oyster-oil.jpg" },
     ],
   },
   {
@@ -77,9 +77,9 @@ const HERO_SLIDES: HeroSlide[] = [
     image: { src: "/hero/drink.png", alt: "아까시 벌꿀, 감귤청, 하동 녹차 한 잔", position: "60% center" },
     sideLabel: "차·꿀·청",
     featuredProducts: [
-      { name: "하동 녹차", slug: "hadong-woojeon-tea", href: "/products/hadong-woojeon-tea", imageKind: "tea" },
-      { name: "아까시 벌꿀", slug: "hongcheon-acacia-honey", href: "/products/hongcheon-acacia-honey", imageKind: "honey" },
-      { name: "감귤청", slug: "jeju-citrus-cheong", href: "/products/jeju-citrus-cheong", imageKind: "citrus" },
+      { name: "하동 녹차", href: "/products/hadong-woojeon-tea", cardImage: "/product-cards/hadong-woojeon-tea.jpg" },
+      { name: "아까시 벌꿀", href: "/products/hongcheon-acacia-honey", cardImage: "/product-cards/hongcheon-acacia-honey.jpg" },
+      { name: "감귤청", href: "/products/jeju-citrus-cheong", cardImage: "/product-cards/jeju-citrus-cheong.jpg" },
     ],
   },
   {
