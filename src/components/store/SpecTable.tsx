@@ -14,7 +14,9 @@ export function SpecTable({ product }: { product: Product }) {
     ["배송 일정", product.deliveryEta],
     [
       "배송비",
-      `${formatPrice(product.shippingFee)}원 (${formatPrice(product.freeShippingOver)}원 이상 무료)`,
+      product.shippingFee === 0
+        ? "무료배송"
+        : `${formatPrice(product.shippingFee)}원 (${formatPrice(product.freeShippingOver)}원 이상 무료)`,
     ],
     ["판매자", product.seller],
     ["포장타입", product.packaging],

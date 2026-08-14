@@ -29,9 +29,9 @@ export function ProductCard({
     >
       <Card
         size="sm"
-        className="rounded-lp-card border border-lp-gray-200 p-lp-sm shadow-none ring-0"
+        className="gap-0 rounded-lp-card border border-lp-gray-200 p-0 shadow-none ring-0"
       >
-        <div className="relative overflow-hidden rounded-lp-card bg-lp-gray-100">
+        <div className="relative overflow-hidden bg-lp-gray-100">
           <ProductImage
             slug={product.slug}
             kind={product.imageKind}
@@ -48,7 +48,7 @@ export function ProductCard({
           )}
         </div>
 
-        <CardContent className="px-lp-xs pt-lp-md">
+        <CardContent className="pb-lp-sm pl-lp-md pr-lp-sm pt-lp-md">
           <h3 className="line-clamp-2 text-sm font-medium leading-snug text-lp-gray-900 group-hover:text-lp-green">
             {product.name}
           </h3>
