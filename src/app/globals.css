@@ -8,23 +8,22 @@
 
 /*
  * LOCAL PICK 디자인 토큰
- * 지정 팔레트 적용: Digital Blue(포인트/CTA) · Scarlet Rush(가격 강조) ·
- * Alabaster Grey에 가까운 배경 · Black 텍스트.
+ * 팀 로고(딥 포레스트 그린 + 오렌지)에서 추출한 원래 브랜드 팔레트.
  * 토큰 이름(lp-green/lp-orange 등)은 기존 컴포넌트 코드를 그대로 두기 위해
- * 유지하고, 실제 색상값만 새 팔레트로 교체했다.
+ * 유지한다.
  */
 @theme {
-  --color-lp-green: #3772ff; /* Digital Blue — 버튼·링크·활성 상태 포인트 컬러 */
-  --color-lp-green-dark: #2955c9;
-  --color-lp-green-light: #e8eefe;
+  --color-lp-green: #1b5e3f; /* 딥 포레스트 그린 — 버튼·링크·활성 상태 포인트 컬러 */
+  --color-lp-green-dark: #14472f;
+  --color-lp-green-light: #e3efe8;
 
-  --color-lp-orange: #df2935; /* Scarlet Rush — 가격·할인율 강조 */
-  --color-lp-orange-dark: #b81f29;
-  --color-lp-orange-light: #fbe6e7;
+  --color-lp-orange: #f08019; /* 오렌지 — 가격·할인율 강조 */
+  --color-lp-orange-dark: #d3660a;
+  --color-lp-orange-light: #fef1e0;
 
-  --color-lp-cream: #e6e8e6; /* Alabaster Grey — 배경 */
+  --color-lp-cream: #fcfcf9; /* 로고 배경 톤 */
 
-  --color-lp-ink: #080708; /* Black — 본문 텍스트 */
+  --color-lp-ink: #1a1a1a;
   --color-lp-gray-900: #2e2e2e;
   --color-lp-gray-700: #5c5c5c;
   --color-lp-gray-500: #8a8a8a;
