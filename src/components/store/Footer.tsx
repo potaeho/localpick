@@ -22,7 +22,7 @@ export function Footer() {
                 LOCAL PICK
               </span>
             </span>
-            <p className="mt-lp-md text-lp-body text-lp-gray-700">
+            <p className="mt-lp-md pl-8 text-lp-body text-lp-gray-700">
               누가, 어디서, 어떻게 만들었는지 확인할 수 있는 로컬 상품을
               모았습니다.
             </p>
