@@ -91,7 +91,7 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
     >
       <div className="flex">
         {/* ── 메인 배너 영역 ── */}
-        <div className="relative min-h-[220px] flex-1 touch-pan-y overflow-hidden text-white sm:min-h-[340px] lg:min-h-[420px]">
+        <div className="relative min-h-[220px] flex-1 touch-none overflow-hidden text-white sm:min-h-[340px] lg:min-h-[420px]">
           <div
             ref={trackRef}
             className="absolute inset-0 flex"
