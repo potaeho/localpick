@@ -10,7 +10,7 @@ const notoSansKr = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "LOCAL PICK | 태두리",
+  title: "LOCAL PICK",
   description:
     "생산자와 생산지를 확인할 수 있는 로컬 특산물 스토어. 전국 각지의 로컬 크리에이터가 만든 상품을 만나보세요.",
 };
