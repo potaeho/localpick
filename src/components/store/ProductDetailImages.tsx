@@ -24,7 +24,7 @@ export function ProductDetailImages({
           정렬된 좁은 컬럼(≈680px)으로 보인다. 부모 섹션이 max-w-6xl 전체를
           쓰다 보니 이미지가 그대로 늘어나 글자가 커지고 정보 전달력이
           떨어지므로, 여기서 폭을 별도로 제한한다. */}
-      <div className="mx-auto max-w-xl overflow-hidden rounded-lp-card border border-lp-gray-300 bg-white">
+      <div className="mx-auto max-w-2xl overflow-hidden rounded-lp-card border border-lp-gray-300 bg-white">
         {images.map((src, index) => (
           // 포스터 이미지는 폭에 맞춰 이어붙이는 용도라 다음/이전 이미지와 틈이
           // 생기지 않아야 한다. 실제 사진 폭·비율이 제각각이라 next/image의
