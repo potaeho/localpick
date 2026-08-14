@@ -175,7 +175,7 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
 
       {/* ── 모바일 인디케이터 ── */}
       {slides.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-2 lg:hidden">
+        <div className="flex items-center justify-center gap-2 border-t border-lp-gray-200 bg-white py-3 lg:hidden">
           {slides.map((slide, i) => (
             <button
               key={slide.id}
@@ -185,8 +185,8 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
               onClick={() => setIndex(i)}
               className={`h-1.5 rounded-full transition-all ${
                 i === index
-                  ? "w-6 bg-white"
-                  : "w-1.5 bg-white/50 hover:bg-white/75"
+                  ? "w-6 bg-lp-green"
+                  : "w-1.5 bg-lp-gray-300 hover:bg-lp-gray-500"
               }`}
             />
           ))}
