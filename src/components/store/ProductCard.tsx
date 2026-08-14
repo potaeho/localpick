@@ -52,7 +52,7 @@ export function ProductCard({
           <h3 className="line-clamp-2 text-sm font-medium leading-snug text-lp-gray-900 group-hover:text-lp-green">
             {product.name}
           </h3>
-          <p className="mt-lp-sm line-clamp-1 text-xs leading-relaxed text-lp-gray-500">
+          <p className="mt-lp-sm line-clamp-2 text-xs leading-relaxed text-lp-gray-500">
             {product.tagline}
           </p>
 
