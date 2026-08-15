@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { getRegion, products, searchProducts } from "@/lib/products";
 import { ProductImage } from "./ProductImage";
 import { Input } from "@/components/ui/input";
+import { trackClick } from "@/lib/events";
 
 const MAX_SUGGESTIONS = 6;
 
@@ -74,9 +75,11 @@ export function SearchBox() {
     if (activeIndex >= 0 && suggestions[activeIndex]) {
       event.preventDefault();
       setOpen(false);
+      trackClick(`search_suggestion_keyboard:${suggestions[activeIndex].slug}`);
       router.push(`/products/${suggestions[activeIndex].slug}`);
     } else {
       setOpen(false);
+      trackClick(`search_submit:${trimmedQuery}`);
     }
   }
 
@@ -160,7 +163,10 @@ export function SearchBox() {
               <li key={product.slug} role="option" aria-selected={active}>
                 <Link
                   href={`/products/${product.slug}`}
-                  onClick={() => setOpen(false)}
+                  onClick={() => {
+                    setOpen(false);
+                    trackClick(`search_suggestion:${product.slug}`);
+                  }}
                   onMouseEnter={() => setActiveIndex(index)}
                   className={`flex items-center gap-lp-md px-lp-md py-2.5 ${
                     active ? "bg-lp-green-light" : "hover:bg-lp-gray-100"

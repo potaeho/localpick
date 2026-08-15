@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { Logo } from "./Logo";
 import { SearchBox } from "./SearchBox";
+import { TrackedLink } from "@/components/experiment/TrackedLink";
 
 /**
  * 스토어 헤더.
@@ -17,9 +17,9 @@ export function Header() {
   return (
     <header className="sticky top-0 z-30 border-b border-lp-gray-300 bg-white">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:h-16 lg:px-6">
-        <Link href="/" aria-label="LOCAL PICK 홈">
+        <TrackedLink href="/" label="header_logo" aria-label="LOCAL PICK 홈">
           <Logo className="shrink-0" />
-        </Link>
+        </TrackedLink>
 
         <SearchBox />
       </div>

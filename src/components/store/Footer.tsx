@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { PRIVACY_CONTACT } from "@/lib/consent";
 import { LogoMark } from "./Logo";
+import { TrackedLink } from "@/components/experiment/TrackedLink";
 
 /**
  * 스토어 푸터.
@@ -34,14 +34,22 @@ export function Footer() {
             </p>
             <ul className="mt-lp-md flex flex-col gap-lp-sm text-lp-body text-lp-gray-700">
               <li>
-                <Link href="/regions" className="hover:text-lp-green">
+                <TrackedLink
+                  href="/regions"
+                  label="footer_regions_link"
+                  className="hover:text-lp-green"
+                >
                   지역별 보기
-                </Link>
+                </TrackedLink>
               </li>
               <li>
-                <Link href="/creators" className="hover:text-lp-green">
+                <TrackedLink
+                  href="/creators"
+                  label="footer_creators_link"
+                  className="hover:text-lp-green"
+                >
                   생산자 보기
-                </Link>
+                </TrackedLink>
               </li>
             </ul>
           </nav>

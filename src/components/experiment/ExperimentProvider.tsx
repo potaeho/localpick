@@ -8,8 +8,9 @@ import {
   useRef,
   useState,
 } from "react";
+import { usePathname } from "next/navigation";
 
-import { captureUtm, trackOnce } from "@/lib/events";
+import { captureLanding, captureUtm, trackBeacon, trackOnce } from "@/lib/events";
 import type { SurveyTrigger } from "@/lib/types";
 import { FakeDoorOverlay } from "./FakeDoorOverlay";
 import { SurveyModal } from "./SurveyModal";
@@ -72,12 +73,73 @@ export function ExperimentProvider({
   const viewedRef = useRef<string[]>([]);
   const lastViewedRef = useRef<string | undefined>(undefined);
   const buyInFlightRef = useRef(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     // 광고에서 넘어온 UTM을 세션에 붙잡아둔다
     captureUtm();
     viewedRef.current = readJson<string[]>(VIEWED_KEY, []);
+
+    // 유입 경로(리퍼러·랜딩 페이지) — 세션당 한 번만 남는다
+    const landing = captureLanding();
+    void trackOnce("session_start", {
+      type: "session_start",
+      referrer: landing?.referrer,
+      landingPath: landing?.landingPath,
+    });
   }, []);
+
+  /**
+   * 페이지별 체류시간·최대 스크롤 깊이를 재고, 그 페이지를 떠나는 순간
+   * page_exit로 남긴다.
+   *
+   * 라우트가 바뀌면(pathname 변경) 이 effect의 클린업이 "떠나는 페이지" 기준으로
+   * 먼저 실행되고, 새 pathname으로 다시 시작한다. 탭을 닫거나 백그라운드로
+   * 보내는 경우(클린업이 실행되지 않는 경우)는 visibilitychange로 따로 잡는다.
+   */
+  useEffect(() => {
+    const enteredAt = Date.now();
+    const path = pathname;
+    let maxScroll = 0;
+    let sent = false;
+
+    function currentScrollDepth(): number {
+      const doc = document.documentElement;
+      const scrollable = doc.scrollHeight - doc.clientHeight;
+      if (scrollable <= 0) return 100;
+      return Math.min(100, Math.max(0, Math.round((window.scrollY / scrollable) * 100)));
+    }
+
+    function updateMaxScroll() {
+      maxScroll = Math.max(maxScroll, currentScrollDepth());
+    }
+
+    function sendExit() {
+      if (sent) return;
+      sent = true;
+      trackBeacon({
+        type: "page_exit",
+        path,
+        durationMs: Date.now() - enteredAt,
+        scrollDepth: maxScroll,
+      });
+    }
+
+    function onVisibilityChange() {
+      if (document.visibilityState === "hidden") sendExit();
+    }
+
+    window.addEventListener("scroll", updateMaxScroll, { passive: true });
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("pagehide", sendExit);
+
+    return () => {
+      window.removeEventListener("scroll", updateMaxScroll);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("pagehide", sendExit);
+      sendExit();
+    };
+  }, [pathname]);
 
   const openSurvey = useCallback(
     (trigger: SurveyTrigger, productSlug?: string) => {

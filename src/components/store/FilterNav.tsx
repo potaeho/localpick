@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { categories, regions, getProductsByCategory, getProductsByRegion } from "@/lib/products";
 import { Badge } from "@/components/ui/badge";
+import { trackClick } from "@/lib/events";
 
 type ViewMode = "product" | "region";
 
@@ -37,7 +38,9 @@ export function FilterNav() {
             viewMode === "product" ? "bg-lp-ink hover:bg-lp-ink" : ""
           }`}
         >
-          <Link href="/">상품별</Link>
+          <Link href="/" onClick={() => trackClick("filter_view_mode:product")}>
+            상품별
+          </Link>
         </Badge>
         <Badge
           asChild
@@ -46,7 +49,12 @@ export function FilterNav() {
             viewMode === "region" ? "bg-lp-ink hover:bg-lp-ink" : ""
           }`}
         >
-          <Link href="/regions">지역별</Link>
+          <Link
+            href="/regions"
+            onClick={() => trackClick("filter_view_mode:region")}
+          >
+            지역별
+          </Link>
         </Badge>
       </div>
 
@@ -61,7 +69,11 @@ export function FilterNav() {
                   variant={isHome ? "default" : "outline"}
                   className="min-h-10 rounded-lp-circle px-lp-lg text-lp-label focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
                 >
-                  <Link href="/" aria-current={isHome ? "page" : undefined}>
+                  <Link
+                    href="/"
+                    aria-current={isHome ? "page" : undefined}
+                    onClick={() => trackClick("filter_chip:all_products")}
+                  >
                     전체
                   </Link>
                 </Badge>
@@ -78,6 +90,7 @@ export function FilterNav() {
                       <Link
                         href={`/categories/${category.id}`}
                         aria-current={active ? "page" : undefined}
+                        onClick={() => trackClick(`filter_chip:category:${category.id}`)}
                       >
                         {category.name}
                         <span className={active ? "text-white/70" : "text-lp-gray-500"}>
@@ -100,6 +113,7 @@ export function FilterNav() {
                   <Link
                     href="/regions"
                     aria-current={pathname === "/regions" ? "page" : undefined}
+                    onClick={() => trackClick("filter_chip:all_regions")}
                   >
                     전체
                   </Link>
@@ -117,6 +131,7 @@ export function FilterNav() {
                       <Link
                         href={`/regions/${region.id}`}
                         aria-current={active ? "page" : undefined}
+                        onClick={() => trackClick(`filter_chip:region:${region.id}`)}
                       >
                         {region.name}
                         <span className={active ? "text-white/70" : "text-lp-gray-500"}>

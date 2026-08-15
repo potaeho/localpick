@@ -1,7 +1,12 @@
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 
-import { EVENT_TYPES, type EventType, type TrackedEvent } from "@/lib/types";
+import {
+  EVENT_TYPES,
+  MULTI_FIRE_EVENT_TYPES,
+  type EventType,
+  type TrackedEvent,
+} from "@/lib/types";
 import { storage } from "@/lib/store";
 import { SESSION_COOKIE } from "@/proxy";
 import { getVerifiedAnonymousSessionId } from "@/lib/anonymous-session";
@@ -18,6 +23,11 @@ function clamp(value: unknown, max = 120): string | undefined {
   if (typeof value !== "string") return undefined;
   const trimmed = value.trim();
   return trimmed ? trimmed.slice(0, max) : undefined;
+}
+
+function clampNumber(value: unknown, min: number, max: number): number | undefined {
+  if (typeof value !== "number" || !Number.isFinite(value)) return undefined;
+  return Math.min(max, Math.max(min, Math.round(value)));
 }
 
 export async function POST(request: NextRequest) {
@@ -67,7 +77,22 @@ export async function POST(request: NextRequest) {
   const creatorId = product?.creatorId ?? creator?.id;
   const regionId = product?.regionId ?? creator?.regionId ?? region?.id;
   const trigger = input.trigger === "buy_click" || input.trigger === "browse_3" ? input.trigger : undefined;
-  const dedupeKey = [sessionId, type, productSlug ?? "", creatorId ?? "", regionId ?? "", trigger ?? ""].join(":");
+
+  // 클릭 로그·이탈 이벤트는 같은 세션에서 여러 번 일어나는 게 정상이라,
+  // dedupe_key에 매번 다른 값을 섞어야 서버가 두 번째부터를 중복으로 보고
+  // 버리지 않는다. 나머지 이벤트는 지금처럼 세션당 한 번만 남는 게 맞다.
+  const dedupeSuffix = MULTI_FIRE_EVENT_TYPES.has(type as EventType)
+    ? (clamp(input.clientEventId, 64) ?? crypto.randomUUID())
+    : "";
+  const dedupeKey = [
+    sessionId,
+    type,
+    productSlug ?? "",
+    creatorId ?? "",
+    regionId ?? "",
+    trigger ?? "",
+    dedupeSuffix,
+  ].join(":");
 
   const event: TrackedEvent = {
     id: crypto.randomUUID(),
@@ -84,6 +109,12 @@ export async function POST(request: NextRequest) {
     utmCampaign: clamp(input.utmCampaign),
     utmContent: clamp(input.utmContent),
     trigger,
+    label: clamp(input.label, 200),
+    referrer: clamp(input.referrer, 300),
+    landingPath: clamp(input.landingPath, 300),
+    path: clamp(input.path, 300),
+    durationMs: clampNumber(input.durationMs, 0, 1000 * 60 * 60 * 6),
+    scrollDepth: clampNumber(input.scrollDepth, 0, 100),
   };
 
   if (PRODUCT_EVENT_TYPES.has(event.type) && !event.productSlug) {

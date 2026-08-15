@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
 
 import { categories, getProductsByCategory } from "@/lib/products";
 import { Badge } from "@/components/ui/badge";
+import { trackClick } from "@/lib/events";
 
 /**
  * 카테고리 칩 — 스토어를 훑는 1차 축.
@@ -21,7 +24,11 @@ export function CategoryChips({ activeId }: { activeId?: string }) {
               variant={activeId ? "outline" : "default"}
               className="min-h-11 rounded-lp-circle px-lp-lg text-lp-label focus-visible:ring-2 focus-visible:ring-lp-green focus-visible:ring-offset-2"
             >
-              <Link href="/" aria-current={activeId ? undefined : "page"}>
+              <Link
+                href="/"
+                aria-current={activeId ? undefined : "page"}
+                onClick={() => trackClick("category_chip_all")}
+              >
                 전체
               </Link>
             </Badge>
@@ -38,6 +45,7 @@ export function CategoryChips({ activeId }: { activeId?: string }) {
                   <Link
                     href={`/categories/${category.id}`}
                     aria-current={active ? "page" : undefined}
+                    onClick={() => trackClick(`category_chip:${category.id}`)}
                   >
                     {category.name}
                     <span className={active ? "text-white/70" : "text-lp-gray-500"}>

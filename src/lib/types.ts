@@ -146,9 +146,25 @@ export const EVENT_TYPES = [
   "creator_story_click",
   "region_info_click",
   "visit_info_click",
+  /** 세션당 한 번 — 유입 경로(리퍼러·랜딩 페이지·UTM) 기록용 */
+  "session_start",
+  /** 페이지를 옮기거나 탭을 떠날 때마다 — 어디서 얼마나 머물다 이탈했는지 */
+  "page_exit",
+  /** 아직 전용 이벤트 타입이 없는 클릭들을 label로 구분해 담는 범용 클릭 이벤트 */
+  "ui_click",
 ] as const;
 
 export type EventType = (typeof EVENT_TYPES)[number];
+
+/**
+ * 한 세션에서 여러 번 발생해도 전부 남아야 하는 이벤트 타입.
+ *
+ * 나머지 이벤트는 session/type/context가 같으면 서버가 dedupe_key로 한 번만
+ * 남기지만(예: buy_click은 세션당 한 번이면 충분), 클릭 로그와 페이지 이탈은
+ * 같은 세션 안에서 여러 번 일어나는 게 정상이다 — 그래서 dedupe_key에 매번
+ * 새로운 값(clientEventId)을 섞어 전부 남긴다.
+ */
+export const MULTI_FIRE_EVENT_TYPES = new Set<EventType>(["ui_click", "page_exit"]);
 
 /** 설문이 열린 경로 */
 export type SurveyTrigger = "buy_click" | "browse_3";
@@ -176,6 +192,20 @@ export type TrackedEvent = UtmParams & {
   creatorId?: string;
   device: DeviceType;
   trigger?: SurveyTrigger;
+  /** ui_click이 무엇을 눌렀는지 구분하는 값 (예: "header_logo", "search_suggestion") */
+  label?: string;
+  /** session_start 전용 — 첫 진입 시 document.referrer (외부 유입 경로) */
+  referrer?: string;
+  /** session_start 전용 — 세션의 첫 도착 경로 */
+  landingPath?: string;
+  /** page_exit 전용 — 이탈한 페이지 경로 */
+  path?: string;
+  /** page_exit 전용 — 그 페이지에 머문 시간(ms) */
+  durationMs?: number;
+  /** page_exit 전용 — 그 페이지에서 도달한 최대 스크롤 비율(0~100) */
+  scrollDepth?: number;
+  /** MULTI_FIRE_EVENT_TYPES에서 같은 세션의 여러 발생을 구분하기 위한 클라이언트 생성 난수 */
+  clientEventId?: string;
 };
 
 /** 클라이언트가 /api/events로 보내는 페이로드. sessionId와 ts는 서버가 채운다. */
@@ -186,6 +216,13 @@ export type EventInput = UtmParams & {
   creatorId?: string;
   device: DeviceType;
   trigger?: SurveyTrigger;
+  label?: string;
+  referrer?: string;
+  landingPath?: string;
+  path?: string;
+  durationMs?: number;
+  scrollDepth?: number;
+  clientEventId?: string;
 };
 
 /* ------------------------------------------------------------------ */

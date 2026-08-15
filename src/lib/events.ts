@@ -1,6 +1,7 @@
 import type { DeviceType, EventInput, UtmParams } from "./types";
 
 const UTM_KEY = "lp_utm";
+const LANDING_KEY = "lp_landing";
 const TRACKED_KEY_PREFIX = "lp_tracked:";
 
 // A single browser tab can dispatch effects and click handlers almost at the
@@ -61,6 +62,38 @@ export function captureUtm(fallback: UtmParams = {}): void {
   } catch {
     /* 저장 실패는 무시 — 이벤트는 UTM 없이 기록된다 */
   }
+}
+
+/**
+ * 세션의 첫 도착 지점(리퍼러·랜딩 경로)을 한 번만 붙잡아둔다.
+ *
+ * captureUtm과 같은 first-touch 패턴이다 — 이후 사이트 안에서 이동하면
+ * document.referrer는 내부 페이지로 바뀌어버리므로, 외부에서 처음 들어온
+ * 순간의 값을 세션 내내 재사용해야 "진짜" 유입 경로가 남는다.
+ */
+export function captureLanding(): { referrer: string; landingPath: string } | null {
+  const store = safeSession();
+  if (!store) return null;
+
+  try {
+    const raw = store.getItem(LANDING_KEY);
+    if (raw) return JSON.parse(raw) as { referrer: string; landingPath: string };
+  } catch {
+    /* 저장된 값이 깨졌으면 새로 잡는다 */
+  }
+
+  const captured = {
+    referrer: (document.referrer || "").slice(0, 300),
+    landingPath: (window.location.pathname + window.location.search).slice(0, 300),
+  };
+
+  try {
+    store.setItem(LANDING_KEY, JSON.stringify(captured));
+  } catch {
+    /* 저장 실패는 무시 — session_start는 그래도 한 번은 나간다 */
+  }
+
+  return captured;
 }
 
 export function getUtm(): UtmParams {
@@ -135,6 +168,76 @@ export async function track(
   // recorded. The caller still receives a resolved promise by design.
   eventQueue = queued.catch(() => undefined);
   await queued.catch(() => undefined);
+}
+
+function randomId(): string {
+  try {
+    return crypto.randomUUID();
+  } catch {
+    return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }
+}
+
+/** "무엇을 눌렀는지"를 label 하나로 남기는 범용 클릭 기록 — 매번 새로 기록된다 */
+export function trackClick(
+  label: string,
+  extra: Partial<Omit<EventInput, "type" | "device" | "label">> = {},
+): void {
+  void track({ type: "ui_click", label, clientEventId: randomId(), ...extra });
+}
+
+/**
+ * 탭을 닫거나 다른 페이지로 이동하는 순간에도 살아남는 전송.
+ *
+ * track()의 fetch(keepalive)는 대기 중인 큐를 거치는데, 페이지가 사라지는
+ * 순간에는 그 대기가 끝까지 실행된다는 보장이 없다. sendBeacon은 브라우저가
+ * 페이지 언로드 이후에도 전송을 이어가도록 설계된 API라 이탈 신호에는
+ * 이쪽이 더 안전하다.
+ */
+export function trackBeacon(
+  input: Omit<EventInput, "device"> & { device?: DeviceType },
+): void {
+  if (typeof navigator === "undefined") return;
+
+  const explicitUtm: UtmParams = {
+    utmSource: input.utmSource,
+    utmMedium: input.utmMedium,
+    utmCampaign: input.utmCampaign,
+    utmContent: input.utmContent,
+  };
+  captureUtm(explicitUtm);
+
+  const provided = Object.fromEntries(
+    Object.entries(input).filter(
+      ([key, value]) => value !== undefined && !UTM_INPUT_FIELDS.has(key),
+    ),
+  );
+  const storedUtm = getUtm();
+  const attribution =
+    Object.keys(storedUtm).length > 0 ? storedUtm : explicitUtm;
+
+  const payload = {
+    ...attribution,
+    device: getDevice(),
+    ...provided,
+  };
+
+  try {
+    const blob = new Blob([JSON.stringify(payload)], {
+      type: "application/json",
+    });
+    const sent = navigator.sendBeacon?.("/api/events", blob);
+    if (!sent) {
+      void fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        keepalive: true,
+        body: JSON.stringify(payload),
+      }).catch(() => undefined);
+    }
+  } catch {
+    /* 이탈 측정 실패가 페이지 이탈 자체를 막으면 안 된다 */
+  }
 }
 
 /**

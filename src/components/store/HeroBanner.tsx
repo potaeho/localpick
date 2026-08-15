@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { trackClick } from "@/lib/events";
 
 export type FeaturedProduct = {
   name: string;
@@ -149,6 +150,9 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
                             key={product.href}
                             href={product.href}
                             className="group flex flex-col items-center gap-1.5"
+                            onClick={() =>
+                              trackClick(`hero_thumbnail:${product.name}`)
+                            }
                           >
                             <div className="relative h-16 w-16 overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-white/30 transition group-hover:scale-105 sm:h-20 sm:w-20">
                               <Image
@@ -181,6 +185,7 @@ export function HeroBanner({ slides }: { slides: HeroSlide[] }) {
                   <Link
                     href={slide.cta.href}
                     className="mt-4 inline-flex w-fit items-center gap-1.5 rounded-lg bg-lp-green px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-lp-green-dark sm:text-base"
+                    onClick={() => trackClick(`hero_cta:${slide.id}`)}
                   >
                     {slide.cta.label}
                     <span aria-hidden="true">&rarr;</span>
