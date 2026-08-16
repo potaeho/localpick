@@ -18,9 +18,11 @@ import { SurveyModal } from "./SurveyModal";
 const VIEWED_KEY = "lp_viewed";
 const BUY_CLICKED_KEY = "lp_buy_clicked";
 const SURVEY_SHOWN_KEY = "lp_survey_shown";
+const SURVEY_COMPLETED_KEY = "lp_survey_completed";
 
-/** 설문 보조 트리거가 발동하는 서로 다른 상품 조회 수 */
-const BROWSE_THRESHOLD = 2;
+/** 랜딩을 조금 살펴본 뒤 설문을 여는 기준 */
+const ENGAGEMENT_DELAY_MS = 5_000;
+const ENGAGEMENT_SCROLL_DEPTH = 15;
 
 function readJson<T>(key: string, fallback: T): T {
   try {
@@ -149,6 +151,68 @@ export function ExperimentProvider({
     [],
   );
 
+  /**
+   * 이 랜딩의 1차 역할은 설문 참여 유도다. 페이지를 열자마자 콘텐츠를 가리지
+   * 않고, 5초를 머물거나 15% 이상 살펴본 시점 중 빠른 쪽에서 한 번만 연다.
+   * 구매 흐름이 이미 시작됐거나 같은 세션에서 설문을 본 사람은 제외한다.
+   */
+  useEffect(() => {
+    let finished = false;
+    let delayElapsed = false;
+
+    function alreadyHandled(): boolean {
+      try {
+        return (
+          window.sessionStorage.getItem(BUY_CLICKED_KEY) === "1" ||
+          window.sessionStorage.getItem(SURVEY_SHOWN_KEY) === "1" ||
+          window.sessionStorage.getItem(SURVEY_COMPLETED_KEY) === "1"
+        );
+      } catch {
+        return false;
+      }
+    }
+
+    function showEngagedSurvey() {
+      if (finished || document.visibilityState !== "visible" || alreadyHandled()) {
+        return;
+      }
+      finished = true;
+      openSurvey("landing_engaged", lastViewedRef.current);
+    }
+
+    function currentScrollDepth(): number {
+      const doc = document.documentElement;
+      const scrollable = doc.scrollHeight - doc.clientHeight;
+      if (scrollable <= 0) return 0;
+      return Math.round((window.scrollY / scrollable) * 100);
+    }
+
+    function onScroll() {
+      if (currentScrollDepth() >= ENGAGEMENT_SCROLL_DEPTH) {
+        showEngagedSurvey();
+      }
+    }
+
+    function onVisibilityChange() {
+      if (document.visibilityState === "visible" && delayElapsed) {
+        showEngagedSurvey();
+      }
+    }
+
+    const timer = window.setTimeout(() => {
+      delayElapsed = true;
+      showEngagedSurvey();
+    }, ENGAGEMENT_DELAY_MS);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("scroll", onScroll);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [openSurvey]);
+
   const noteProductViewed = useCallback(
     (productSlug: string) => {
       lastViewedRef.current = productSlug;
@@ -165,26 +229,8 @@ export function ExperimentProvider({
       viewedRef.current = merged;
       if (merged !== stored) writeSession(VIEWED_KEY, JSON.stringify(merged));
 
-      /*
-       * 보조 경로: 서로 다른 상품을 기준치만큼 보면 그 자리에서 바로 묻는다.
-       *
-       * 이전에는 떠나려는 신호(마우스가 화면 밖으로 나감 / 뒤로가기 스와이프)를
-       * 기다렸는데, 상품만 계속 둘러보는 사람에게는 끝내 뜨지 않아 응답이 거의
-       * 모이지 않았다.
-       *
-       * 구매 버튼을 누른 세션에는 여전히 뜨지 않는다. 구매 의도 측정이 이
-       * 실험의 핵심 지표라, 그 흐름만은 방해하지 않는다.
-       */
-      const buyClicked =
-        window.sessionStorage.getItem(BUY_CLICKED_KEY) === "1";
-      const alreadyShown =
-        window.sessionStorage.getItem(SURVEY_SHOWN_KEY) === "1";
-
-      if (!buyClicked && !alreadyShown && merged.length >= BROWSE_THRESHOLD) {
-        openSurvey("browse_3", productSlug);
-      }
     },
-    [openSurvey],
+    [],
   );
 
   const buyClick = useCallback((productSlug: string) => {
@@ -221,6 +267,13 @@ export function ExperimentProvider({
         onSurvey={() => {
           const slug = fakeDoorSlug ?? undefined;
           setFakeDoorSlug(null);
+          try {
+            if (window.sessionStorage.getItem(SURVEY_COMPLETED_KEY) === "1") {
+              return;
+            }
+          } catch {
+            // 저장소를 쓸 수 없으면 현재 구매 경로의 설문을 정상적으로 연다.
+          }
           openSurvey("buy_click", slug);
         }}
       />
@@ -230,6 +283,7 @@ export function ExperimentProvider({
           open
           trigger={survey.trigger}
           productSlug={survey.productSlug}
+          onCompleted={() => writeSession(SURVEY_COMPLETED_KEY, "1")}
           onClose={() => setSurvey(null)}
         />
       )}

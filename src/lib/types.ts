@@ -140,7 +140,10 @@ export const EVENT_TYPES = [
   "product_view",
   "buy_click",
   "fakedoor_shown",
+  "survey_impression",
   "survey_start",
+  "survey_dismiss",
+  "survey_submit_error",
   "survey_complete",
   "interview_consent",
   "creator_story_click",
@@ -167,7 +170,17 @@ export type EventType = (typeof EVENT_TYPES)[number];
 export const MULTI_FIRE_EVENT_TYPES = new Set<EventType>(["ui_click", "page_exit"]);
 
 /** 설문이 열린 경로 */
-export type SurveyTrigger = "buy_click" | "browse_3";
+export const SURVEY_TRIGGERS = [
+  "buy_click",
+  "browse_3",
+  "landing_engaged",
+] as const;
+
+export type SurveyTrigger = (typeof SURVEY_TRIGGERS)[number];
+
+export function isSurveyTrigger(value: unknown): value is SurveyTrigger {
+  return SURVEY_TRIGGERS.includes(value as SurveyTrigger);
+}
 
 export type DeviceType = "mobile" | "desktop";
 
@@ -324,6 +337,20 @@ export type FunnelStep = {
   previousValue?: number;
 };
 
+/** 설문이 열린 경로별 참여·완료 상태. 모두 세션 단위로 중복 제거한다. */
+export type SurveyFunnelMetric = {
+  trigger: SurveyTrigger;
+  label: string;
+  reached: number;
+  started: number;
+  completed: number;
+  dismissed: number;
+  submitErrors: number;
+  abandoned: number;
+  startRate: number;
+  completionRate: number;
+};
+
 export type ProductFunnelMetric = {
   productSlug: string;
   detailViews: number;
@@ -379,6 +406,7 @@ export type DashboardStats = {
   generatedAt: string;
   primaryKpis: MetricValue[];
   funnel: FunnelStep[];
+  surveyFunnel: SurveyFunnelMetric[];
   secondaryMetrics: MetricValue[];
   productFunnels: ProductFunnelMetric[];
   campaigns: CampaignMetric[];

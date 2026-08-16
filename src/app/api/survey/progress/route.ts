@@ -1,10 +1,15 @@
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 
-import type { SurveyAnswers, SurveyProgress } from "@/lib/types";
+import {
+  isSurveyTrigger,
+  type SurveyAnswers,
+  type SurveyProgress,
+  type SurveyTrigger,
+} from "@/lib/types";
 import { storage } from "@/lib/store";
 import { SESSION_COOKIE } from "@/proxy";
-import { QUESTIONS } from "@/lib/survey-questions";
+import { QUESTIONS, questionsForTrigger } from "@/lib/survey-questions";
 import { getVerifiedAnonymousSessionId } from "@/lib/anonymous-session";
 import { getProduct } from "@/lib/products";
 
@@ -37,9 +42,10 @@ function strList(value: unknown, max = 12): string[] {
 }
 
 function optionValues(
+  trigger: SurveyTrigger,
   id: "buyReason" | "purchaseExperience" | "channels" | "trustFactors" | "regionInterest",
 ): string[] {
-  const question = QUESTIONS.find((item) => item.id === id);
+  const question = questionsForTrigger(trigger).find((item) => item.id === id);
   return question && (question.kind === "single" || question.kind === "multi")
     ? question.options
     : [];
@@ -48,13 +54,16 @@ function optionValues(
 const QUESTION_IDS = new Set(QUESTIONS.map((question) => question.id));
 
 /** 이미 알려진 선택지에 있는 값만 통과시킨다. 나머지는 자동저장이라 조용히 버린다. */
-function sanitizeAnswers(input: unknown): Partial<SurveyAnswers> {
+function sanitizeAnswers(
+  input: unknown,
+  trigger: SurveyTrigger,
+): Partial<SurveyAnswers> {
   if (!input || typeof input !== "object") return {};
   const raw = input as Record<string, unknown>;
   const answers: Partial<SurveyAnswers> = {};
 
   const buyReason = str(raw.buyReason, 120);
-  if (buyReason && optionValues("buyReason").includes(buyReason)) {
+  if (buyReason && optionValues(trigger, "buyReason").includes(buyReason)) {
     answers.buyReason = buyReason;
   }
   const buyReasonDetail = str(raw.buyReasonDetail, 1000);
@@ -64,18 +73,18 @@ function sanitizeAnswers(input: unknown): Partial<SurveyAnswers> {
   if (useContext) answers.useContext = useContext;
 
   const purchaseExperience = str(raw.purchaseExperience, 120);
-  if (purchaseExperience && optionValues("purchaseExperience").includes(purchaseExperience)) {
+  if (purchaseExperience && optionValues(trigger, "purchaseExperience").includes(purchaseExperience)) {
     answers.purchaseExperience = purchaseExperience;
   }
 
-  const channels = strList(raw.channels).filter((v) => optionValues("channels").includes(v));
+  const channels = strList(raw.channels).filter((v) => optionValues(trigger, "channels").includes(v));
   if (channels.length > 0) answers.channels = channels;
 
-  const trustFactors = strList(raw.trustFactors).filter((v) => optionValues("trustFactors").includes(v));
+  const trustFactors = strList(raw.trustFactors).filter((v) => optionValues(trigger, "trustFactors").includes(v));
   if (trustFactors.length > 0) answers.trustFactors = trustFactors;
 
   const regionInterest = str(raw.regionInterest, 120);
-  if (regionInterest && optionValues("regionInterest").includes(regionInterest)) {
+  if (regionInterest && optionValues(trigger, "regionInterest").includes(regionInterest)) {
     answers.regionInterest = regionInterest;
   }
 
@@ -105,7 +114,7 @@ export async function POST(request: NextRequest) {
   );
   if (!sessionId) return new Response("no session", { status: 400 });
 
-  if (input.trigger !== "buy_click" && input.trigger !== "browse_3") {
+  if (!isSurveyTrigger(input.trigger)) {
     return new Response("invalid survey trigger", { status: 400 });
   }
   const trigger = input.trigger;
@@ -115,7 +124,7 @@ export async function POST(request: NextRequest) {
   const productSlug =
     rawProductSlug && getProduct(rawProductSlug) ? rawProductSlug : undefined;
 
-  const answers = sanitizeAnswers(input.answers);
+  const answers = sanitizeAnswers(input.answers, trigger);
   // 아무것도 안 골랐으면 저장할 게 없다 — 빈 스냅샷을 쌓아 upsert 트래픽만
   // 늘릴 이유가 없다.
   if (Object.keys(answers).length === 0) {
@@ -166,7 +175,7 @@ export async function DELETE(request: NextRequest) {
   );
   if (!sessionId) return new Response("no session", { status: 400 });
 
-  if (input.trigger !== "buy_click" && input.trigger !== "browse_3") {
+  if (!isSurveyTrigger(input.trigger)) {
     return new Response("invalid survey trigger", { status: 400 });
   }
   const productSlug = str(input.productSlug, 120);

@@ -84,7 +84,7 @@ alter table public.lp_events add column if not exists product_slug text;
 alter table public.lp_events add column if not exists region_id text;
 alter table public.lp_events add column if not exists creator_id text;
 alter table public.lp_events add column if not exists device text;       -- mobile / desktop
-alter table public.lp_events add column if not exists trigger text;      -- buy_click / browse_3 (survey events only)
+alter table public.lp_events add column if not exists trigger text;      -- buy_click / browse_3 / landing_engaged
 alter table public.lp_events add column if not exists utm_source text;
 alter table public.lp_events add column if not exists utm_medium text;
 alter table public.lp_events add column if not exists utm_campaign text;

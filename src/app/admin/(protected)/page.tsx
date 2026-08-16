@@ -8,6 +8,7 @@ import { ProductFunnelTable } from "@/components/admin/ProductFunnelTable";
 import { InterviewList } from "@/components/admin/InterviewList";
 import { SurveyResponseList } from "@/components/admin/SurveyResponseList";
 import { AbandonedSurveyList } from "@/components/admin/AbandonedSurveyList";
+import { SurveyFunnelTable } from "@/components/admin/SurveyFunnelTable";
 
 export const metadata: Metadata = {
   title: "실험 대시보드 - LOCAL PICK",
@@ -50,7 +51,7 @@ export default async function AdminDashboardPage() {
     <>
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-lp-ink">1차 실험 — 상품 수요 비교</h1>
+          <h1 className="text-xl font-bold text-lp-ink">랜딩 설문 · 상품 수요 실험</h1>
           <p className="mt-1 text-sm text-lp-gray-500">
             집계 시각 {new Date(stats.generatedAt).toLocaleString("ko-KR")}
           </p>
@@ -84,7 +85,14 @@ export default async function AdminDashboardPage() {
       </aside>
 
       <Section
-        title="1차 핵심 지표"
+        title="설문 유도 성과"
+        description="랜딩에서 설문이 열린 뒤 시작하고 끝낸 비율을 유입 경로별로 봅니다. 시작 또는 완료 기록이 있으면 노출 이벤트가 누락돼도 '도달'로 보정합니다."
+      >
+        <SurveyFunnelTable rows={stats.surveyFunnel} />
+      </Section>
+
+      <Section
+        title="구매 의도 핵심 지표"
         description="광고를 본 사람이 상품 상세를 거쳐 인터뷰 대상자가 되기까지의 전환입니다."
       >
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -178,7 +186,7 @@ export default async function AdminDashboardPage() {
 
       <Section
         title="설문 응답"
-        description="선택형 문항 집계와 주관식 원문입니다."
+        description="선택형 문항 집계와 주관식 원문입니다. 개별 응답은 랜딩 탐색·구매 클릭 등 유입 경로와 상품으로 걸러볼 수 있습니다."
       >
         <SurveyResponseList
           summaries={stats.surveySummaries}

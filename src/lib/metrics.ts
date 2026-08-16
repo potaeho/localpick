@@ -15,9 +15,11 @@ import type {
   MetricValue,
   ProductFunnelMetric,
   SurveyAnswers,
+  SurveyFunnelMetric,
   SurveyProgress,
   SurveyQuestionSummary,
   SurveyResponse,
+  SurveyTrigger,
   TrackedEvent,
 } from "@/lib/types";
 
@@ -64,13 +66,90 @@ function answerCounts(question: string, values: string[]): SurveyQuestionSummary
 
 function createSurveySummaries(surveys: SurveyResponse[]): SurveyQuestionSummary[] {
   return [
-    answerCounts("구매 버튼을 누른 이유", surveys.map((survey) => survey.buyReason)),
+    answerCounts("관심·구매 행동을 이어간 이유", surveys.map((survey) => survey.buyReason)),
     answerCounts("온라인 지역 상품 구매 경험", surveys.map((survey) => survey.purchaseExperience)),
     answerCounts("주 사용 구매 채널", surveys.flatMap((survey) => survey.channels)),
     answerCounts("신뢰 판단 정보", surveys.flatMap((survey) => survey.trustFactors)),
     answerCounts("지역·생산자 관심", surveys.map((survey) => survey.regionInterest)),
     answerCounts("인터뷰 참여 의사", surveys.map((survey) => (survey.interviewWilling ? "참여 의사 있음" : "참여 의사 없음"))),
   ];
+}
+
+const SURVEY_TRIGGER_LABELS: Record<SurveyTrigger, string> = {
+  landing_engaged: "랜딩 탐색 후 자동 설문",
+  buy_click: "구매 클릭 후 설문",
+  browse_3: "상품 탐색 후 설문(기존)",
+};
+
+function eventSessionsForTrigger(
+  events: TrackedEvent[],
+  trigger: SurveyTrigger,
+  type: EventType,
+): Set<string> {
+  return new Set(
+    events
+      .filter((event) => event.type === type && event.trigger === trigger)
+      .map((event) => event.sessionId),
+  );
+}
+
+/**
+ * 설문 유도 성과를 경로별로 보여준다.
+ *
+ * 네트워크 상황 때문에 impression/start 이벤트 하나가 빠져도 이미 다음 단계가
+ * 저장돼 있다면 앞 단계에 도달한 것으로 보정한다. 따라서 관리자 표의 퍼널은
+ * 항상 도달 >= 시작 >= 완료 관계를 유지하면서 완료 설문을 누락하지 않는다.
+ */
+function surveyFunnelMetrics(
+  events: TrackedEvent[],
+  surveys: SurveyResponse[],
+  progress: SurveyProgress[],
+): SurveyFunnelMetric[] {
+  const displayOrder: SurveyTrigger[] = [
+    "landing_engaged",
+    "buy_click",
+    "browse_3",
+  ];
+
+  const completedDedupeKeys = new Set(
+    surveys.map((survey) => survey.dedupeKey),
+  );
+
+  return displayOrder.map((trigger) => {
+    const impressions = eventSessionsForTrigger(events, trigger, "survey_impression");
+    const starts = eventSessionsForTrigger(events, trigger, "survey_start");
+    const completed = new Set(
+      surveys
+        .filter((survey) => survey.trigger === trigger)
+        .map((survey) => survey.sessionId),
+    );
+    const started = new Set([...starts, ...completed]);
+    const reached = new Set([...impressions, ...started]);
+    const dismissed = eventSessionsForTrigger(events, trigger, "survey_dismiss");
+    const submitErrors = eventSessionsForTrigger(events, trigger, "survey_submit_error");
+    const abandoned = new Set(
+      progress
+        .filter(
+          (entry) =>
+            entry.trigger === trigger &&
+            !completedDedupeKeys.has(entry.dedupeKey),
+        )
+        .map((entry) => entry.sessionId),
+    );
+
+    return {
+      trigger,
+      label: SURVEY_TRIGGER_LABELS[trigger],
+      reached: reached.size,
+      started: started.size,
+      completed: completed.size,
+      dismissed: dismissed.size,
+      submitErrors: submitErrors.size,
+      abandoned: abandoned.size,
+      startRate: percent(started.size, reached.size),
+      completionRate: percent(completed.size, started.size),
+    };
+  });
 }
 
 function productFunnels(
@@ -270,6 +349,7 @@ export function calculateDashboardStats(
     generatedAt: new Date().toISOString(),
     primaryKpis,
     funnel,
+    surveyFunnel: surveyFunnelMetrics(events, surveys, progress),
     secondaryMetrics,
     productFunnels: productFunnels(events, buyerPathSurveys, buyerPathConsents),
     campaigns: campaignMetrics(events),

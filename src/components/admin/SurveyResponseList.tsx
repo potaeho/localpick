@@ -1,7 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { SurveyQuestionSummary, SurveyResponse } from "@/lib/types";
+import type {
+  SurveyQuestionSummary,
+  SurveyResponse,
+  SurveyTrigger,
+} from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -74,6 +78,9 @@ export function SurveyResponseList({
   productNames: Record<string, string>;
 }) {
   const [productFilter, setProductFilter] = useState<string>("all");
+  const [triggerFilter, setTriggerFilter] = useState<SurveyTrigger | "all">(
+    "all",
+  );
   const [baseQuestionKey, setBaseQuestionKey] = useState(
     CROSS_TAB_QUESTIONS[0].key,
   );
@@ -88,11 +95,14 @@ export function SurveyResponseList({
   }, [responses]);
 
   const filtered = useMemo(
-    () =>
-      productFilter === "all"
-        ? responses
-        : responses.filter((r) => r.productSlug === productFilter),
-    [responses, productFilter],
+    () => responses.filter((response) => {
+      const productMatches =
+        productFilter === "all" || response.productSlug === productFilter;
+      const triggerMatches =
+        triggerFilter === "all" || response.trigger === triggerFilter;
+      return productMatches && triggerMatches;
+    }),
+    [responses, productFilter, triggerFilter],
   );
 
   const baseQuestion =
@@ -292,6 +302,31 @@ export function SurveyResponseList({
       <div>
         <div className="flex flex-wrap items-center gap-3">
           <label
+            htmlFor="survey-trigger-filter"
+            className="text-sm font-medium text-lp-ink"
+          >
+            유입 경로
+          </label>
+          <Select
+            value={triggerFilter}
+            onValueChange={(value) =>
+              setTriggerFilter(value as SurveyTrigger | "all")
+            }
+          >
+            <SelectTrigger
+              id="survey-trigger-filter"
+              className="h-10 rounded-lp-control border-lp-gray-300 bg-white px-lp-md text-sm"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">전체 경로</SelectItem>
+              <SelectItem value="landing_engaged">랜딩 탐색 후</SelectItem>
+              <SelectItem value="buy_click">구매 클릭 후</SelectItem>
+              <SelectItem value="browse_3">상품 탐색 후(기존)</SelectItem>
+            </SelectContent>
+          </Select>
+          <label
             htmlFor="survey-product-filter"
             className="text-sm font-medium text-lp-ink"
           >
@@ -332,7 +367,9 @@ export function SurveyResponseList({
                     <Badge variant="secondary" className="text-lp-gray-700">
                       {response.trigger === "buy_click"
                         ? "구매 클릭"
-                        : "탐색 2개 후"}
+                        : response.trigger === "landing_engaged"
+                          ? "랜딩 탐색 후"
+                          : "상품 탐색 후"}
                     </Badge>
                     <span>
                       {response.device === "mobile" ? "모바일" : "데스크탑"}

@@ -4,6 +4,7 @@ import type { NextRequest } from "next/server";
 import {
   EVENT_TYPES,
   MULTI_FIRE_EVENT_TYPES,
+  isSurveyTrigger,
   type EventType,
   type TrackedEvent,
 } from "@/lib/types";
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
   const productSlug = product?.slug;
   const creatorId = product?.creatorId ?? creator?.id;
   const regionId = product?.regionId ?? creator?.regionId ?? region?.id;
-  const trigger = input.trigger === "buy_click" || input.trigger === "browse_3" ? input.trigger : undefined;
+  const trigger = isSurveyTrigger(input.trigger) ? input.trigger : undefined;
 
   // 클릭 로그·이탈 이벤트는 같은 세션에서 여러 번 일어나는 게 정상이라,
   // dedupe_key에 매번 다른 값을 섞어야 서버가 두 번째부터를 중복으로 보고

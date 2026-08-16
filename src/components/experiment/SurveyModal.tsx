@@ -12,6 +12,9 @@ import type { SurveyAnswers, SurveyTrigger } from "@/lib/types";
 type AnswerMap = Partial<Record<keyof SurveyAnswers, unknown>>;
 
 const EMPTY: AnswerMap = { channels: [], trustFactors: [] };
+const INITIAL_GAUGE_PERCENT = 6;
+const FINAL_ANSWER_GAUGE_PERCENT = 97;
+const SAVE_CONFIRMATION_DELAY_MS = 500;
 
 /** 화면 폭에 따라 한 화면에 보여줄 문항 수를 정한다 */
 function usePerStep(): number {
@@ -60,6 +63,33 @@ function isAnswered(question: Question, answers: AnswerMap): boolean {
   }
 }
 
+/** 선택을 실제로 남긴 문항만 센다. 선택 문항이라도 빈 배열은 완료로 보지 않는다. */
+function answeredCount(questions: Question[], answers: AnswerMap): number {
+  return questions.filter((question) => {
+    const value = answers[question.id];
+    if (question.kind === "text") {
+      return typeof value === "string" && value.trim().length > 0;
+    }
+    return isAnswered(question, answers);
+  }).length;
+}
+
+/**
+ * 첫 답변에서 크게 전진하고 뒤로 갈수록 증가 폭이 줄어드는 동기부여 곡선.
+ * 마지막 답변만으로는 97%에 머물고 서버 저장이 확인된 뒤에만 100%가 된다.
+ */
+export function motivationalProgress(completed: number, total: number): number {
+  if (total <= 0 || completed <= 0) return INITIAL_GAUGE_PERCENT;
+  if (completed >= total) return FINAL_ANSWER_GAUGE_PERCENT;
+
+  const ratio = Math.min(1, completed / total);
+  const eased = 1 - (1 - ratio) ** 2.5;
+  return Math.round(
+    INITIAL_GAUGE_PERCENT +
+      (FINAL_ANSWER_GAUGE_PERCENT - INITIAL_GAUGE_PERCENT) * eased,
+  );
+}
+
 /**
  * 설문 모달.
  *
@@ -71,11 +101,13 @@ export function SurveyModal({
   open,
   trigger,
   productSlug,
+  onCompleted,
   onClose,
 }: {
   open: boolean;
   trigger: SurveyTrigger;
   productSlug?: string;
+  onCompleted: () => void;
   onClose: () => void;
 }) {
   const perStep = usePerStep();
@@ -86,6 +118,8 @@ export function SurveyModal({
   );
   const [surveyId, setSurveyId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [maxCompletedCount, setMaxCompletedCount] = useState(0);
+  const [saveConfirmed, setSaveConfirmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const questions = useMemo(() => questionsForTrigger(trigger), [trigger]);
@@ -98,37 +132,56 @@ export function SurveyModal({
     return grouped;
   }, [perStep, questions]);
 
-  // StrictMode가 개발 중 effect를 두 번 실행하므로 한 번만 보내도록 막는다
-  const startSent = useRef(false);
+  // StrictMode가 개발 중 effect를 두 번 실행하므로 한 번만 보내도록 막는다.
+  const impressionSent = useRef(false);
   useEffect(() => {
-    if (!open || startSent.current) return;
+    if (!open || impressionSent.current) return;
+    impressionSent.current = true;
+    void trackOnce(`survey_impression:${trigger}:${productSlug ?? "none"}`, {
+      type: "survey_impression",
+      productSlug,
+      trigger,
+    });
+  }, [open, productSlug, trigger]);
+
+  const startSent = useRef(false);
+  function noteFirstAnswer() {
+    if (startSent.current) return;
     startSent.current = true;
     void trackOnce(`survey_start:${trigger}:${productSlug ?? "none"}`, {
       type: "survey_start",
       productSlug,
       trigger,
     });
-  }, [open, productSlug, trigger]);
+  }
 
   // 마지막으로 손댄 문항 — 이탈 시 "어디서 멈췄는지"로 함께 저장한다
   const lastTouchedRef = useRef<keyof SurveyAnswers | undefined>(undefined);
 
   function setAnswer(id: keyof SurveyAnswers, value: unknown) {
+    noteFirstAnswer();
     lastTouchedRef.current = id;
-    setAnswers((prev) => ({ ...prev, [id]: value }));
+    const next = { ...answers, [id]: value };
+    setAnswers(next);
+    setMaxCompletedCount((count) =>
+      Math.max(count, answeredCount(questions, next)),
+    );
   }
 
   function toggleMulti(id: keyof SurveyAnswers, option: string) {
+    noteFirstAnswer();
     lastTouchedRef.current = id;
-    setAnswers((prev) => {
-      const list = Array.isArray(prev[id]) ? (prev[id] as string[]) : [];
-      return {
-        ...prev,
-        [id]: list.includes(option)
-          ? list.filter((item) => item !== option)
-          : [...list, option],
-      };
-    });
+    const list = Array.isArray(answers[id]) ? (answers[id] as string[]) : [];
+    const next = {
+      ...answers,
+      [id]: list.includes(option)
+        ? list.filter((item) => item !== option)
+        : [...list, option],
+    };
+    setAnswers(next);
+    setMaxCompletedCount((count) =>
+      Math.max(count, answeredCount(questions, next)),
+    );
   }
 
   /**
@@ -167,7 +220,16 @@ export function SurveyModal({
 
   /** Esc·배경 클릭으로 나갈 때도 방금 고른 값까지는 잡아둔다(디바운스를 기다리지 않고 즉시). */
   function handleClose() {
-    if (phase === "questions") saveProgress(answers);
+    if (phase === "questions") {
+      saveProgress(answers);
+      if (!saveConfirmed) {
+        void trackOnce(`survey_dismiss:${trigger}:${productSlug ?? "none"}`, {
+          type: "survey_dismiss",
+          productSlug,
+          trigger,
+        });
+      }
+    }
     onClose();
   }
 
@@ -177,9 +239,32 @@ export function SurveyModal({
   const current = steps[currentStep] ?? [];
   const canAdvance = current.every((question) => isAnswered(question, answers));
   const isLastStep = currentStep === steps.length - 1;
+  const completedCount = Math.max(
+    maxCompletedCount,
+    Math.min(currentStep * perStep, questions.length),
+  );
+  const gaugePercent = saveConfirmed
+    ? 100
+    : motivationalProgress(completedCount, questions.length);
+  const gaugeText = saveConfirmed
+    ? "설문 답변 저장 완료"
+    : `전체 ${questions.length}개 문항 중 ${completedCount}개 완료`;
+
+  function advance() {
+    const completedThroughStep = Math.min(
+      (currentStep + 1) * perStep,
+      questions.length,
+    );
+    setMaxCompletedCount((count) =>
+      Math.max(count, completedThroughStep),
+    );
+    setStep((value) => Math.min(value + 1, steps.length - 1));
+  }
 
   async function submit() {
+    setMaxCompletedCount(questions.length);
     setSubmitting(true);
+    setSaveConfirmed(false);
     setError(null);
 
     try {
@@ -210,10 +295,23 @@ export function SurveyModal({
       }).catch(() => undefined);
 
       setSurveyId(id);
+      setSaveConfirmed(true);
+      onCompleted();
+      await new Promise((resolve) =>
+        window.setTimeout(resolve, SAVE_CONFIRMATION_DELAY_MS),
+      );
       // 인터뷰 참여 의사와 무관하게 추첨 참여 연락처는 모두에게 안내한다.
       setPhase("consent");
     } catch {
       setError("저장에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      void trackOnce(
+        `survey_submit_error:${trigger}:${productSlug ?? "none"}`,
+        {
+          type: "survey_submit_error",
+          productSlug,
+          trigger,
+        },
+      );
     } finally {
       setSubmitting(false);
     }
@@ -228,24 +326,35 @@ export function SurveyModal({
               더 나은 로컬 상품 구매 경험을 위해
             </h2>
             <p className="mt-1 text-sm text-lp-gray-700">
-              {steps.length}단계 중 {currentStep + 1}단계 · 약 2분
+              전체 문항 · 약 2분
             </p>
             <p className="mt-1 text-xs text-lp-orange">
               참여해 주신 분들 중 추첨을 통해 로컬 특산품을 보내드려요
             </p>
             <div
-              className="mt-3 h-1.5 overflow-hidden rounded-lp-circle bg-lp-gray-100"
+              className="mt-3 h-2.5 overflow-hidden rounded-lp-circle bg-lp-gray-100"
               role="progressbar"
-              aria-valuenow={currentStep + 1}
-              aria-valuemin={1}
-              aria-valuemax={steps.length}
+              aria-valuenow={saveConfirmed ? questions.length : completedCount}
+              aria-valuemin={0}
+              aria-valuemax={questions.length}
+              aria-valuetext={gaugeText}
               aria-label="설문 진행률"
             >
               <div
-                className="h-full rounded-lp-circle bg-lp-green transition-all"
-                style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+                className={`h-full rounded-lp-circle transition-[width,background-color] duration-500 ease-out motion-reduce:transition-none ${
+                  saveConfirmed ? "bg-lp-green" : "bg-lp-orange"
+                }`}
+                style={{ width: `${gaugePercent}%` }}
               />
             </div>
+            {saveConfirmed && (
+              <p
+                aria-live="polite"
+                className="mt-2 text-sm font-medium text-lp-green"
+              >
+                ✓ 답변이 안전하게 저장됐습니다
+              </p>
+            )}
           </div>
 
           <div className="space-y-8 px-6 py-6">
@@ -282,7 +391,7 @@ export function SurveyModal({
               disabled={!canAdvance || submitting}
               onClick={() => {
                 if (isLastStep) void submit();
-                else setStep((s) => Math.min(s + 1, steps.length - 1));
+                else advance();
               }}
               className="h-12 flex-1 rounded-lp-control text-lp-button disabled:bg-lp-gray-300"
             >
@@ -316,7 +425,7 @@ export function SurveyModal({
             onClick={onClose}
             className="mt-7 h-12 w-full rounded-lp-control text-lp-button"
           >
-            닫기
+            계속 둘러보기
           </Button>
         </div>
       )}
