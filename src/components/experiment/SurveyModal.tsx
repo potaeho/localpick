@@ -329,7 +329,7 @@ export function SurveyModal({
               전체 문항 · 약 2분
             </p>
             <p className="mt-1 text-xs text-lp-orange">
-              참여해 주신 분들 중 추첨을 통해 로컬 특산품을 보내드려요
+              설문 참여자 중 추첨을 통해 상품을 드립니다
             </p>
             <div
               className="mt-3 h-2.5 overflow-hidden rounded-lp-circle bg-lp-gray-100"
