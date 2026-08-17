@@ -1,6 +1,9 @@
 import "server-only";
 
-import { NO_PURCHASE_EXPERIENCE, QUESTIONS } from "@/lib/survey-questions";
+import {
+  NO_PURCHASE_EXPERIENCE,
+  questionsForAnswers,
+} from "@/lib/survey-questions";
 import { storage } from "@/lib/store";
 import type {
   AbandonedAnswer,
@@ -66,11 +69,30 @@ function answerCounts(question: string, values: string[]): SurveyQuestionSummary
 
 function createSurveySummaries(surveys: SurveyResponse[]): SurveyQuestionSummary[] {
   return [
-    answerCounts("관심·구매 행동을 이어간 이유", surveys.map((survey) => survey.buyReason)),
     answerCounts("온라인 지역 상품 구매 경험", surveys.map((survey) => survey.purchaseExperience)),
-    answerCounts("주 사용 구매 채널", surveys.flatMap((survey) => survey.channels)),
-    answerCounts("신뢰 판단 정보", surveys.flatMap((survey) => survey.trustFactors)),
-    answerCounts("지역·생산자 관심", surveys.map((survey) => survey.regionInterest)),
+    answerCounts("구매 경험자의 실제 구매처", surveys.flatMap((survey) => survey.channels ?? [])),
+    answerCounts("구매 상품 종류", surveys.flatMap((survey) => survey.productCategories ?? [])),
+    answerCounts("구매 빈도", surveys.map((survey) => survey.purchaseFrequency)),
+    answerCounts("1회 평균 구매 금액", surveys.map((survey) => survey.typicalSpend)),
+    answerCounts("구매 목적", surveys.flatMap((survey) => survey.purchasePurposes ?? [])),
+    answerCounts("구매 판단 정보", surveys.flatMap((survey) => survey.trustFactors ?? [])),
+    answerCounts("구매 불편·실망", surveys.flatMap((survey) => survey.purchaseProblems ?? [])),
+    answerCounts("온라인 미구매 이유", surveys.flatMap((survey) => survey.purchaseBarriers ?? [])),
+    answerCounts("미경험자의 오프라인 구매처", surveys.flatMap((survey) => survey.offlineChannels ?? [])),
+    answerCounts("온라인 구매 전환 조건", surveys.flatMap((survey) => survey.purchaseConditions ?? [])),
+    answerCounts("예상 온라인 구매처", surveys.flatMap((survey) => survey.prospectiveChannels ?? [])),
+    answerCounts("온라인 구매 우려", surveys.flatMap((survey) => survey.purchaseConcerns ?? [])),
+    answerCounts("평소 생산 지역 확인", surveys.map((survey) => survey.regionAttention)),
+    answerCounts("지역 확인 이유", surveys.flatMap((survey) => survey.regionReasons ?? [])),
+    answerCounts("지역 미확인 이유", surveys.flatMap((survey) => survey.regionNonReasons ?? [])),
+    answerCounts("생산자 이야기의 도움", surveys.map((survey) => survey.producerStoryHelp)),
+    answerCounts("생산 과정 설명의 신뢰 효과", surveys.map((survey) => survey.processInfoTrust)),
+    answerCounts("생산 지역 관심 가능성", surveys.map((survey) => survey.regionInterest)),
+    answerCounts("지역 여행 정보 관심", surveys.map((survey) => survey.travelInfoInterest)),
+    answerCounts("지역 기여 설명의 구매 영향", surveys.map((survey) => survey.regionalImpactInfluence)),
+    answerCounts("선호 상품 소개 중심", surveys.map((survey) => survey.preferredStoryFocus)),
+    answerCounts("연령대", surveys.map((survey) => survey.ageGroup)),
+    answerCounts("성별", surveys.map((survey) => survey.gender)),
     answerCounts("인터뷰 참여 의사", surveys.map((survey) => (survey.interviewWilling ? "참여 의사 있음" : "참여 의사 없음"))),
   ];
 }
@@ -213,11 +235,12 @@ function campaignMetrics(events: TrackedEvent[]): CampaignMetric[] {
  */
 function formatAbandonedAnswers(
   answers: Partial<SurveyAnswers>,
+  trigger: SurveyTrigger,
 ): { rows: AbandonedAnswer[]; answeredCount: number } {
   const rows: AbandonedAnswer[] = [];
   let answeredCount = 0;
 
-  for (const question of QUESTIONS) {
+  for (const question of questionsForAnswers(trigger, answers)) {
     const value = answers[question.id];
     if (value === undefined) continue;
 
@@ -255,7 +278,7 @@ function abandonedSurveyRows(
   return progress
     .filter((entry) => !completedDedupeKeys.has(entry.dedupeKey))
     .map((entry) => {
-      const { rows, answeredCount } = formatAbandonedAnswers(entry.answers);
+      const { rows, answeredCount } = formatAbandonedAnswers(entry.answers, entry.trigger);
       return {
         id: entry.dedupeKey,
         ts: entry.ts,
@@ -264,6 +287,7 @@ function abandonedSurveyRows(
         device: entry.device,
         utmCampaign: entry.utmCampaign,
         answeredCount,
+        totalQuestions: questionsForAnswers(entry.trigger, entry.answers).length,
         answers: rows,
       };
     })
@@ -307,8 +331,8 @@ export function calculateDashboardStats(
   const buyerPathSurveys = surveys.filter((survey) => survey.trigger === "buy_click");
   const buyerSurveyIds = new Set(buyerPathSurveys.map((survey) => survey.id));
   const buyerSurveySessions = new Set(buyerPathSurveys.map((survey) => survey.sessionId));
-  // 추첨만 신청한 연락처는 인터뷰 동의 관련 KPI·퍼널에 섞이지 않는다 —
-  // 아래 "인터뷰 대상자" 목록(interviewRows)에서는 목적과 무관하게 계속 보인다.
+  // 기존 저장값 중 추첨 전용 연락처가 남아 있을 수 있으므로 인터뷰 관련
+  // KPI·퍼널에는 interview 목적이 있는 연락처만 포함한다.
   const buyerPathConsents = consents.filter(
     (consent) =>
       buyerSurveyIds.has(consent.surveyId) &&

@@ -5,33 +5,24 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Modal } from "./Modal";
 import { ConsentForm } from "./ConsentForm";
 import { Button } from "@/components/ui/button";
-import { questionsForTrigger, type Question } from "@/lib/survey-questions";
+import {
+  NO_PURCHASE_EXPERIENCE,
+  REGION_ATTENTION_LOW,
+  questionsForAnswers,
+  type Question,
+} from "@/lib/survey-questions";
 import { getDevice, getUtm, trackOnce } from "@/lib/events";
 import type { SurveyAnswers, SurveyTrigger } from "@/lib/types";
 
 type AnswerMap = Partial<Record<keyof SurveyAnswers, unknown>>;
 
-const EMPTY: AnswerMap = { channels: [], trustFactors: [] };
+const EMPTY: AnswerMap = {};
 const INITIAL_GAUGE_PERCENT = 6;
+const FIRST_ANSWER_GAUGE_PERCENT = 32;
 const FINAL_ANSWER_GAUGE_PERCENT = 97;
 const SAVE_CONFIRMATION_DELAY_MS = 500;
 
-/** 화면 폭에 따라 한 화면에 보여줄 문항 수를 정한다 */
-function usePerStep(): number {
-  const [perStep, setPerStep] = useState(1);
-
-  useEffect(() => {
-    const query = window.matchMedia("(min-width: 640px)");
-    const apply = () => setPerStep(query.matches ? 2 : 1);
-    apply();
-    query.addEventListener("change", apply);
-    return () => query.removeEventListener("change", apply);
-  }, []);
-
-  return perStep;
-}
-
-/** 뭔가 하나라도 골랐는지 — 초기 빈 상태({channels:[], trustFactors:[]})는 제외 */
+/** 뭔가 하나라도 골랐는지 확인한다. */
 function hasAnyAnswer(answers: AnswerMap): boolean {
   return Object.values(answers).some((value) => {
     if (Array.isArray(value)) return value.length > 0;
@@ -81,21 +72,22 @@ function answeredCount(questions: Question[], answers: AnswerMap): number {
 export function motivationalProgress(completed: number, total: number): number {
   if (total <= 0 || completed <= 0) return INITIAL_GAUGE_PERCENT;
   if (completed >= total) return FINAL_ANSWER_GAUGE_PERCENT;
+  if (completed === 1) return FIRST_ANSWER_GAUGE_PERCENT;
 
-  const ratio = Math.min(1, completed / total);
-  const eased = 1 - (1 - ratio) ** 2.5;
+  const ratio = Math.min(1, (completed - 1) / Math.max(1, total - 1));
+  const eased = 1 - (1 - ratio) ** 2.2;
   return Math.round(
-    INITIAL_GAUGE_PERCENT +
-      (FINAL_ANSWER_GAUGE_PERCENT - INITIAL_GAUGE_PERCENT) * eased,
+    FIRST_ANSWER_GAUGE_PERCENT +
+      (FINAL_ANSWER_GAUGE_PERCENT - FIRST_ANSWER_GAUGE_PERCENT) * eased,
   );
 }
 
 /**
  * 설문 모달.
  *
- * 기획서 5단계의 7문항을 2분 안에 끝낼 수 있도록, 모바일은 한 화면에 한 문항,
- * 데스크탑은 두 문항씩 보여준다. 인터뷰 연락처는 설문이 저장된 뒤 별도 화면에서
- * 따로 받는다.
+ * 구매 경험과 지역 확인 행동에 따라 문항을 분기한다. 앞 답변에 따라 다음
+ * 질문이 달라지므로 모든 화면에서 한 번에 한 문항만 보여준다. 인터뷰 연락처는
+ * 설문이 저장된 뒤 별도 화면에서 따로 받는다.
  */
 export function SurveyModal({
   open,
@@ -110,7 +102,6 @@ export function SurveyModal({
   onCompleted: () => void;
   onClose: () => void;
 }) {
-  const perStep = usePerStep();
   const [answers, setAnswers] = useState<AnswerMap>(EMPTY);
   const [step, setStep] = useState(0);
   const [phase, setPhase] = useState<"questions" | "consent" | "done">(
@@ -122,15 +113,18 @@ export function SurveyModal({
   const [saveConfirmed, setSaveConfirmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const questions = useMemo(() => questionsForTrigger(trigger), [trigger]);
+  const questions = useMemo(
+    () => questionsForAnswers(trigger, answers as Partial<SurveyAnswers>),
+    [answers, trigger],
+  );
 
   const steps = useMemo(() => {
     const grouped: Question[][] = [];
-    for (let i = 0; i < questions.length; i += perStep) {
-      grouped.push(questions.slice(i, i + perStep));
+    for (let i = 0; i < questions.length; i += 1) {
+      grouped.push(questions.slice(i, i + 1));
     }
     return grouped;
-  }, [perStep, questions]);
+  }, [questions]);
 
   // StrictMode가 개발 중 effect를 두 번 실행하므로 한 번만 보내도록 막는다.
   const impressionSent = useRef(false);
@@ -162,9 +156,32 @@ export function SurveyModal({
     noteFirstAnswer();
     lastTouchedRef.current = id;
     const next = { ...answers, [id]: value };
+    if (id === "purchaseExperience") {
+      const buyerOnly: (keyof SurveyAnswers)[] = [
+        "channels", "productCategories", "purchaseFrequency", "typicalSpend",
+        "purchasePurposes", "trustFactors", "purchaseProblems",
+      ];
+      const nonBuyerOnly: (keyof SurveyAnswers)[] = [
+        "purchaseBarriers", "offlineChannels", "purchaseConditions",
+        "prospectiveChannels", "purchaseConcerns",
+      ];
+      const hidden = value === NO_PURCHASE_EXPERIENCE ? buyerOnly : nonBuyerOnly;
+      for (const key of hidden) delete next[key];
+    }
+    if (id === "regionAttention") {
+      if (typeof value === "string" && REGION_ATTENTION_LOW.includes(value)) {
+        delete next.regionReasons;
+      } else {
+        delete next.regionNonReasons;
+      }
+    }
     setAnswers(next);
+    const nextQuestions = questionsForAnswers(
+      trigger,
+      next as Partial<SurveyAnswers>,
+    );
     setMaxCompletedCount((count) =>
-      Math.max(count, answeredCount(questions, next)),
+      Math.max(count, answeredCount(nextQuestions, next)),
     );
   }
 
@@ -179,8 +196,12 @@ export function SurveyModal({
         : [...list, option],
     };
     setAnswers(next);
+    const nextQuestions = questionsForAnswers(
+      trigger,
+      next as Partial<SurveyAnswers>,
+    );
     setMaxCompletedCount((count) =>
-      Math.max(count, answeredCount(questions, next)),
+      Math.max(count, answeredCount(nextQuestions, next)),
     );
   }
 
@@ -233,15 +254,14 @@ export function SurveyModal({
     onClose();
   }
 
-  // A viewport change can regroup questions while this modal is open. Derive
-  // a safe display index rather than setting state from an effect.
+  // 앞선 답변 변경으로 분기 길이가 달라져도 유효한 문항을 보여준다.
   const currentStep = Math.min(step, steps.length - 1);
   const current = steps[currentStep] ?? [];
   const canAdvance = current.every((question) => isAnswered(question, answers));
   const isLastStep = currentStep === steps.length - 1;
   const completedCount = Math.max(
     maxCompletedCount,
-    Math.min(currentStep * perStep, questions.length),
+    Math.min(currentStep, questions.length),
   );
   const gaugePercent = saveConfirmed
     ? 100
@@ -252,7 +272,7 @@ export function SurveyModal({
 
   function advance() {
     const completedThroughStep = Math.min(
-      (currentStep + 1) * perStep,
+      currentStep + 1,
       questions.length,
     );
     setMaxCompletedCount((count) =>
@@ -300,8 +320,7 @@ export function SurveyModal({
       await new Promise((resolve) =>
         window.setTimeout(resolve, SAVE_CONFIRMATION_DELAY_MS),
       );
-      // 인터뷰 참여 의사와 무관하게 추첨 참여 연락처는 모두에게 안내한다.
-      setPhase("consent");
+      setPhase(answers.interviewWilling === true ? "consent" : "done");
     } catch {
       setError("저장에 실패했습니다. 잠시 후 다시 시도해 주세요.");
       void trackOnce(
@@ -326,10 +345,10 @@ export function SurveyModal({
               더 나은 로컬 상품 구매 경험을 위해
             </h2>
             <p className="mt-1 text-sm text-lp-gray-700">
-              전체 문항 · 약 2분
+              맞춤형 문항 · 약 3분
             </p>
             <p className="mt-1 text-xs text-lp-orange">
-              설문 참여자 중 추첨을 통해 상품을 드립니다
+              인터뷰에 실제 참여한 분을 대상으로 상품을 추첨해 드립니다
             </p>
             <div
               className="mt-3 h-2.5 overflow-hidden rounded-lp-circle bg-lp-gray-100"
@@ -405,7 +424,6 @@ export function SurveyModal({
         <ConsentForm
           surveyId={surveyId}
           productSlug={productSlug}
-          interviewWilling={answers.interviewWilling === true}
           onDone={() => setPhase("done")}
           onSkip={() => setPhase("done")}
         />

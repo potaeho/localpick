@@ -16,10 +16,8 @@ const VALID_PURPOSES = new Set<ConsentPurpose>(["interview", "raffle"]);
  * 요구하는 분리 수집이자, 대시보드에서 연락처만 따로 접근 통제하기 위한
  * 구조이기도 하다.
  *
- * 추첨 참여는 인터뷰 참여 의사(설문 7번 문항)와 무관하게 열려 있으므로,
- * 이 엔드포인트는 설문을 완료한 세션이면 받는다. 다만 "interview" 목적은
- * 실제로 7번 문항에서 참여 의사를 밝힌 세션만 주장할 수 있게 막는다 —
- * 그래야 대시보드의 인터뷰 동의율이 추첨만 신청한 사람으로 부풀지 않는다.
+ * 실제 인터뷰 참여자만 상품 추첨 대상이므로, 인터뷰 참여 의사를 밝힌 완료
+ * 설문만 연락처를 남길 수 있고 interview·raffle 두 목적을 함께 동의받는다.
  */
 export async function POST(request: NextRequest) {
   let body: unknown;
@@ -58,8 +56,12 @@ export async function POST(request: NextRequest) {
         typeof p === "string" && VALID_PURPOSES.has(p as ConsentPurpose),
       ))]
     : [];
-  if (purposes.length === 0) {
-    return new Response("purposes are required", { status: 400 });
+  if (
+    purposes.length !== 2 ||
+    !purposes.includes("interview") ||
+    !purposes.includes("raffle")
+  ) {
+    return new Response("interview and raffle purposes are required", { status: 400 });
   }
 
   const contactType = input.contactType === "phone" ? "phone" : "email";
@@ -75,7 +77,7 @@ export async function POST(request: NextRequest) {
   if (!survey) {
     return new Response("eligible survey not found", { status: 400 });
   }
-  if (purposes.includes("interview") && !survey.interviewWilling) {
+  if (!survey.interviewWilling) {
     return new Response("survey did not opt into interview", { status: 400 });
   }
 
@@ -95,10 +97,7 @@ export async function POST(request: NextRequest) {
   };
 
   const inserted = await storage.saveConsent(consent);
-  // "interview_consent" 이벤트는 실제로 인터뷰 참여 의사를 밝힌 세션에서만
-  // 남긴다 — 추첨만 신청한 세션까지 이 이벤트로 세면 대시보드의 인터뷰
-  // 관련 퍼널·KPI가 실제보다 부풀려진다.
-  if (inserted && purposes.includes("interview")) {
+  if (inserted) {
     const event: TrackedEvent = {
       id: crypto.randomUUID(),
       dedupeKey: [sessionId, "interview_consent", survey.productSlug ?? "", "", "", survey.trigger].join(":"),

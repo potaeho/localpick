@@ -239,24 +239,46 @@ export type EventInput = UtmParams & {
 };
 
 /* ------------------------------------------------------------------ */
-/* 설문 — 기획서 5단계 7문항                                            */
+/* 설문 — 구매 경험·지역 확인 여부에 따른 조건부 문항                     */
 /* ------------------------------------------------------------------ */
 
 export type SurveyAnswers = {
-  /** 1. 이 상품의 구매 버튼을 누른 가장 큰 이유 */
-  buyReason: string;
+  /** 이전 설문 문항. 기존 응답 호환을 위해 유지한다. */
+  buyReason?: string;
   buyReasonDetail?: string;
-  /** 2. 구매를 기대한 사용 상황 */
-  useContext: string;
-  /** 3. 최근 온라인 로컬 상품 구매 경험 */
+  /** 이전 설문 문항. 기존 응답 호환을 위해 유지한다. */
+  useContext?: string;
+  /** 온라인 지역 상품 구매 경험 */
   purchaseExperience: string;
-  /** 4. 주로 이용하는 구매처 (복수 선택) */
+  /** 구매 경험자의 실제 구매처 */
   channels: string[];
-  /** 5. 구매할 때 중요하게 확인하는 정보 (복수 선택) */
+  productCategories: string[];
+  purchaseFrequency: string;
+  typicalSpend: string;
+  purchasePurposes: string[];
   trustFactors: string[];
-  /** 6. 해당 생산지역 또는 생산자에 대한 관심 */
+  purchaseProblems: string[];
+  /** 구매 미경험자 분기 */
+  purchaseBarriers: string[];
+  offlineChannels: string[];
+  purchaseConditions: string[];
+  prospectiveChannels: string[];
+  purchaseConcerns: string[];
+  /** 평소 생산 지역 확인 행동과 이유 */
+  regionAttention: string;
+  regionReasons: string[];
+  regionNonReasons: string[];
+  /** 지역·생산자 연결 가치 */
+  producerStoryHelp: string;
+  processInfoTrust: string;
   regionInterest: string;
-  /** 7. 후속 인터뷰 참여 의사 */
+  travelInfoInterest: string;
+  regionalImpactInfluence: string;
+  preferredStoryFocus: string;
+  /** 최소 분류 정보 */
+  ageGroup: string;
+  gender: string;
+  /** 후속 인터뷰 참여 의사 */
   interviewWilling: boolean;
 };
 
@@ -294,9 +316,9 @@ export type SurveyProgress = UtmParams & {
 };
 
 /**
- * 이 연락처를 수집한 목적. 인터뷰 참여 의사와 무관하게 추첨 참여만을 위해
- * 남기는 경우가 있으므로, 인터뷰 동의 여부를 나타내는 지표(KPI)가 추첨만
- * 신청한 사람까지 "인터뷰 동의"로 세지 않도록 이 필드로 구분한다.
+ * 이 연락처를 수집한 목적. 신규 흐름에서는 실제 인터뷰 참여자가 상품 추첨
+ * 대상이므로 interview와 raffle을 함께 동의받는다. 기존 저장값 호환을 위해
+ * 두 목적값을 그대로 유지한다.
  */
 export type ConsentPurpose = "interview" | "raffle";
 
@@ -397,8 +419,9 @@ export type AbandonedSurveyRow = {
   productSlug?: string;
   device: DeviceType;
   utmCampaign?: string;
-  /** 7문항 중 몇 개까지 답했는지 */
+  /** 해당 분기 전체 문항 중 몇 개까지 답했는지 */
   answeredCount: number;
+  totalQuestions: number;
   answers: AbandonedAnswer[];
 };
 

@@ -102,8 +102,28 @@ alter table public.lp_surveys add column if not exists buy_reason_detail text;
 alter table public.lp_surveys add column if not exists use_context text;
 alter table public.lp_surveys add column if not exists purchase_experience text;
 alter table public.lp_surveys add column if not exists channels text[];        -- 복수 선택
+alter table public.lp_surveys add column if not exists product_categories text[];
+alter table public.lp_surveys add column if not exists purchase_frequency text;
+alter table public.lp_surveys add column if not exists typical_spend text;
+alter table public.lp_surveys add column if not exists purchase_purposes text[];
 alter table public.lp_surveys add column if not exists trust_factors text[];    -- 복수 선택
+alter table public.lp_surveys add column if not exists purchase_problems text[];
+alter table public.lp_surveys add column if not exists purchase_barriers text[];
+alter table public.lp_surveys add column if not exists offline_channels text[];
+alter table public.lp_surveys add column if not exists purchase_conditions text[];
+alter table public.lp_surveys add column if not exists prospective_channels text[];
+alter table public.lp_surveys add column if not exists purchase_concerns text[];
+alter table public.lp_surveys add column if not exists region_attention text;
+alter table public.lp_surveys add column if not exists region_reasons text[];
+alter table public.lp_surveys add column if not exists region_non_reasons text[];
+alter table public.lp_surveys add column if not exists producer_story_help text;
+alter table public.lp_surveys add column if not exists process_info_trust text;
 alter table public.lp_surveys add column if not exists region_interest text;
+alter table public.lp_surveys add column if not exists travel_info_interest text;
+alter table public.lp_surveys add column if not exists regional_impact_influence text;
+alter table public.lp_surveys add column if not exists preferred_story_focus text;
+alter table public.lp_surveys add column if not exists age_group text;
+alter table public.lp_surveys add column if not exists gender text;
 alter table public.lp_surveys add column if not exists interview_willing boolean;
 alter table public.lp_surveys add column if not exists utm_source text;
 alter table public.lp_surveys add column if not exists utm_medium text;
@@ -144,8 +164,28 @@ update public.lp_surveys set
   use_context         = coalesce(use_context, payload->>'useContext'),
   purchase_experience = coalesce(purchase_experience, payload->>'purchaseExperience'),
   channels            = coalesce(channels, array(select jsonb_array_elements_text(payload->'channels'))),
+  product_categories  = coalesce(product_categories, array(select jsonb_array_elements_text(payload->'productCategories'))),
+  purchase_frequency  = coalesce(purchase_frequency, payload->>'purchaseFrequency'),
+  typical_spend       = coalesce(typical_spend, payload->>'typicalSpend'),
+  purchase_purposes   = coalesce(purchase_purposes, array(select jsonb_array_elements_text(payload->'purchasePurposes'))),
   trust_factors       = coalesce(trust_factors, array(select jsonb_array_elements_text(payload->'trustFactors'))),
+  purchase_problems   = coalesce(purchase_problems, array(select jsonb_array_elements_text(payload->'purchaseProblems'))),
+  purchase_barriers   = coalesce(purchase_barriers, array(select jsonb_array_elements_text(payload->'purchaseBarriers'))),
+  offline_channels    = coalesce(offline_channels, array(select jsonb_array_elements_text(payload->'offlineChannels'))),
+  purchase_conditions = coalesce(purchase_conditions, array(select jsonb_array_elements_text(payload->'purchaseConditions'))),
+  prospective_channels = coalesce(prospective_channels, array(select jsonb_array_elements_text(payload->'prospectiveChannels'))),
+  purchase_concerns   = coalesce(purchase_concerns, array(select jsonb_array_elements_text(payload->'purchaseConcerns'))),
+  region_attention    = coalesce(region_attention, payload->>'regionAttention'),
+  region_reasons      = coalesce(region_reasons, array(select jsonb_array_elements_text(payload->'regionReasons'))),
+  region_non_reasons  = coalesce(region_non_reasons, array(select jsonb_array_elements_text(payload->'regionNonReasons'))),
+  producer_story_help = coalesce(producer_story_help, payload->>'producerStoryHelp'),
+  process_info_trust  = coalesce(process_info_trust, payload->>'processInfoTrust'),
   region_interest     = coalesce(region_interest, payload->>'regionInterest'),
+  travel_info_interest = coalesce(travel_info_interest, payload->>'travelInfoInterest'),
+  regional_impact_influence = coalesce(regional_impact_influence, payload->>'regionalImpactInfluence'),
+  preferred_story_focus = coalesce(preferred_story_focus, payload->>'preferredStoryFocus'),
+  age_group           = coalesce(age_group, payload->>'ageGroup'),
+  gender              = coalesce(gender, payload->>'gender'),
   interview_willing   = coalesce(interview_willing, (payload->>'interviewWilling')::boolean),
   utm_source          = coalesce(utm_source, payload->>'utmSource'),
   utm_medium          = coalesce(utm_medium, payload->>'utmMedium'),
@@ -228,7 +268,9 @@ create index if not exists lp_survey_progress_updated_at_idx on public.lp_survey
 -- must move on every revision, not just the first insert — a plain column
 -- default only fires on insert.
 create or replace function public.lp_survey_progress_touch_updated_at()
-returns trigger language plpgsql as $$
+returns trigger language plpgsql
+set search_path = pg_catalog
+as $$
 begin
   new.updated_at = now();
   return new;

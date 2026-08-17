@@ -9,7 +9,12 @@ import {
 } from "@/lib/types";
 import { storage } from "@/lib/store";
 import { SESSION_COOKIE } from "@/proxy";
-import { QUESTIONS, questionsForTrigger } from "@/lib/survey-questions";
+import {
+  NO_PURCHASE_EXPERIENCE,
+  QUESTIONS,
+  REGION_ATTENTION_LOW,
+  questionsForTrigger,
+} from "@/lib/survey-questions";
 import { getVerifiedAnonymousSessionId } from "@/lib/anonymous-session";
 import { getProduct } from "@/lib/products";
 
@@ -43,7 +48,7 @@ function strList(value: unknown, max = 12): string[] {
 
 function optionValues(
   trigger: SurveyTrigger,
-  id: "buyReason" | "purchaseExperience" | "channels" | "trustFactors" | "regionInterest",
+  id: keyof SurveyAnswers,
 ): string[] {
   const question = questionsForTrigger(trigger).find((item) => item.id === id);
   return question && (question.kind === "single" || question.kind === "multi")
@@ -62,34 +67,56 @@ function sanitizeAnswers(
   const raw = input as Record<string, unknown>;
   const answers: Partial<SurveyAnswers> = {};
 
-  const buyReason = str(raw.buyReason, 120);
-  if (buyReason && optionValues(trigger, "buyReason").includes(buyReason)) {
-    answers.buyReason = buyReason;
+  for (const question of questionsForTrigger(trigger)) {
+    const value = raw[question.id];
+    if (question.kind === "boolean") {
+      if (typeof value === "boolean") {
+        (answers as Record<string, unknown>)[question.id] = value;
+      }
+      continue;
+    }
+    if (question.kind === "multi") {
+      const values = strList(value).filter((item) =>
+        optionValues(trigger, question.id).includes(item),
+      );
+      if (values.length > 0) {
+        (answers as Record<string, unknown>)[question.id] = values;
+      }
+      continue;
+    }
+    const text = str(value, question.kind === "text" ? 1000 : 120);
+    if (
+      text &&
+      (question.kind === "text" || optionValues(trigger, question.id).includes(text))
+    ) {
+      (answers as Record<string, unknown>)[question.id] = text;
+    }
   }
+
   const buyReasonDetail = str(raw.buyReasonDetail, 1000);
   if (buyReasonDetail) answers.buyReasonDetail = buyReasonDetail;
 
-  const useContext = str(raw.useContext, 1000);
-  if (useContext) answers.useContext = useContext;
+  const buyerOnly: (keyof SurveyAnswers)[] = [
+    "channels", "productCategories", "purchaseFrequency", "typicalSpend",
+    "purchasePurposes", "trustFactors", "purchaseProblems",
+  ];
+  const nonBuyerOnly: (keyof SurveyAnswers)[] = [
+    "purchaseBarriers", "offlineChannels", "purchaseConditions",
+    "prospectiveChannels", "purchaseConcerns",
+  ];
+  const hiddenPurchaseBranch =
+    answers.purchaseExperience === NO_PURCHASE_EXPERIENCE
+      ? buyerOnly
+      : nonBuyerOnly;
+  for (const id of hiddenPurchaseBranch) delete answers[id];
 
-  const purchaseExperience = str(raw.purchaseExperience, 120);
-  if (purchaseExperience && optionValues(trigger, "purchaseExperience").includes(purchaseExperience)) {
-    answers.purchaseExperience = purchaseExperience;
-  }
-
-  const channels = strList(raw.channels).filter((v) => optionValues(trigger, "channels").includes(v));
-  if (channels.length > 0) answers.channels = channels;
-
-  const trustFactors = strList(raw.trustFactors).filter((v) => optionValues(trigger, "trustFactors").includes(v));
-  if (trustFactors.length > 0) answers.trustFactors = trustFactors;
-
-  const regionInterest = str(raw.regionInterest, 120);
-  if (regionInterest && optionValues(trigger, "regionInterest").includes(regionInterest)) {
-    answers.regionInterest = regionInterest;
-  }
-
-  if (typeof raw.interviewWilling === "boolean") {
-    answers.interviewWilling = raw.interviewWilling;
+  if (
+    answers.regionAttention &&
+    REGION_ATTENTION_LOW.includes(answers.regionAttention)
+  ) {
+    delete answers.regionReasons;
+  } else {
+    delete answers.regionNonReasons;
   }
 
   return answers;

@@ -53,7 +53,7 @@ export function AbandonedSurveyList({
                     variant="outline"
                     className="border-lp-orange-light bg-lp-orange-light text-lp-orange"
                   >
-                    7문항 중 {row.answeredCount}개 답함
+                    {row.totalQuestions}문항 중 {row.answeredCount}개 답함
                   </Badge>
                 </div>
 

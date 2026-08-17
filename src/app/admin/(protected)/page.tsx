@@ -196,8 +196,8 @@ export default async function AdminDashboardPage() {
       </Section>
 
       <Section
-        title="인터뷰 · 추첨 연락처"
-        description="인터뷰 또는 추첨 참여에 동의하고 연락처를 남긴 분들입니다. 목적 배지로 구분하세요 — 인터뷰 관련 지표는 '인터뷰' 목적이 포함된 연락처만 집계합니다. 연락처는 기본적으로 가려져 있습니다."
+        title="인터뷰 참여 연락처"
+        description="인터뷰 일정 안내와 상품 추첨 결과 안내에 동의하고 연락처를 남긴 분들입니다. 실제 인터뷰 참여자가 상품 추첨 대상이며, 연락처는 기본적으로 가려져 있습니다."
       >
         <InterviewList interviews={stats.interviews} />
       </Section>

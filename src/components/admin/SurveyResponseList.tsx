@@ -26,24 +26,25 @@ const CROSS_TAB_QUESTIONS: Array<{
   label: string;
   getValues: (r: SurveyResponse) => string[];
 }> = [
-  { key: "buyReason", label: "누른 이유", getValues: (r) => [r.buyReason] },
-  {
-    key: "useContext",
-    label: "쓰려던 상황",
-    getValues: (r) => (r.useContext ? [r.useContext] : []),
-  },
   {
     key: "purchaseExperience",
     label: "구매 경험",
     getValues: (r) => [r.purchaseExperience],
   },
-  { key: "channels", label: "이용 채널", getValues: (r) => r.channels },
-  { key: "trustFactors", label: "판단 기준", getValues: (r) => r.trustFactors },
+  { key: "channels", label: "실제 구매처", getValues: (r) => r.channels ?? [] },
+  { key: "productCategories", label: "구매 상품", getValues: (r) => r.productCategories ?? [] },
+  { key: "purchaseFrequency", label: "구매 빈도", getValues: (r) => r.purchaseFrequency ? [r.purchaseFrequency] : [] },
+  { key: "typicalSpend", label: "구매 금액", getValues: (r) => r.typicalSpend ? [r.typicalSpend] : [] },
+  { key: "purchaseBarriers", label: "미구매 이유", getValues: (r) => r.purchaseBarriers ?? [] },
+  { key: "regionAttention", label: "지역 확인", getValues: (r) => r.regionAttention ? [r.regionAttention] : [] },
+  { key: "preferredStoryFocus", label: "선호 소개", getValues: (r) => r.preferredStoryFocus ? [r.preferredStoryFocus] : [] },
   {
     key: "regionInterest",
-    label: "지역·생산자 관심",
-    getValues: (r) => [r.regionInterest],
+    label: "지역 관심",
+    getValues: (r) => r.regionInterest ? [r.regionInterest] : [],
   },
+  { key: "ageGroup", label: "연령대", getValues: (r) => r.ageGroup ? [r.ageGroup] : [] },
+  { key: "gender", label: "성별", getValues: (r) => r.gender ? [r.gender] : [] },
   {
     key: "interviewWilling",
     label: "인터뷰 의사",
@@ -378,22 +379,30 @@ export function SurveyResponseList({
                   </div>
 
                   <dl className="mt-3 space-y-2 text-sm">
-                    <Row label="누른 이유">
-                      {response.buyReason}
-                      {response.buyReasonDetail &&
-                        ` — ${response.buyReasonDetail}`}
-                    </Row>
-                    {response.useContext && (
-                      <Row label="쓰려던 상황">{response.useContext}</Row>
-                    )}
                     <Row label="구매 경험">{response.purchaseExperience}</Row>
-                    <Row label="이용 채널">
-                      {response.channels.join(", ") || "-"}
-                    </Row>
-                    <Row label="판단 기준">
-                      {response.trustFactors.join(", ") || "-"}
-                    </Row>
-                    <Row label="지역·생산자">{response.regionInterest}</Row>
+                    {(response.channels?.length ?? 0) > 0 && <Row label="구매처">{response.channels.join(", ")}</Row>}
+                    {(response.productCategories?.length ?? 0) > 0 && <Row label="구매 상품">{response.productCategories.join(", ")}</Row>}
+                    {response.purchaseFrequency && <Row label="구매 빈도">{response.purchaseFrequency}</Row>}
+                    {response.typicalSpend && <Row label="구매 금액">{response.typicalSpend}</Row>}
+                    {(response.purchasePurposes?.length ?? 0) > 0 && <Row label="구매 목적">{response.purchasePurposes.join(", ")}</Row>}
+                    {(response.trustFactors?.length ?? 0) > 0 && <Row label="판단 기준">{response.trustFactors.join(", ")}</Row>}
+                    {(response.purchaseProblems?.length ?? 0) > 0 && <Row label="구매 불편">{response.purchaseProblems.join(", ")}</Row>}
+                    {(response.purchaseBarriers?.length ?? 0) > 0 && <Row label="미구매 이유">{response.purchaseBarriers.join(", ")}</Row>}
+                    {(response.offlineChannels?.length ?? 0) > 0 && <Row label="평소 구매처">{response.offlineChannels.join(", ")}</Row>}
+                    {(response.purchaseConditions?.length ?? 0) > 0 && <Row label="전환 조건">{response.purchaseConditions.join(", ")}</Row>}
+                    {(response.prospectiveChannels?.length ?? 0) > 0 && <Row label="예상 구매처">{response.prospectiveChannels.join(", ")}</Row>}
+                    {(response.purchaseConcerns?.length ?? 0) > 0 && <Row label="구매 우려">{response.purchaseConcerns.join(", ")}</Row>}
+                    <Row label="지역 확인">{response.regionAttention || "-"}</Row>
+                    {(response.regionReasons?.length ?? 0) > 0 && <Row label="확인 이유">{response.regionReasons.join(", ")}</Row>}
+                    {(response.regionNonReasons?.length ?? 0) > 0 && <Row label="미확인 이유">{response.regionNonReasons.join(", ")}</Row>}
+                    <Row label="생산자 정보">{response.producerStoryHelp || "-"}</Row>
+                    <Row label="과정 신뢰">{response.processInfoTrust || "-"}</Row>
+                    <Row label="지역 관심">{response.regionInterest || "-"}</Row>
+                    <Row label="여행 정보">{response.travelInfoInterest || "-"}</Row>
+                    <Row label="지역 기여">{response.regionalImpactInfluence || "-"}</Row>
+                    <Row label="선호 소개">{response.preferredStoryFocus || "-"}</Row>
+                    <Row label="연령대">{response.ageGroup || "-"}</Row>
+                    <Row label="성별">{response.gender || "-"}</Row>
                     <Row label="인터뷰 의사">
                       {response.interviewWilling ? "있음" : "없음"}
                     </Row>

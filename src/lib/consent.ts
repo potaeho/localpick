@@ -7,7 +7,7 @@ import type { ConsentPurpose } from "./types";
  * 같은 문구를 참조해야, 나중에 "이 응답자는 어떤 고지를 받고 동의했는가"를
  * 되짚을 수 있다. 문구를 고치면 반드시 버전도 함께 올릴 것.
  */
-export const PRIVACY_NOTICE_VERSION = "2026-08-13";
+export const PRIVACY_NOTICE_VERSION = "2026-08-17";
 
 /**
  * A public deletion-request channel must be configured before collecting an
@@ -33,7 +33,7 @@ export function getPrivacyNotice(
 
   const purposeParts: string[] = [];
   if (wantsInterview) {
-    purposeParts.push("로컬 상품 구매 경험에 관한 후속 인터뷰 참여 요청 및 일정 안내");
+    purposeParts.push("지역 상품 구매 경험에 관한 후속 인터뷰 참여 요청 및 일정 안내");
   }
   if (wantsRaffle) {
     purposeParts.push("추첨 경품 당첨 여부 안내 및 배송");

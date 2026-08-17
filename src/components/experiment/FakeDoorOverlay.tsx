@@ -34,8 +34,9 @@ export function FakeDoorOverlay({
           </p>
           <p>기대하셨을 텐데 바로 구매 경험을 제공하지 못해 죄송합니다.</p>
           <p>
-            더 나은 로컬 상품 구매 경험을 만들기 위해 짧은 설문에 참여해 주세요.
-            참여해 주신 분들 중 추첨을 통해 로컬 특산품을 보내드립니다.
+            더 나은 로컬 상품 구매 경험을 만들기 위해 설문에 참여해 주세요.
+            설문 마지막에 인터뷰 참여 의사를 남길 수 있으며, 실제 인터뷰에
+            참여한 분을 대상으로 상품을 추첨해 드립니다.
           </p>
         </div>
 
@@ -46,7 +47,7 @@ export function FakeDoorOverlay({
               onClick={onSurvey}
               className="h-12 flex-1 rounded-lp-control text-lp-button"
             >
-              설문 참여하기 (2분)
+              설문 참여하기 (약 3분)
             </Button>
           ) : (
             <Button
